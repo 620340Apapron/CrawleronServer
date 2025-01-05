@@ -5,6 +5,27 @@ import crawler_b2s
 import crawler_jamsai
 import crawler_amarin
 import crawler_seed
+import os
+import mysql.connector
+
+
+# ฟังก์ชันเชื่อมต่อกับ Database
+def connect_to_database():
+    return mysql.connector.connect(
+        host=os.getenv("mysql.railway.internal"),
+        user=os.getenv("root"),
+        password=os.getenv("jfYnLvcFdUEEVzrvcfceFwTFuMdUBVOc"),
+        database=os.getenv(""),
+        port=os.getenv("3306")
+    )
+
+# ฟังก์ชันบันทึกข้อมูลลง Database
+def save_to_database(cursor, books_data, source):
+    for _, row in books_data.iterrows():
+        cursor.execute("""
+            INSERT INTO books (name, price, author, source)
+            VALUES (%s, %s, %s, %s)
+        """, (row['name'], row['price'], row['author'], source))
 
 def run_all_crawlers():
     # เรียกใช้ Naiin
