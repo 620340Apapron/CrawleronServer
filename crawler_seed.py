@@ -8,7 +8,7 @@ from selenium.webdriver.common.keys import Keys
 #from webdriver_manager.chrome import ChromeDriverManager  # ต้องเพิ่มส่วนนี้สำหรับ WebDriverManager
 
 # URL สำหรับเว็บไซต์ Naiin
-NAIIN_URL = 'https://www.naiin.com/'
+SEED_URL = 'https://www.se-ed.com/'
 
 # ตั้งค่า Chrome Options สำหรับโหมด Headless
 def get_driver():
@@ -22,12 +22,12 @@ def get_driver():
 # ดึงข้อมูลหนังสือจากเว็บไซต์ Naiin
 def get_books(driver):
     try:
-        driver.get(NAIIN_URL)
+        driver.get(SEED_URL)
 
         # ค้นหาช่องค้นหาและป้อนข้อความ
         search = driver.find_element(
             By.XPATH,
-            '/html/body/div[1]/div[1]/div[2]/div/div[2]/div/div[1]/div[1]/form/div[1]/input'
+            '/html/body/div[1]/div/div/div[1]/div/div/div[1]/div[2]/div/div/div/input'
         )
         search.send_keys('หนังสือ')
         search.send_keys(Keys.ENTER)
@@ -39,11 +39,11 @@ def get_books(driver):
         soup = BeautifulSoup(driver.page_source, 'html.parser')
 
         # ดึงชื่อหนังสือ
-        all_book = soup.find_all('p', {'class': 'txt-normal'})
+        all_book = soup.find_all('div', {'class': 'min-height: 36px;'})
         all_book_list = [book.text.strip() for book in all_book]
 
         # ดึงราคาหนังสือ
-        all_price = soup.find_all('p', {'class': 'txt-price'})
+        all_price = soup.find_all('p', {'class': 'MuiTypography-root MuiTypography-body1 m-0 text-ci-primary truncate css-6b2fbd'})
         all_price_list = [price.text.strip() for price in all_price]
 
         # ดึงชื่อผู้แต่ง
@@ -65,7 +65,7 @@ def get_books(driver):
         return pd.DataFrame()  # คืนค่า DataFrame ว่างในกรณีเกิดข้อผิดพลาด
 
 # บันทึกข้อมูลลงไฟล์ CSV
-def save_to_csv(data, filename="naain_books.csv"):
+def save_to_csv(data, filename="seed_books.csv"):
     try:
         data.to_csv(filename, index=False, encoding='utf-8')
         print(f"บันทึกข้อมูลลงไฟล์ {filename} สำเร็จ")
@@ -76,7 +76,7 @@ if __name__ == "__main__":
     print("Creating driver")
     driver = get_driver()
 
-    print("Fetching books from Naiin")
+    print("Fetching books from Seed")
     books_data = get_books(driver)
 
     if not books_data.empty:
