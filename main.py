@@ -15,7 +15,7 @@ def connect_to_database():
         host=os.getenv("mysql.railway.internal"),
         user=os.getenv("root"),
         password=os.getenv("jfYnLvcFdUEEVzrvcfceFwTFuMdUBVOc"),
-        database=os.getenv(""),
+        database=os.getenv("MySQL"),
         port=os.getenv("3306")
     )
 
