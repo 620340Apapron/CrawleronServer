@@ -65,7 +65,7 @@ def run_all_crawlers():
 # กำหนด Schedule
 #schedule.every().sunday.at("10:00").do(run_all_crawlers)
 
-print("Scheduler started. Waiting for Sunday at 10:00...")
-while True:
-    schedule.run_pending()
-    time.sleep(1)
+#print("Scheduler started. Waiting for Sunday at 10:00...")
+#while True:
+#    schedule.run_pending()
+#    time.sleep(1)
