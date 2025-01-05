@@ -63,7 +63,7 @@ def run_all_crawlers():
         driver.quit()
 
 # กำหนด Schedule
-schedule.every().sunday.at("10:00").do(run_all_crawlers)
+#schedule.every().sunday.at("10:00").do(run_all_crawlers)
 
 print("Scheduler started. Waiting for Sunday at 10:00...")
 while True:
