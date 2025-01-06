@@ -3,10 +3,9 @@ import pandas as pd
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
-from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
-import time
+#from webdriver_manager.chrome import ChromeDriverManager  # ต้องเพิ่มส่วนนี้สำหรับ WebDriverManager
 
 # URL สำหรับเว็บไซต์ Naiin
 NAIIN_URL = 'https://www.naiin.com/'
@@ -17,62 +16,37 @@ def get_driver():
     chrome_options.add_argument('--no-sandbox')
     chrome_options.add_argument('--headless')  # ใช้งานในโหมด Headless
     chrome_options.add_argument('--disable-dev-shm-usage')  # แก้ปัญหา Shared Memory
-    chrome_options.add_argument('--ignore-certificate-errors')  # ปิดการตรวจสอบ SSL
-    chrome_options.add_argument('--allow-insecure-localhost')
-    chrome_options.add_argument('--disable-web-security')
-    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
+    driver = webdriver.Chrome(options=chrome_options)
     return driver
 
 # ดึงข้อมูลหนังสือจากเว็บไซต์ Naiin
 def get_books(driver):
-
-    all_book_list = []
-    all_price_list = []
-    all_author_list = []
-
     try:
         driver.get(NAIIN_URL)
 
         # ค้นหาช่องค้นหาและป้อนข้อความ
-        search = driver.find_element(By.XPATH, '/html/body/div[1]/div[1]/div[2]/div/div[2]/div/div[1]/div[1]/form/div[1]/input')
+        search = driver.find_element(By.XPATH,'/html/body/div[1]/div[1]/div[2]/div/div[2]/div/div[1]/div[1]/form/div[1]/input'
+        )
         search.send_keys('หนังสือ')
         search.send_keys(Keys.ENTER)
 
         # รอให้หน้าโหลดข้อมูล
-        time.sleep(5)
+        driver.implicitly_wait(10)
 
-        while True:
-            # ดึงข้อมูล HTML จากหน้าเว็บ
-            soup = BeautifulSoup(driver.page_source, 'html.parser')
-            
-            # ดึงชื่อหนังสือ
-            all_book = soup.find_all('p', {'class': 'txt-normal'})
-            all_book_list.extend([book.text.strip() for book in all_book])
+        # ดึงข้อมูล HTML จากหน้าเว็บ
+        soup = BeautifulSoup(driver.page_source, 'html.parser')
 
-            # ดึงราคาหนังสือ
-            all_price = soup.find_all('p', {'class': 'txt-price'})
-            all_price_list.extend([price.text.strip() for price in all_price])
+        # ดึงชื่อหนังสือ
+        all_book = soup.find_all('p', {'class': 'txt-normal'})
+        all_book_list = [book.text.strip() for book in all_book]
 
-            # ดึงชื่อผู้แต่ง
-            all_author = soup.find_all('a', {'class': 'inline-block tw-whitespace-normal tw-block'})
-            all_author_list.extend([author.text.strip() for author in all_author])
+        # ดึงราคาหนังสือ
+        all_price = soup.find_all('p', {'class': 'txt-price'})
+        all_price_list = [price.text.strip() for price in all_price]
 
-            # ตรวจสอบว่ามีปุ่มหน้าถัดไปหรือไม่
-            try:
-                next_button = driver.find_element(By.XPATH, '//a[contains(@class, "page")]')
-            #    driver.execute_script("arguments[0].scrollIntoView(true);", next_button)
-            #    driver.execute_script("arguments[0].click();", next_button)
-                time.sleep(3)
-            except Exception as e:
-            #    print("ไม่มีหน้าถัดไปหรือเกิดข้อผิดพลาด:", e)
-                break
-
-        # ตรวจสอบความยาวของข้อมูล
-
-        min_length = min(len(all_book_list), len(all_price_list), len(all_author_list))
-        all_book_list = all_book_list[:min_length]
-        all_price_list = all_price_list[:min_length]
-        all_author_list = all_author_list[:min_length]
+        # ดึงชื่อผู้แต่ง
+        all_author = soup.find_all('a', {'class': 'inline-block tw-whitespace-normal tw-block'})
+        all_author_list = [author.text.strip() for author in all_author]
 
         # สร้าง DataFrame
         shop_data = pd.DataFrame({
