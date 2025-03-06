@@ -5,7 +5,7 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
-#from webdriver_manager.chrome import ChromeDriverManager  # ต้องเพิ่มส่วนนี้สำหรับ WebDriverManager
+from webdriver_manager.chrome import ChromeDriverManager  # ต้องเพิ่มส่วนนี้สำหรับ WebDriverManager
 
 # URL สำหรับเว็บไซต์ Jamsai
 JAMSAI_URL = 'https://www.jamsai.com/'
@@ -16,7 +16,7 @@ def get_driver():
     chrome_options.add_argument('--no-sandbox')
     chrome_options.add_argument('--headless')  # ใช้งานในโหมด Headless
     chrome_options.add_argument('--disable-dev-shm-usage')  # แก้ปัญหา Shared Memory
-    driver = webdriver.Chrome(options=chrome_options)
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
     return driver
 
 # ดึงข้อมูลหนังสือจากเว็บไซต์ Jamsai
@@ -25,19 +25,19 @@ def get_books(driver):
         driver.get(JAMSAI_URL)
 
         # ค้นหาช่องค้นหาและป้อนข้อความ
-        search = driver.find_element(By.XPATH,'/html/body/div/div/div/header/div/div[2]/div/div/div/div[4]/div/div[1]/form/div/input'
+        search = driver.find_element(By.XPATH,'/html/body/div/div/div/section[1]/div[1]/form/div/div/div[1]/input'
         )
         search.send_keys('หนังสือ')
         search.send_keys(Keys.ENTER)
 
         # รอให้หน้าโหลดข้อมูล
-        driver.implicitly_wait(10)
+        driver.implicitly_wait(20)
 
         # ดึงข้อมูล HTML จากหน้าเว็บ
         soup = BeautifulSoup(driver.page_source, 'html.parser')
 
         # ดึงชื่อหนังสือ
-        all_book = soup.find_all('h3', {'class': 'tp-product-title-2 truncate-text-line-2'})
+        all_book = soup.find_all('h3', {'class': 'tp-product-tag-2 truncate-text-line-1'})
         all_book_list = [book.text.strip() for book in all_book]
 
         # ดึงราคาหนังสือ
@@ -75,7 +75,7 @@ if __name__ == "__main__":
     print("Creating driver")
     driver = get_driver()
 
-    print("Fetching books from B2S")
+    print("Fetching books from JAMSAI")
     books_data = get_books(driver)
 
     if not books_data.empty:
@@ -83,7 +83,6 @@ if __name__ == "__main__":
         save_to_csv(books_data)
     else:
         print("ไม่มีข้อมูลที่จะบันทึก")
-        print("ตรวจสอบ HTML ของหน้าเว็บเพื่อดูว่า Selector ยังใช้งานได้หรือไม่")
 
     print("Finished.")
     driver.quit()

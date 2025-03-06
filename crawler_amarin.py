@@ -5,10 +5,10 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
-#from webdriver_manager.chrome import ChromeDriverManager  # ต้องเพิ่มส่วนนี้สำหรับ WebDriverManager
+from webdriver_manager.chrome import ChromeDriverManager  # ต้องเพิ่มส่วนนี้สำหรับ WebDriverManager
 
 # URL สำหรับเว็บไซต์ Naiin
-NAIIN_URL = 'https://amarinbooks.com/'
+AMARIN_URL = 'https://amarinbooks.com/'
 
 # ตั้งค่า Chrome Options สำหรับโหมด Headless
 def get_driver():
@@ -16,19 +16,16 @@ def get_driver():
     chrome_options.add_argument('--no-sandbox')
     chrome_options.add_argument('--headless')  # ใช้งานในโหมด Headless
     chrome_options.add_argument('--disable-dev-shm-usage')  # แก้ปัญหา Shared Memory
-    driver = webdriver.Chrome(options=chrome_options)
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
     return driver
 
 # ดึงข้อมูลหนังสือจากเว็บไซต์ Naiin
 def get_books(driver):
     try:
-        driver.get(NAIIN_URL)
+        driver.get(AMARIN_URL)
 
         # ค้นหาช่องค้นหาและป้อนข้อความ
-        search = driver.find_element(
-            By.XPATH,
-            '/html/body/div[1]/div[1]/div[2]/div/div[2]/div/div[1]/div[1]/form/div[1]/input'
-        )
+        search = driver.find_element(By.XPATH,'/html/body/div[2]/header/div/div[3]/div/div[1]/ul/li/a/i')
         search.send_keys('หนังสือ')
         search.send_keys(Keys.ENTER)
 
@@ -76,7 +73,7 @@ if __name__ == "__main__":
     print("Creating driver")
     driver = get_driver()
 
-    print("Fetching books from Naiin")
+    print("Fetching books from AMARIN")
     books_data = get_books(driver)
 
     if not books_data.empty:

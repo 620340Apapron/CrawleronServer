@@ -1,11 +1,11 @@
 from bs4 import BeautifulSoup
-#import pandas as pd
+import pandas as pd
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
-#from webdriver_manager.chrome import ChromeDriverManager  # ต้องเพิ่มส่วนนี้สำหรับ WebDriverManager
+from webdriver_manager.chrome import ChromeDriverManager  # ต้องเพิ่มส่วนนี้สำหรับ WebDriverManager
 
 # URL สำหรับเว็บไซต์ B2S
 B2S_URL = 'https://www.b2s.co.th/'
@@ -16,7 +16,7 @@ def get_driver():
     chrome_options.add_argument('--no-sandbox')
     chrome_options.add_argument('--headless')  # ใช้งานในโหมด Headless
     chrome_options.add_argument('--disable-dev-shm-usage')  # แก้ปัญหา Shared Memory
-    driver = webdriver.Chrome(options=chrome_options)
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
     return driver
 
 # ดึงข้อมูลหนังสือจากเว็บไซต์ B2S
@@ -25,13 +25,13 @@ def get_books(driver):
         driver.get(B2S_URL)
 
         # ค้นหาช่องค้นหาและป้อนข้อความ
-        search = driver.find_element(By.XPATH,'/html/body/div[1]/div/div/nav/div[3]/div/div/input'
-        )
+        search = driver.find_element(By.XPATH,'/html/body/div[1]/div/div/nav/div[3]/div/div/input')
         search.send_keys('หนังสือ')
+        search.send_keys(Keys.ENTER)
         search.send_keys(Keys.ENTER)
 
         # รอให้หน้าโหลดข้อมูล
-        driver.implicitly_wait(10)
+        driver.implicitly_wait(20)
 
         # ดึงข้อมูล HTML จากหน้าเว็บ
         soup = BeautifulSoup(driver.page_source, 'html.parser')

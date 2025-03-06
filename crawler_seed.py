@@ -5,7 +5,7 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
-#from webdriver_manager.chrome import ChromeDriverManager  # ต้องเพิ่มส่วนนี้สำหรับ WebDriverManager
+from webdriver_manager.chrome import ChromeDriverManager  # ต้องเพิ่มส่วนนี้สำหรับ WebDriverManager
 
 # URL สำหรับเว็บไซต์ Naiin
 SEED_URL = 'https://www.se-ed.com/'
@@ -16,7 +16,7 @@ def get_driver():
     chrome_options.add_argument('--no-sandbox')
     chrome_options.add_argument('--headless')  # ใช้งานในโหมด Headless
     chrome_options.add_argument('--disable-dev-shm-usage')  # แก้ปัญหา Shared Memory
-    driver = webdriver.Chrome(options=chrome_options)
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
     return driver
 
 # ดึงข้อมูลหนังสือจากเว็บไซต์ Naiin
