@@ -3,4 +3,8 @@ pandas
 selenium
 schedule
 webdriver-manager
+<<<<<<< HEAD
 mysql-connector-python
+=======
+mysql-connector-python
+>>>>>>> a47718275b27b68f191a1fcd967733c1f0f50585

@@ -1,9 +1,38 @@
 # main.py
 import time
+<<<<<<< HEAD
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
+=======
+import crawler_naiin
+import crawler_b2s
+import crawler_jamsai
+import crawler_amarin
+import crawler_seed
+import os
+import mysql.connector
+
+
+# ฟังก์ชันเชื่อมต่อกับ Database
+def connect_to_database():
+    return mysql.connector.connect(
+        host=os.getenv("mysql.railway.internal"),
+        user=os.getenv("root"),
+        password=os.getenv("jfYnLvcFdUEEVzrvcfceFwTFuMdUBVOc"),
+        database=os.getenv("MySQL"),
+        port=os.getenv("3306")
+    )
+
+# ฟังก์ชันบันทึกข้อมูลลง Database
+def save_to_database(cursor, books_data, source):
+    for _, row in books_data.iterrows():
+        cursor.execute("""
+            INSERT INTO books (name, price, author, source)
+            VALUES (%s, %s, %s, %s)
+        """, (row['name'], row['price'], row['author'], source))
+>>>>>>> a47718275b27b68f191a1fcd967733c1f0f50585
 
 from db_service import create_connection, create_table, insert_book
 from crawlers.niin import scrape_niin_all_pages

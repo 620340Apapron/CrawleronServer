@@ -5,14 +5,19 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
+<<<<<<< HEAD
 from webdriver_manager.chrome import ChromeDriverManager
 import time
+=======
+#from webdriver_manager.chrome import ChromeDriverManager  # ต้องเพิ่มส่วนนี้สำหรับ WebDriverManager
+>>>>>>> a47718275b27b68f191a1fcd967733c1f0f50585
 
 NAIIN_URL = "https://www.naiin.com/"
 
 def get_driver():
     chrome_options = Options()
     chrome_options.add_argument('--no-sandbox')
+<<<<<<< HEAD
     chrome_options.add_argument('--headless')  # ทำงานแบบไม่แสดง UI
     chrome_options.add_argument('--disable-dev-shm-usage')
     driver = webdriver.Chrome(
@@ -118,6 +123,41 @@ def get_all_books(driver):
     # สร้าง DataFrame จาก all_data
     df = pd.DataFrame(all_data)
     return df
+=======
+    chrome_options.add_argument('--headless')  # ใช้งานในโหมด Headless
+    chrome_options.add_argument('--disable-dev-shm-usage')  # แก้ปัญหา Shared Memory
+    driver = webdriver.Chrome(options=chrome_options)
+    return driver
+
+# ดึงข้อมูลหนังสือจากเว็บไซต์ Naiin
+def get_books(driver):
+    try:
+        driver.get(NAIIN_URL)
+
+        # ค้นหาช่องค้นหาและป้อนข้อความ
+        search = driver.find_element(By.XPATH,'/html/body/div[1]/div[1]/div[2]/div/div[2]/div/div[1]/div[1]/form/div[1]/input'
+        )
+        search.send_keys('หนังสือ')
+        search.send_keys(Keys.ENTER)
+
+        # รอให้หน้าโหลดข้อมูล
+        driver.implicitly_wait(10)
+
+        # ดึงข้อมูล HTML จากหน้าเว็บ
+        soup = BeautifulSoup(driver.page_source, 'html.parser')
+
+        # ดึงชื่อหนังสือ
+        all_book = soup.find_all('p', {'class': 'txt-normal'})
+        all_book_list = [book.text.strip() for book in all_book]
+
+        # ดึงราคาหนังสือ
+        all_price = soup.find_all('p', {'class': 'txt-price'})
+        all_price_list = [price.text.strip() for price in all_price]
+
+        # ดึงชื่อผู้แต่ง
+        all_author = soup.find_all('a', {'class': 'inline-block tw-whitespace-normal tw-block'})
+        all_author_list = [author.text.strip() for author in all_author]
+>>>>>>> a47718275b27b68f191a1fcd967733c1f0f50585
 
 def save_to_csv(data, filename="naiin_books.csv"):
     try:
