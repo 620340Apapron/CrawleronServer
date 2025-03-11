@@ -1,9 +1,6 @@
-sudo apt update
-sudo apt install -y google-chrome-stable
 beautifulsoup4
 pandas
 selenium
 schedule
 webdriver-manager
-
-
+mysql-connector-python
