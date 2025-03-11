@@ -14,5 +14,5 @@ echo "✅ ตรวจสอบ Google Chrome & Chromedriver"
 google-chrome --version
 chromedriver --version
 
-echo "🚀 เริ่มรันโปรแกรม Python"
+echo "🚀 Starting crawler..."
 python main.py
