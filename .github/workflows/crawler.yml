@@ -1,0 +1,27 @@
+name: Daily Crawler
+
+on:
+  schedule:
+    # ตั้งค่า cron: '0 1 * * *' หมายถึงรันทุกวัน เวลา 01:00 UTC
+    - cron: '0 6 * * *'
+
+jobs:
+  run-crawler:
+    runs-on: ubuntu-latest
+    steps:
+      # ขั้นแรก เช็คเอาต์โค้ดจาก Repo
+      - uses: actions/checkout@v2
+
+      # ตั้งค่า Python version ที่ต้องการ (เช่น 3.9)
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.9'
+
+      # ติดตั้ง dependencies จากไฟล์ requirements.txt
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      # รันสคริปต์หลัก (main.py หรือไฟล์อื่น ๆ)
+      - name: Run crawler
+        run: python main.py
