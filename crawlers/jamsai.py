@@ -1,5 +1,8 @@
-# crawlers/jamsai.py
 from bs4 import BeautifulSoup
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.action_chains import ActionChains
 import time
 
 def normalize_text(text):
@@ -10,73 +13,79 @@ def normalize_text(text):
 def scrape_jamsai_detail(driver):
     time.sleep(2)
     soup = BeautifulSoup(driver.page_source, "html.parser")
-    
-    image_tag = soup.find("img", {"class": "jamsai-detail-image"})
-    image = normalize_text(image_tag["src"]) if image_tag and image_tag.has_attr("src") else ""
-    
-    title_tag = soup.find("h1", {"class": "jamsai-detail-title"})
-    title = normalize_text(title_tag.get_text()) if title_tag else ""
-    
-    author_tag = soup.find("span", {"class": "jamsai-detail-author"})
-    author = normalize_text(author_tag.get_text()) if author_tag else ""
-    
-    publisher_tag = soup.find("span", {"class": "jamsai-detail-publisher"})
-    publisher = normalize_text(publisher_tag.get_text()) if publisher_tag else ""
-    
-    price_tag = soup.find("span", {"class": "jamsai-detail-price"})
-    price = normalize_text(price_tag.get_text()) if price_tag else ""
-    
-    category_tag = soup.find("span", {"class": "jamsai-detail-category"})
-    category = normalize_text(category_tag.get_text()) if category_tag else ""
-    
-    return {
-        "image": image,
-        "title": title,
-        "author": author,
-        "publisher": publisher,
-        "price": price,
-        "category": category,
-        "source": "jamsai"
-    }
 
-def scrape_jamsai_cards(driver):
-    products = []
-    time.sleep(3)
-    product_cards = driver.find_elements("xpath", "//div[contains(@class, 'jamsai-card')]")
-    for index in range(len(product_cards)):
+    books = []
+    
+    for book_div in soup.find_all("div", class_="col-xxl-3 col-xl-3 col-lg-4 col-md-4 col-sm-6 col-6"):
         try:
-            product_cards = driver.find_elements("xpath", "//div[contains(@class, 'jamsai-card')]")
-            card = product_cards[index]
-            card.click()
-            time.sleep(3)
-            detail = scrape_jamsai_detail(driver)
-            products.append(detail)
-            driver.back()
-            time.sleep(3)
+            title_tag = book_div.find("h3", class_="tp-product-title-2 truncate-text-line-2")
+            title = normalize_text(title_tag.text) if title_tag else "Unknown"
+
+            author_tag = book_div.find("div", class_="tp-product-tag-2 truncate-text-line-1")
+            author = normalize_text(author_tag.text) if author_tag else "Unknown"
+
+            publisher_tag = book_div.find("div", class_="publisher")
+            publisher = normalize_text(publisher_tag.text) if publisher_tag else "Jamsai Publisher"
+
+            price_tag = book_div.find("span", class_="tp-product-price-2 new-price")
+            price = normalize_text(price_tag.text).replace(",", "") if price_tag else "0"
+
+            url_tag = book_div.find("a", href=True)
+            url = url_tag["href"] if url_tag else driver.current_url
+
+            category_tag = book_div.find("span", class_="category")
+            category = normalize_text(category_tag.text) if category_tag else "General"
+
+            books.append({
+                "title": title,
+                "author": author,
+                "publisher": publisher,
+                "price": int(float(price)) if price.replace(".", "").isdigit() else 0,
+                "category": category,
+                "url": url,
+                "source": "jamsai"
+            })
+
         except Exception as e:
-            print(f"[jamsai] Error at card {index}: {e}")
-            try:
-                driver.back()
-            except:
-                pass
-            time.sleep(3)
-    return products
+            print("[ERROR] ไม่สามารถดึงข้อมูลหนังสือ:", e)
+
+    return books
+
+
 
 def scrape_jamsai_all_pages(driver):
     all_products = []
     page = 1
-    while True:
+
+    while page <= 175:
         print(f"[jamsai] Scraping page {page} ...")
-        products = scrape_jamsai_cards(driver)
-        if not products:
-            break
-        all_products.extend(products)
+
         try:
-            next_button = driver.find_element("xpath", "//a[contains(text(),'ถัดไป')]")
-            next_button.click()
+            products = scrape_jamsai_detail(driver)
+            if not products or len(products) == 0:
+                print(f"[jamsai] ไม่พบข้อมูลในหน้า {page}, หยุดทำงาน")
+                break
+            all_products.extend(products)
+        except Exception as e:
+            print(f"[ERROR] ไม่สามารถดึงข้อมูลจากหน้า {page}: {e}")
+            break
+
+        try:
+            # ตรวจสอบว่ามีปุ่มถัดไปหรือไม่
+            next_button = WebDriverWait(driver, 10).until(
+                EC.element_to_be_clickable((By.CLASS_NAME, "next.page-numbers"))
+            )
+
+            # ใช้ ActionChains เพื่อคลิกปุ่ม
+            actions = ActionChains(driver)
+            actions.move_to_element(next_button).click().perform()
+
+            print(f"✅ คลิกปุ่ม 'ถัดไป' สำเร็จ (ไปหน้า {page+1})")
             time.sleep(3)
             page += 1
+
         except Exception as e:
-            print(f"[jamsai] No next page or error: {e}")
+            print("[ERROR] ไม่สามารถคลิกปุ่มถัดไป:", e)
             break
+
     return all_products
