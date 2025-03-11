@@ -25,9 +25,11 @@ def get_driver():
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--disable-gpu")
-    options.binary_location = "/usr/bin/google-chrome"  # ระบุพาธของ Chrome
 
-    service = Service(ChromeDriverManager().install())
+    # กำหนดพาธของ Google Chrome และ Chromedriver
+    options.binary_location = "/usr/bin/google-chrome"
+    service = Service("/usr/local/bin/chromedriver")
+
     driver = webdriver.Chrome(service=service, options=options)
     return driver
 
