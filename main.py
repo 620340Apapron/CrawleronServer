@@ -21,15 +21,15 @@ ssl._create_default_https_context = ssl._create_unverified_context
 
 def get_driver():
     options = webdriver.ChromeOptions()
-    options.add_argument("--headless")  # รันแบบไม่มี UI
+    options.add_argument("--headless")  
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--disable-gpu")
-
-    # กำหนดพาธของ Google Chrome และ Chromedriver
+    # ระบุพาธของ chrome binary หากจำเป็น
     options.binary_location = "/usr/bin/google-chrome"
-    service = Service("/usr/local/bin/chromedriver")
 
+    # ใช้ ChromeDriverManager เพื่อติดตั้งเวอร์ชันที่ตรงกับ Chrome เวอร์ชันที่ใช้งาน
+    service = Service(ChromeDriverManager().install())
     driver = webdriver.Chrome(service=service, options=options)
     return driver
 
