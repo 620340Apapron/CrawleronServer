@@ -22,33 +22,42 @@ ssl._create_default_https_context = ssl._create_unverified_context
 def get_driver():
     options = webdriver.ChromeOptions()
     options.add_argument("--headless")  
-    options.add_argument("--no-sandbox")
-    options.add_argument("--disable-dev-shm-usage")
-    options.add_argument("--disable-gpu")
-    # ระบุพาธของ chrome binary หากจำเป็น
-    options.binary_location = "/usr/bin/google-chrome"
+    options.add_argument("--disable-dev-shm-usage")  # ลดการใช้ shared memory
+    options.add_argument("--no-sandbox")  # ป้องกันการ crash
+    options.add_argument("--disable-gpu")  # ปิด GPU acceleration
+    options.add_argument("--remote-debugging-port=9222")  # เปิด debugging mode
+    options.add_argument("--disable-software-rasterizer")  # ลดการใช้กราฟิก
+    options.add_argument("--disable-features=VizDisplayCompositor")  # ลดโหลด GPU
+    options.add_argument("--disable-popup-blocking")  # ป้องกัน popups
+    options.add_argument("--disable-extensions")  # ปิดส่วนขยาย
+    options.add_argument("--disable-background-networking")  # ปิดการเชื่อมต่อพื้นหลัง
+    options.add_argument("--disable-background-timer-throttling")  # ปิด timer throttling
+    options.add_argument("--disable-backgrounding-occluded-windows")  # ปิด backgrounding
+    options.add_argument("--disable-breakpad")  # ปิด crash reporting
+    options.add_argument("--disable-component-extensions-with-background-pages")  # ปิด background pages
+    options.add_argument("--disable-infobars")  # ปิดแถบ info
+    options.add_argument("--disable-notifications")  # ปิดการแจ้งเตือน
+    options.add_argument("--ignore-certificate-errors")  # ข้าม SSL errors
+    options.add_argument("--log-level=3")  # ลด log verbosity
 
     # ใช้ ChromeDriverManager เพื่อติดตั้งเวอร์ชันที่ตรงกับ Chrome เวอร์ชันที่ใช้งาน
     service = Service(ChromeDriverManager().install())
     driver = webdriver.Chrome(service=service, options=options)
     return driver
 
+
 if __name__ == "__main__":
-    conn = create_connection("books.db")
+    conn = create_connection()
     create_table(conn)
     
     driver = get_driver()
     
-    # รายการเว็บที่ต้องดึงข้อมูล
     sites = [
-        
         {"name": "amarin", "url": "https://amarinbooks.com/shop/?orderby=date"},
         {"name": "se-ed", "url": "https://www.se-ed.com/book-cat.book?option.skip=0&filter.productTypes=PRODUCT_TYPE_BOOK_PHYSICAL"},      
         {"name": "niin", "url": "https://www.naiin.com/category?type_book=best_seller"},
         {"name": "jamsai", "url": "https://www.jamsai.com/shop/"},
         {"name": "b2s", "url": "https://www.b2s.co.th/widget/promotion/%E0%B8%AB%E0%B8%99%E0%B8%B1%E0%B8%87%E0%B8%AA%E0%B8%B7%E0%B8%AD"},  
-
-
     ]
     
     for site in sites:
@@ -57,7 +66,6 @@ if __name__ == "__main__":
         print(f"\n=== ดึงข้อมูลจากเว็บ: {source} ===")
         driver.get(url)
 
-        # ใช้ WebDriverWait แทน time.sleep()
         try:
             WebDriverWait(driver, 10).until(
                 EC.presence_of_element_located((By.TAG_NAME, "body"))
@@ -79,31 +87,16 @@ if __name__ == "__main__":
             products = scrape_amarin_all_pages(driver)
         
         print(f"[{source}] พบข้อมูล {len(products)} รายการ")
-        
-        for i in range(len(products)):
-            if isinstance(products[i], dict):  # ตรวจสอบว่าเป็น dictionary
-                products[i]["url"] = url  # ใช้ URL หน้าหลักแทน
-            else:
-                print(f"[ERROR] Product at index {i} is not a dictionary: {products[i]}")
-        
-        insert_book(conn, products)
 
-    if driver.session_id is None:
-        print("[ERROR] WebDriver session is invalid. Restarting driver...")
-        driver.quit()
-        driver = get_driver()  # ฟังก์ชันที่ใช้สร้าง WebDriver ใหม่
-    
-    try:
-        driver.get(url)
-    except InvalidSessionIdException:
-        print("[ERROR] WebDriver session expired. Restarting WebDriver...")
-        driver.quit()
-        driver = get_driver()
-        driver.get(url)
-    
+        # **🛠 แก้ไขการบันทึกข้อมูล**
+        for book in products:
+            if isinstance(book, dict):
+                insert_book(conn, book)  # ✅ บันทึกทีละเล่ม
+            else:
+                print(f"[ERROR] ข้อมูลหนังสือไม่ถูกต้อง: {book}")
+
+    # ปิด WebDriver
     driver.quit()
     conn.close()
     
-    print("ดึงข้อมูลจากทุกเว็บและบันทึกลงฐานข้อมูลเรียบร้อย")
-
-# python main.py
+    print("✅ ดึงข้อมูลจากทุกเว็บและบันทึกลงฐานข้อมูลเรียบร้อย")
