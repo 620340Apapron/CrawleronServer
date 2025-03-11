@@ -53,11 +53,13 @@ if __name__ == "__main__":
     driver = get_driver()
     
     sites = [
-        {"name": "amarin", "url": "https://amarinbooks.com/shop/?orderby=date"},
-        {"name": "se-ed", "url": "https://www.se-ed.com/book-cat.book?option.skip=0&filter.productTypes=PRODUCT_TYPE_BOOK_PHYSICAL"},      
+        
         {"name": "niin", "url": "https://www.naiin.com/category?type_book=best_seller"},
         {"name": "jamsai", "url": "https://www.jamsai.com/shop/"},
         {"name": "b2s", "url": "https://www.b2s.co.th/widget/promotion/%E0%B8%AB%E0%B8%99%E0%B8%B1%E0%B8%87%E0%B8%AA%E0%B8%B7%E0%B8%AD"},  
+        {"name": "amarin", "url": "https://amarinbooks.com/shop/?orderby=date"},
+        {"name": "se-ed", "url": "https://www.se-ed.com/book-cat.book?option.skip=0&filter.productTypes=PRODUCT_TYPE_BOOK_PHYSICAL"},      
+        
     ]
     
     for site in sites:
