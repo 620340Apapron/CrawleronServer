@@ -20,11 +20,15 @@ from crawlers.amarin import scrape_amarin_all_pages
 ssl._create_default_https_context = ssl._create_unverified_context
 
 def get_driver():
-    options = Options()
-    options.add_argument('--headless')  # รันแบบไม่มี UI
-    options.add_argument('--no-sandbox')
-    options.add_argument('--disable-dev-shm-usage')
-    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+    options = webdriver.ChromeOptions()
+    options.add_argument("--headless")  # รันแบบไม่มี UI
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("--disable-gpu")
+    options.binary_location = "/usr/bin/google-chrome"  # ระบุพาธของ Chrome
+
+    service = Service(ChromeDriverManager().install())
+    driver = webdriver.Chrome(service=service, options=options)
     return driver
 
 if __name__ == "__main__":
