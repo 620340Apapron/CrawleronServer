@@ -42,7 +42,7 @@ def create_table(conn):
         publisher VARCHAR(255) DEFAULT 'Unknown',
         price INT DEFAULT 0,
         category VARCHAR(255) DEFAULT 'General',
-        url TEXT DEFAULT '',
+        url TEXT,
         source VARCHAR(255) NOT NULL
     )
     """)
