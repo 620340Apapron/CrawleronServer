@@ -150,10 +150,3 @@ def scrape_niin_all_pages(driver):
             break
 
     return all_products
-
-if __name__ == "__main__":
-    driver = start_new_driver()
-    driver.get("https://www.naiin.com/category?type_book=best_seller")
-    data = scrape_niin_all_pages(driver)
-    print(f"พบข้อมูลทั้งหมด {len(data)} รายการ")
-    driver.quit()
