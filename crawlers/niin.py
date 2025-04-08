@@ -51,7 +51,7 @@ def scrape_niin_detail(driver):
         publisher = "Unknown"
 
     try:
-        price = normalize_text(driver.find_element(By.CLASS_NAME, '//*[@id="discount-price"]').text).replace(",", "")
+        price = normalize_text(driver.find_element(By.CLASS_NAME, '/html/body/div[1]/div[2]/div[1]/div/div/div[3]/div[2]/div[1]/div[2]/div[1]/p[1]/span').text).replace(",", "")
     except Exception:
         price = "0"
 
