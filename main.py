@@ -54,12 +54,12 @@ if __name__ == "__main__":
     
     sites = [
         
-        {"name": "niin", "url": "https://www.naiin.com/category?category_1_code=2&product_type_id=1"},{"name": "niin", "url": "https://www.naiin.com/category?category_1_code=13&product_type_id=1"}, {"name": "niin", "url": "https://www.naiin.com/category?category_1_code=33&product_type_id=1"},{"name": "niin", "url": "https://www.naiin.com/category?category_1_code=14&product_type_id=1"},{"name": "niin", "url": "https://www.naiin.com/category?category_1_code=2&product_type_id=1&categoryLv2Code=134"},{"name": "niin", "url": "https://www.naiin.com/category?category_1_code=19&product_type_id=1"},{"name": "niin", "url": "https://www.naiin.com/category?category_1_code=15&product_type_id=1"},{"name": "niin", "url": " https://www.naiin.com/category?category_1_code=5&product_type_id=1"},
         {"name": "jamsai", "url": "https://www.jamsai.com/shop/"},
         {"name": "b2s", "url": "https://www.b2s.co.th/widget/promotion/%E0%B8%AB%E0%B8%99%E0%B8%B1%E0%B8%87%E0%B8%AA%E0%B8%B7%E0%B8%AD"},  
         {"name": "amarin", "url": "https://amarinbooks.com/shop/?orderby=date"},
         {"name": "se-ed", "url": "https://www.se-ed.com/book-cat.book?option.skip=0&filter.productTypes=PRODUCT_TYPE_BOOK_PHYSICAL"},      
-        
+        {"name": "niin", "url": "https://www.naiin.com/category?category_1_code=2&product_type_id=1"},{"name": "niin", "url": "https://www.naiin.com/category?category_1_code=13&product_type_id=1"}, {"name": "niin", "url": "https://www.naiin.com/category?category_1_code=33&product_type_id=1"},{"name": "niin", "url": "https://www.naiin.com/category?category_1_code=14&product_type_id=1"},{"name": "niin", "url": "https://www.naiin.com/category?category_1_code=2&product_type_id=1&categoryLv2Code=134"},{"name": "niin", "url": "https://www.naiin.com/category?category_1_code=19&product_type_id=1"},{"name": "niin", "url": "https://www.naiin.com/category?category_1_code=15&product_type_id=1"},{"name": "niin", "url": " https://www.naiin.com/category?category_1_code=5&product_type_id=1"},
+
     ]
     
     for site in sites:
