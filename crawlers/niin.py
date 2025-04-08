@@ -51,13 +51,9 @@ def scrape_niin_detail(driver):
         publisher = "Unknown"
 
     try:
-        # ลองหาป้ายราคาจาก discount-price ก่อน
-        price = normalize_text(driver.find_element(By.XPATH, '//*[@id="discount-price"]').text).replace(",", "")
+        price = normalize_text(driver.find_element(By.CLASS_NAME, '//*[@id="discount-price"]').text).replace(",", "")
     except Exception:
-        try:
-            price = normalize_text(driver.find_element(By.CLASS_NAME, "discount-price").text).replace(",", "")
-        except Exception:
-            price = "0"
+        price = "0"
 
     try:
         category = normalize_text(driver.find_element(By.XPATH, '//*[@id="main"]/div/div/div[3]/div[2]/div[1]/div[1]/p[3]/a[1]').text)
