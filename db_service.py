@@ -6,7 +6,7 @@ def create_connection():
     # ดึงค่าจาก environment variable
     host = os.getenv("MYSQLHOST")
     if not host:
-        host = "mysql-production-5c81d.up.railway.app"
+        host = "mysql.railway.internal"
     
     user = os.getenv("MYSQLUSER")
     if not user:
