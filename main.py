@@ -45,8 +45,38 @@ def get_driver():
     driver = webdriver.Chrome(service=service, options=options)
     return driver
 
+def create_table(conn):
+    sql = """
+    CREATE TABLE IF NOT EXISTS books (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        source TEXT,
+        title TEXT,
+        author TEXT,
+        price REAL,
+        url TEXT
+    );
+    """
+    conn.execute(sql)
+    conn.commit()
 
-if __name__ == "__main__":
+def insert_book(conn, book):
+    sql = """
+    INSERT INTO books (source, title, author, price, url)
+    VALUES (?, ?, ?, ?, ?)
+    """
+    params = (
+        book.get('source'),
+        book.get('title'),
+        book.get('author'),
+        book.get('price'),
+        book.get('url'),
+    )
+    cur = conn.cursor()
+    cur.execute(sql, params)
+    conn.commit()
+
+
+def main():
     conn = create_connection()
     create_table(conn)
     
@@ -103,3 +133,6 @@ if __name__ == "__main__":
     conn.close()
     
     print("✅ ดึงข้อมูลจากทุกเว็บและบันทึกลงฐานข้อมูลเรียบร้อย")
+
+if __name__ == "__main__":
+    main()
