@@ -6,7 +6,7 @@ def create_connection():
     # ดึงค่าจาก environment variable
     host = os.getenv("MYSQLHOST")
     if not host:
-        host = "ballast.proxy.rlwy.net"
+        host = "mysql-production-5c81d.up.railway.app"
     
     user = os.getenv("MYSQLUSER")
     if not user:
@@ -14,7 +14,7 @@ def create_connection():
     
     password = os.getenv("MYSQLPASSWORD")
     if not password:
-        password = "FrmfJcaQNVQXdOsAtBuMQopdrwrqmPdF"
+        password = "FwgRufsqEStTVfTHDNLVioShukkZrgBaF"
     
     database = os.getenv("MYSQLDATABASE")
     if not database:
