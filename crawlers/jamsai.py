@@ -18,23 +18,23 @@ def scrape_jamsai_detail(driver):
     
     for book_div in soup.find_all("div", class_="col-xxl-3 col-xl-3 col-lg-4 col-md-4 col-sm-6 col-6"):
         try:
-            title_tag = book_div.find(By.XPATH, '//*[@id="grid-tab-pane"]/div/div[1]/div/div[2]/h3/a')
+            title_tag = book_div.find_element(By.XPATH, '//*[@id="grid-tab-pane"]/div/div[1]/div/div[2]/h3/a')
             title = normalize_text(title_tag.text) if title_tag else "Unknown"
 
-            author_tag = book_div.find(By.XPATH, '//*[@id="grid-tab-pane"]/div/div[1]/div/div[2]/div[1]')
+            author_tag = book_div.find_element(By.XPATH, '//*[@id="grid-tab-pane"]/div/div[1]/div/div[2]/div[1]')
             author = normalize_text(author_tag.text) if author_tag else "Unknown"
 
             #publisher_tag = book_div.find(By.XPATH,)
             publisher = "Jamsai Publisher"
             #publisher = normalize_text(publisher_tag.text) if publisher_tag else "Jamsai Publisher"
 
-            price_tag = book_div.find(By.XPATH, '//*[@id="grid-tab-pane"]/div/div[1]/div/div[2]/div[4]/span[1]')
+            price_tag = book_div.find_element(By.XPATH, '//*[@id="grid-tab-pane"]/div/div[1]/div/div[2]/div[4]/span[1]')
             price = normalize_text(price_tag.text).replace(",", "") if price_tag else "0"
 
             url_tag = book_div.find("a", class_="tp-product-title-2 truncate-text-line-2")
             url = url_tag["href"] if url_tag else driver.current_url
 
-            category_tag = book_div.find(By.XPATH, )
+            category_tag = book_div.find_element(By.XPATH, )
             category = normalize_text(category_tag.text) if category_tag else "General"
 
             books.append({
