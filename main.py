@@ -47,7 +47,7 @@ def get_driver():
 
 def create_table(conn):
     sql = """
-    CREATE TABLE IF NOT EXISTS books (
+    CREATE TABLE IF NOT EXISTS rawbooks (
         id INT AUTO_INCREMENT PRIMARY KEY,
         source VARCHAR(255),
         title VARCHAR(500),
@@ -64,7 +64,7 @@ def create_table(conn):
 
 def insert_book(conn, book):
     sql = """
-    INSERT INTO books (source, title, author, publisher, price, url)
+    INSERT INTO rawbooks (source, title, author, publisher, price, url)
     VALUES (%s, %s, %s, %s, %s, %s)
     """
     params = (
