@@ -21,7 +21,7 @@ def scrape_b2s_detail(driver):
         title = "Unknown"
     
     try:
-        author_tag = driver.find_element(By.XPATH, '//*[@id="__layout"]/div/div[3]/div/div[2]/div/div[1]/div/div[1]/div[3]/div/div/p[2]/span/text()[1]')
+        author_tag = driver.find_element(By.XPATH, '//*[@id="__layout"]/div/div[3]/div/div[2]/div/div[1]/div/div[1]/div[2]/div/h1')
         author = normalize_text(author_tag.text) if author_tag else "Unknown"
     except Exception:
         author = "Unknown"
@@ -33,7 +33,7 @@ def scrape_b2s_detail(driver):
         publisher = "Unknown"
     
     try:
-        price_tag = soup.find("span", class_="price")
+        price_tag = driver.find_element(By.XPATH, '//*[@id="__layout"]/div/div[3]/div/div[2]/div/div[1]/div/div[1]/div[2]/div/div[6]/label')
         price = normalize_text(price_tag.text).replace(",", "") if price_tag else "0"
     except Exception:
         price = "0"
