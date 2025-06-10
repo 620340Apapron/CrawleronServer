@@ -48,16 +48,18 @@ def get_driver():
 def create_table(conn):
     sql = """
     CREATE TABLE IF NOT EXISTS books (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        source TEXT,
-        title TEXT,
-        author TEXT,
-        price REAL,
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        source VARCHAR(255),
+        title VARCHAR(500),
+        author VARCHAR(255),
+        price DECIMAL(10,2),
         url TEXT
-    );
+    )
     """
-    conn.execute(sql)
+    cur = conn.cursor()
+    cur.execute(sql)
     conn.commit()
+    cur.close()
 
 def insert_book(conn, book):
     sql = """
