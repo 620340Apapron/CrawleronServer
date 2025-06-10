@@ -4,29 +4,23 @@ import os
 
 def create_connection():
     # ดึงค่าจาก environment variable
-    host = os.getenv("MYSQLHOST")
-    if not host:
-        host = "shinkansen.proxy.rlwy.net"
-    
-    user = os.getenv("MYSQLUSER")
-    if not user:
-        user = "root"
-    
-    password = os.getenv("MYSQLPASSWORD")
-    if not password:
-        password = "FwgRufsqEStTVfTHDNLVioShukkZrgBa"
-    
-    database = os.getenv("MYSQLDATABASE")
-    if not database:
-        database = "railway"
-    
-    port_env = os.getenv("MYSQLPORT")
-    port = int(port_env) if port_env and port_env.isdigit() else 554897
+    host     = os.getenv("MYSQL_HOST", "localhost")
+    port     = int(os.getenv("MYSQL_PORT", "3306"))        # ← เปลี่ยนตรงนี้
+    user     = os.getenv("MYSQL_USER", "root")
+    password = os.getenv("MYSQL_PASSWORD", "")
+    database = os.getenv("MYSQL_DATABASE", "")
 
-    return mysql.connector.connect(
-        host=host,
-        user=user,
-        password=password,
-        database=database,
-        port=port
-    )
+    try:
+        conn = mysql.connector.connect(
+            host="shinkansen.proxy.rlwy.net",
+            port=54897,                                  # ← และตรงนี้
+            user="root",
+            password="FwgRufsqEStTVfTHDNLVioShukkZrgBa",
+            database=railway,
+        )
+        print(f"[DB] Connected to {user}@{host}:{port}/{database}")
+        return conn
+
+    except Error as e:
+        print(f"[DB][ERROR] Cannot connect to MySQL: {e}")
+        raise
