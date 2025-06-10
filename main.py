@@ -87,11 +87,11 @@ def main():
     driver = get_driver()
     
     sites = [
-        
+        {"name": "jamsai", "url": "https://www.jamsai.com/shop/"},
         {"name": "niin", "url": "https://www.naiin.com/category?category_1_code=2&product_type_id=1"},{"name": "niin", "url": "https://www.naiin.com/category?category_1_code=13&product_type_id=1"}, {"name": "niin", "url": "https://www.naiin.com/category?category_1_code=33&product_type_id=1"},{"name": "niin", "url": "https://www.naiin.com/category?category_1_code=14&product_type_id=1"},{"name": "niin", "url": "https://www.naiin.com/category?category_1_code=2&product_type_id=1&categoryLv2Code=134"},{"name": "niin", "url": "https://www.naiin.com/category?category_1_code=19&product_type_id=1"},{"name": "niin", "url": "https://www.naiin.com/category?category_1_code=15&product_type_id=1"},{"name": "niin", "url": " https://www.naiin.com/category?category_1_code=5&product_type_id=1"},
         {"name": "b2s", "url": "https://shorturl.asia/JgZ0L"},{"name": "b2s", "url": "https://shorturl.asia/AUefZ"},{"name": "b2s", "url": "https://shorturl.asia/sQXyv"},{"name": "b2s", "url": "https://shorturl.asia/Xnrm3"},{"name": "b2s", "url": "https://shorturl.asia/ojOVW"},{"name": "b2s", "url": "https://shorturl.asia/QoKyp"},{"name": "b2s", "url": "https://shorturl.asia/BEAvO"},{"name": "b2s", "url": "https://shorturl.asia/ldz6p"},{"name": "b2s", "url": "https://shorturl.asia/g8b2m"},{"name": "b2s", "url": "https://shorturl.asia/m9nio"},{"name": "b2s", "url": "https://shorturl.asia/5xIER"},{"name": "b2s", "url": "https://shorturl.asia/QZ0Er"},{"name": "b2s", "url": "https://shorturl.asia/ZNRq2"},{"name": "b2s", "url": "https://shorturl.asia/OMYZv"},
         {"name": "amarin", "url": "https://amarinbooks.com/shop/?orderby=date"},
-        {"name": "jamsai", "url": "https://www.jamsai.com/shop/"},
+        
         {"name": "se-ed", "url": "https://www.se-ed.com/book-cat.book?option.skip=0&filter.productTypes=PRODUCT_TYPE_BOOK_PHYSICAL"},      
     
     ]
