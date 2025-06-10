@@ -64,7 +64,7 @@ def create_table(conn):
 def insert_book(conn, book):
     sql = """
     INSERT INTO books (source, title, author, price, url)
-    VALUES (?, ?, ?, ?, ?)
+    VALUES (%s, %s, %s, %s, %s)
     """
     params = (
         book.get('source'),
