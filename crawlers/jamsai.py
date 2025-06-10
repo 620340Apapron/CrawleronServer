@@ -24,8 +24,9 @@ def scrape_jamsai_detail(driver):
             author_tag = book_div.find(By.XPATH, '//*[@id="grid-tab-pane"]/div/div[1]/div/div[2]/div[1]')
             author = normalize_text(author_tag.text) if author_tag else "Unknown"
 
-            publisher_tag = book_div.find(By.XPATH,)
-            publisher = normalize_text(publisher_tag.text) if publisher_tag else "Jamsai Publisher"
+            #publisher_tag = book_div.find(By.XPATH,)
+            publisher = "Jamsai Publisher"
+            #publisher = normalize_text(publisher_tag.text) if publisher_tag else "Jamsai Publisher"
 
             price_tag = book_div.find(By.XPATH, '//*[@id="grid-tab-pane"]/div/div[1]/div/div[2]/div[4]/span[1]')
             price = normalize_text(price_tag.text).replace(",", "") if price_tag else "0"
