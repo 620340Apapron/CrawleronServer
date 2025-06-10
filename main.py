@@ -62,18 +62,18 @@ def create_table(conn):
     conn.commit()
     cur.close()
 
-def insert_book(conn, rawbook):
+def insert_book(conn, book):
     sql = """
     INSERT INTO books (source, title, author, publisher, price, url)
     VALUES (%s, %s, %s, %s, %s, %s)
     """
     params = (
-        rawbook.get('source'),
-        rawbook.get('title'),
-        rawbook.get('author'),
-        rawbook.get('price'),
-        rawbook.get('ublisher'),
-        rawbook.get('url'),
+        book.get('source'),
+        book.get('title'),
+        book.get('author'),
+        book.get('price'),
+        book.get('ublisher'),
+        book.get('url'),
     )
     cur = conn.cursor()
     cur.execute(sql, params)
