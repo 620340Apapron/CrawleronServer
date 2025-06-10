@@ -72,7 +72,7 @@ def insert_book(conn, book):
         book.get('title'),
         book.get('author'),
         book.get('price'),
-        book.get('ublisher')
+        book.get('ublisher'),
         book.get('url'),
     )
     cur = conn.cursor()
