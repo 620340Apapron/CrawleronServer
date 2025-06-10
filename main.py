@@ -52,6 +52,7 @@ def create_table(conn):
         source VARCHAR(255),
         title VARCHAR(500),
         author VARCHAR(255),
+        publisher VARCHAR(255),
         price DECIMAL(10,2),
         url TEXT
     )
@@ -63,14 +64,15 @@ def create_table(conn):
 
 def insert_book(conn, book):
     sql = """
-    INSERT INTO books (source, title, author, price, url)
-    VALUES (%s, %s, %s, %s, %s)
+    INSERT INTO books (source, title, author, publisher, price, url)
+    VALUES (%s, %s, %s, %s, %s, %s)
     """
     params = (
         book.get('source'),
         book.get('title'),
         book.get('author'),
         book.get('price'),
+        book.get('ublisher')
         book.get('url'),
     )
     cur = conn.cursor()
