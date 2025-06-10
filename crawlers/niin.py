@@ -46,7 +46,7 @@ def scrape_niin_detail(driver):
         author = "Unknown"
 
     try:
-        publisher = normalize_text(driver.find_element(By.XPATH, '//*[@id="main"]/div/div/div[3]/div[2]/div[1]/div[1]/p[2]/a').text)
+        publisher = normalize_text(driver.find_element(By.XPATH, '/html/body/div/div[2]/div[1]/div/div/div[3]/div[2]/div[1]/div[1]/p[2]/a').text)
     except Exception:
         publisher = "Unknown"
 
