@@ -1,5 +1,0 @@
-MYSQLHOST="mysql.railway.internal"
-MYSQLDATABASE="railway"
-MYSQLPASSWORD="IjxcLAzTFgXxTnMDklQKTOghdAkvLRVb"
-MYSQLPORT="3306"
-MYSQLUSER="root"

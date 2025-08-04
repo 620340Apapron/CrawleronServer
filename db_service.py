@@ -2,17 +2,14 @@ import mysql.connector
 import json
 import os
 from mysql.connector import Error
-from dotenv import load_dotenv
-
-load_dotenv()
 
 def create_connection():
     # ดึงค่าจาก environment variable (ทั้งสองแบบรองรับได้)
-    host     = os.getenv("MYSQLHOST")
-    port_str = os.getenv("MYSQLPORT", "3306")
-    user     = os.getenv("MYSQLUSER")
-    password = os.getenv("MYSQLPASSWORD")
-    database = os.getenv("MYSQLDATABASE")
+    host     = "mysql.railway.internal"
+    port_str = "3306"
+    user     = "root"
+    password = "IjxcLAzTFgXxTnMDklQKTOghdAkvLRVb"
+    database = "railway"
 
     print(f"[DEBUG] env values: host={host}, port={port_str}, user={user}, database={database}")
 
