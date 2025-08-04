@@ -9,7 +9,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.common.exceptions import InvalidSessionIdException
 
-from db_service import create_connection
+from API.db_service import create_connection
 from crawlers.niin import scrape_niin_all_pages
 from crawlers.b2s import scrape_b2s_all_pages
 from crawlers.jamsai import scrape_jamsai_all_pages
