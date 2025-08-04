@@ -78,6 +78,7 @@ def insert_book(conn, book):
     cur = conn.cursor()
     cur.execute(sql, params)
     conn.commit()
+    print(f"✅ เพิ่มหนังสือ: {book.get('title')}")
 
 
 def main():
@@ -114,13 +115,14 @@ def main():
         if source == "niin":
             products = scrape_niin_all_pages(driver)
         elif source == "b2s":
-            products = scrape_b2s_all_pages(driver)
+            products, driver = scrape_b2s_all_pages(driver)
         elif source == "jamsai":
             products = scrape_jamsai_all_pages(driver)
         elif source == "se-ed":
-            products = scrape_seed_all_pages(driver)
+            products, driver = scrape_seed_all_pages(driver)
         elif source == "amarin":
-            products = scrape_amarin_all_pages(driver)
+            products, driver = scrape_amarin_all_pages(driver)
+
         
         print(f"[{source}] พบข้อมูล {len(products)} รายการ")
 
