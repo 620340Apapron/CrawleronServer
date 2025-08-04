@@ -1,4 +1,4 @@
-MYSQLHOST="mysql"
+MYSQLHOST="trolley.proxy.rlwy.net"
 MYSQLDATABASE="Booksdata"
 MYSQLPASSWORD="1234"
 MYSQLPORT="3306"
