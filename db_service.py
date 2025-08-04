@@ -5,8 +5,8 @@ from mysql.connector import Error
 
 def create_connection():
     # ดึงค่าจาก environment variable (ทั้งสองแบบรองรับได้)
-    host     = "mysql.railway.internal"
-    port_str = "3306"
+    host     = "hopper.proxy.rlwy.net"
+    port_str = "22749"
     user     = "root"
     password = "IjxcLAzTFgXxTnMDklQKTOghdAkvLRVb"
     database = "railway"
