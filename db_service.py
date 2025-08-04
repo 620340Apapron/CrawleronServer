@@ -4,11 +4,11 @@ import os
 
 def create_connection():
     # ดึงค่าจาก environment variable
-    host     = os.getenv("MYSQL_HOST", "shinkansen.proxy.rlwy.net")
-    port     = int(os.getenv("MYSQL_PORT", "54897"))
+    host     = os.getenv("MYSQL_HOST", "MySQLMorigan")
+    port     = int(os.getenv("MYSQL_PORT", "3306"))
     user     = os.getenv("MYSQL_USER", "root")
-    password = os.getenv("MYSQL_PASSWORD", "FwgRufsqEStTVfTHDNLVioShukkZrgBa")
-    database = os.getenv("MYSQL_DATABASE", "railway")
+    password = os.getenv("MYSQL_PASSWORD", "Meanee3003")
+    database = os.getenv("MYSQL_DATABASE", "Booksdata")
 
     try:
         conn = mysql.connector.connect(

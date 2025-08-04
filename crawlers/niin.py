@@ -46,12 +46,12 @@ def scrape_niin_detail(driver):
         author = "Unknown"
 
     try:
-        publisher = normalize_text(driver.find_element(By.XPATH, '/html/body/div/div[2]/div[1]/div/div/div[3]/div[2]/div[1]/div[1]/p[2]/a').text)
+        publisher = normalize_text(driver.find_element(By.XPATH, '//*[@id="discount-price"]').text)
     except Exception:
         publisher = "Unknown"
 
     try:
-        price = normalize_text(driver.find_element(By.CLASS_NAME, '/html/body/div[1]/div[2]/div/div/div/div[3]/div[2]/div[1]/div[2]/div/div[3]/div[3]/p[2]').text).replace(",", "")
+        price = normalize_text(driver.find_element(By.XPATH, '/html/body/div[1]/div[2]/div/div/div/div[3]/div[2]/div[1]/div[2]/div/div[3]/div[3]/p[2]').text).replace(",", "")
     except Exception:
         price = "0"
 
