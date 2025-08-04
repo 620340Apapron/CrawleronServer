@@ -5,7 +5,7 @@ from mysql.connector import Error
 
 def create_connection():
     # ดึงค่าจาก environment variable
-    host     = os.getenv("MYSQL_HOST", "containers-us-west-89.railway.app")
+    host     = os.getenv("MYSQL_HOST", "Morigandatabaes")
     port     = int(os.getenv("MYSQL_PORT", "3306"))
     user     = os.getenv("MYSQL_USER", "root")
     password = os.getenv("MYSQL_PASSWORD", "Meanee3003")
