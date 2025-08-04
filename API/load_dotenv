@@ -1,5 +1,5 @@
-MYSQLHOST="trolley.proxy.rlwy.net"
-MYSQLDATABASE="Booksdata"
-MYSQLPASSWORD="1234"
+MYSQLHOST="mysql.railway.internal"
+MYSQLDATABASE="railway"
+MYSQLPASSWORD="IjxcLAzTFgXxTnMDklQKTOghdAkvLRVb"
 MYSQLPORT="3306"
 MYSQLUSER="root"
