@@ -1,6 +1,7 @@
 import mysql.connector
 import json
 import os
+from mysql.connector import Error
 
 def create_connection():
     # ดึงค่าจาก environment variable
