@@ -17,13 +17,13 @@ def get_all_book_urls(driver, max_pages):
         driver.get(base_url.format(p))
         try:
             WebDriverWait(driver, 15).until(
-                EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".product-loop-meta a"))
+                EC.presence_of_all_elements_located((By.CSS_SELECTOR, "a.woocommerce-LoopProduct-link"))
             )
         except TimeoutException:
             print(f"[amarin] ไม่พบข้อมูลในหน้า {p}, สิ้นสุดการทำงาน")
             break
         
-        links = driver.find_elements(By.CSS_SELECTOR, ".product-loop-meta a")
+        links = driver.find_elements( "a.woocommerce-LoopProduct-link")
         for link in links:
             href = link.get_attribute("href")
             if href:
@@ -41,17 +41,16 @@ def scrape_one(driver, book_url):
 
     soup = BeautifulSoup(driver.page_source, "html.parser")
     
-    title_tag = soup.select_one("h1.product_title")
+    title_tag = soup.find(By.CSS_SELECTOR,"h1.product_title")
     title = normalize_text(title_tag.text) if title_tag else "Unknown"
 
-    author_tag = soup.select_one("p.product-short-description a")
+    author_tag = soup.find(By.CSS_SELECTOR,"div.product-author > span")
     author = normalize_text(author_tag.text) if author_tag else "Unknown"
 
-    publisher_tag = soup.select_one("span.brand a")
+    publisher_tag = soup.find(By.CSS_SELECTOR,"span.product-publisher a")
     publisher = normalize_text(publisher_tag.text) if publisher_tag else "Unknown"
     
-    price = "0"
-    p_tag = soup.find("span", class_="woocommerce-Price-amount amount")
+    p_tag = soup.find(By.CSS_SELECTOR,"div.product-page-price > p.price > span.woocommerce-Price-amount")
     if p_tag:
         m = re.search(r'[\d,.]+', p_tag.text)
         if m:
