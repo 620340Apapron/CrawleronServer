@@ -13,7 +13,7 @@ from book_history import create_history_table, update_history
 from db_service import create_connection
 from crawlers.amarin import scrape_amarin_all_pages
 from crawlers.b2s import scrape_b2s_all_pages
-from crawlers.jamsai import scrape_jamsai_all_page
+from crawlers.jamsai import scrape_jamsai_all_pages
 from crawlers.niin import scrape_niin_all_pages
 from crawlers.seed import scrape_seed_all_pages
 
@@ -115,7 +115,7 @@ def main():
         elif source == "b2s":
             products, driver = scrape_b2s_all_pages(driver)
         elif source == "jamsai":
-            products = scrape_jamsai_all_page(driver)
+            products = scrape_jamsai_all_pages(driver)
         elif source == "se-ed":
             products = scrape_seed_all_pages(driver)
         elif source == "amarin":
