@@ -95,7 +95,7 @@ def main():
     {"name": "niin", "url": "https://www.naiin.com/product/view-all?product_type_id=1&product_category=list-book-category"}, 
     {"name": "b2s", "url": "https://www.central.co.th/th/b2s/home-lifestyle/books-movies-music/books"}, 
     {"name": "amarin", "url": "https://amarinbooks.com/shop/?orderby=date"}, 
-    {"name": "se-ed", "url": "https://www.se-ed.com/book-cat.book?filter.productTypes=PRODUCT_TYPE_BOOK_PHYSICAL"}, 
+    {"name": "se-ed", "url": "https://se-ed.bookcaze.com/"}, 
     ]
 
     for site in sites:
