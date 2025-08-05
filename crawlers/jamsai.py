@@ -34,14 +34,14 @@ def scrape_one(driver, book_url):
     driver.get(book_url)
     try:
         WebDriverWait(driver, 15).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, "h3.tp-product-title-2 truncate-text-line-2"))
+            EC.presence_of_element_located((By.CSS_SELECTOR, ".tp-product-title-2 truncate-text-line-2 h3"))
         )
     except TimeoutException:
         return None
 
     soup = BeautifulSoup(driver.page_source, "html.parser")
     
-    t = soup.select_one("h3.tp-product-details-title mt-1 mb-1")
+    t = soup.find("h3", class_="tp-product-title-2 truncate-text-line-2")
     title = normalize_text(t.text) if t else "Unknown"
 
     auth_div = soup.find("h3", class_="tp-product-details-variation-title mb-4")
