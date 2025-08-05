@@ -88,7 +88,7 @@ def get_all_book_urls(driver, max_pages=10):
                 urls.add(href)
     return list(urls)
 
-def scrape_naiin_all_pages(driver, max_pages=10):
+def scrape_niin_all_pages(driver, max_pages=10):
     all_products = []
     
     all_urls = get_all_book_urls(driver, max_pages)
