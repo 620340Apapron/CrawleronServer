@@ -3,35 +3,26 @@ import ssl
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
-from selenium.common.exceptions import InvalidSessionIdException
-from db_service import create_connection
+# นำเข้า create_tables
+from db_service import create_connection, create_tables, insert_book, get_all_books, clear_raw_books_table
 from book_history import update_history
-from db_service import create_connection, insert_book
-
-# นำเข้า crawler ที่ปรับแก้แล้ว
 from crawlers.amarin import scrape_amarin_all_pages
 from crawlers.b2s import scrape_b2s_all_pages
 from crawlers.jamsai import scrape_jamsai_all_pages
 from crawlers.niin import scrape_niin_all_pages
 from crawlers.seed import scrape_seed_all_pages
 
-# แก้ปัญหา SSL handshake failed
 ssl._create_default_https_context = ssl._create_unverified_context
 
 def get_driver():
     options = webdriver.ChromeOptions()
-    options.add_argument("--headless")  
+    options.add_argument("--headless")
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-gpu")
     options.add_argument("--remote-debugging-port=9222")
     options.add_argument("--disable-software-rasterizer")
-    
-    # สำหรับการใช้งานบน Docker หรือ Linux server
     options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
     
     service = Service(ChromeDriverManager().install())
@@ -42,9 +33,10 @@ def main():
     if conn is None:
         print("[ERROR] ไม่สามารถเชื่อมต่อฐานข้อมูลได้")
         return
-    
-    # คำสั่งสร้างตารางถูกย้ายไปที่ db_service เพื่อใช้สำหรับ initial setup
-    
+
+    # เรียกใช้ฟังก์ชันนี้เพื่อสร้างตารางหากยังไม่มี
+    create_tables(conn)
+
     driver = get_driver()
     
     sites = [
@@ -55,12 +47,15 @@ def main():
         {"name": "se-ed", "scraper": scrape_seed_all_pages},
     ]
 
+    # ล้างข้อมูลเก่าก่อนเริ่มดึงข้อมูลใหม่
+    clear_raw_books_table(conn)
+
     for site in sites:
         source, scraper = site['name'], site['scraper']
         print(f"\n=== ดึงข้อมูลจากเว็บ: {source} ===")
         
         try:
-            products = scraper(driver)
+            products = scraper(driver, 10)
         except Exception as e:
             print(f"[ERROR] ไม่สามารถดึงข้อมูลจาก {source} ได้: {e}")
             continue

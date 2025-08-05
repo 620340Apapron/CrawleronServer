@@ -19,11 +19,12 @@ def create_connection():
         return None
     
 def create_tables(conn):
-    """สร้างตาราง rawbooks และ book_history หากยังไม่มี"""
+    """สร้างตาราง raw_books และ book_history หากยังไม่มี"""
+    cursor = conn.cursor()
     try:
         sql_create_raw_books_table = """
-        CREATE TABLE IF NOT EXISTS rawbooks (
-            id INTEGER PRIMARY KEY,
+        CREATE TABLE IF NOT EXISTS raw_books (
+            id INT AUTO_INCREMENT PRIMARY KEY,
             title TEXT NOT NULL,
             author TEXT,
             publisher TEXT,
@@ -35,8 +36,8 @@ def create_tables(conn):
         
         sql_create_history_table = """
         CREATE TABLE IF NOT EXISTS book_history (
-            id INTEGER PRIMARY KEY,
-            book_id INTEGER NOT NULL,
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            book_id INT,
             title TEXT NOT NULL,
             author TEXT,
             publisher TEXT,
@@ -46,34 +47,36 @@ def create_tables(conn):
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );"""
         
-        conn.execute(sql_create_raw_books_table)
-        conn.execute(sql_create_history_table)
+        cursor.execute(sql_create_raw_books_table)
+        cursor.execute(sql_create_history_table)
         conn.commit()
-    except sqlite3.Error as e:
+    except mysql.connector.Error as e:
         print(f"Error creating tables: {e}")
 
 def insert_book(conn, book):
-    """แทรกข้อมูลหนังสือใหม่ลงในตาราง rawbooks"""
+    """แทรกข้อมูลหนังสือใหม่ลงในตาราง raw_books"""
+    cursor = conn.cursor()
     sql = """
-    INSERT INTO rawbooks (title, author, publisher, price, url, source)
-    VALUES (?, ?, ?, ?, ?, ?);
+    INSERT INTO raw_books (title, author, publisher, price, url, source)
+    VALUES (%s, %s, %s, %s, %s, %s);
     """
     try:
-        conn.execute(sql, (book['title'], book['author'], book['publisher'], book['price'], book['url'], book['source']))
+        cursor.execute(sql, (book['title'], book['author'], book['publisher'], book['price'], book['url'], book['source']))
         conn.commit()
-    except sqlite3.Error as e:
+    except mysql.connector.Error as e:
         print(f"Error inserting book: {e}")
 
 def get_all_books(conn):
-    """ดึงข้อมูลหนังสือทั้งหมดจาก rawbooks"""
+    """ดึงข้อมูลหนังสือทั้งหมดจาก raw_books"""
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM rawbooks")
+    cursor.execute("SELECT * FROM raw_books")
     return cursor.fetchall()
 
 def clear_raw_books_table(conn):
-    """ล้างข้อมูลในตาราง rawbooks"""
+    """ล้างข้อมูลในตาราง raw_books"""
+    cursor = conn.cursor()
     try:
-        conn.execute("DELETE FROM rawbooks")
+        cursor.execute("DELETE FROM raw_books")
         conn.commit()
-    except sqlite3.Error as e:
+    except mysql.connector.Error as e:
         print(f"Error clearing table: {e}")
