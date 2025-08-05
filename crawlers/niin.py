@@ -100,13 +100,14 @@ def scrape_niin_cards_on_page(driver):
     products = []
     main_window = driver.current_window_handle
 
-    # รอให้สินค้าโหลด (Lazy Loading)
+    # รอให้สินค้าโหลด (Lazy Loading) โดยการเลื่อนหน้าจอ 4 ครั้ง
+    # อาจต้องปรับจำนวนครั้งนี้หากหน้าเว็บมีการโหลดที่แตกต่างไป
     for _ in range(4):
         driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
         time.sleep(2)
         
     try:
-        # ใช้ CSS Selector ที่แม่นยำกว่าในการหาลิงก์
+        # ใช้ CSS Selector ที่แม่นยำกว่าในการหาลิงก์ของหนังสือแต่ละเล่ม
         WebDriverWait(driver, 15).until(
             EC.presence_of_all_elements_located((By.CSS_SELECTOR, "#for-book-list div.item-cover a"))
         )
@@ -121,6 +122,7 @@ def scrape_niin_cards_on_page(driver):
     for index, book_url in enumerate(book_urls):
         try:
             print(f"[niin] กำลังดึงข้อมูลเล่มที่ {index + 1}/{len(book_urls)}")
+            # เปิดแท็บใหม่เพื่อดึงข้อมูลรายละเอียด
             driver.execute_script("window.open(arguments[0], '_blank');", book_url)
             WebDriverWait(driver, 10).until(EC.number_of_windows_to_be(2))
             
@@ -163,16 +165,24 @@ def scrape_niin_all_pages(driver, start_url, max_pages=10):
 
         # --- ส่วนของการเปลี่ยนหน้าที่เสถียรขึ้น ---
         try:
-            # หาปุ่ม "ถัดไป" จาก text ที่เป็นสัญลักษณ์ `›` ซึ่งแม่นยำกว่าตำแหน่ง
+            # หาปุ่ม "ถัดไป" จาก text ที่เป็นสัญลักษณ์ `›`
+            # หมายเหตุ: หากโค้ดทำงานผิดพลาด อาจต้องเปลี่ยนไปใช้ CSS selector ที่แม่นยำกว่านี้
             next_button = WebDriverWait(driver, 10).until(
                 EC.element_to_be_clickable((By.LINK_TEXT, "›"))
             )
+            # เลื่อนหน้าจอให้ปุ่ม "ถัดไป" อยู่ในมุมมอง
             driver.execute_script("arguments[0].scrollIntoView({behavior: 'auto', block: 'center', inline: 'center'});", next_button)
             time.sleep(1) # รอเล็กน้อยหลัง scroll
             next_button.click()
             print(f"✅ คลิกปุ่ม 'ถัดไป' สำเร็จ (กำลังไปหน้า {page + 1})")
+
+            # รอให้การ์ดหนังสือหน้าใหม่โหลดขึ้นมาอย่างน้อย 1 การ์ด
+            WebDriverWait(driver, 15).until(
+                EC.presence_of_element_located((By.CSS_SELECTOR, "#for-book-list div.item-cover a"))
+            )
+
         except TimeoutException:
-            print("[*] [niin] ไม่พบปุ่ม 'ถัดไป' แล้ว น่าจะเป็นหน้าสุดท้าย")
+            print("[*] [niin] ไม่พบปุ่ม 'ถัดไป' หรือไม่พบการ์ดหนังสือในหน้าถัดไปแล้ว น่าจะเป็นหน้าสุดท้าย")
             break
         except Exception as e:
             print(f"[ERROR] ไม่สามารถคลิกปุ่ม 'ถัดไป' ได้: {e}")
