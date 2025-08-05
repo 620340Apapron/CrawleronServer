@@ -48,7 +48,8 @@ def scrape_b2s_detail_page(driver, book_url):
         if match:
             price = int(float(match.group(0).replace(",", "")))
     
-    # Category (B2S doesn't have a clear category in the detail page, so we will not include it for now)
+    # Category
+    category = "General"
     
     return {
         "title": title,
@@ -62,6 +63,7 @@ def scrape_b2s_detail_page(driver, book_url):
 
 def get_all_book_urls(driver, max_pages=10):
     urls = set()
+    # เปลี่ยน URL หน้ารวมสินค้า
     base_url = "https://www.central.co.th/th/b2s/home-lifestyle/books-movies-music/books"
     
     for p in range(1, max_pages + 1):
@@ -69,6 +71,7 @@ def get_all_book_urls(driver, max_pages=10):
         driver.get(f"{base_url}{p}")
         try:
             WebDriverWait(driver, 15).until(
+                # อัปเดต CSS selector ให้ตรงกับโครงสร้างปัจจุบัน
                 EC.presence_of_all_elements_located((By.CSS_SELECTOR, "div.product-card-wrap a"))
             )
         except TimeoutException:

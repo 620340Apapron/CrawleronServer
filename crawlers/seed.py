@@ -66,6 +66,7 @@ def scrape_seed_detail_page(driver, book_url):
 
 def get_all_book_urls(driver, max_pages=10):
     urls = set()
+    # เปลี่ยน URL หน้ารวมสินค้า
     base_url = "https://se-ed.com/book-cat.book?filter.productTypes=PRODUCT_TYPE_BOOK_PHYSICAL&page="
     
     for p in range(1, max_pages + 1):
@@ -73,6 +74,7 @@ def get_all_book_urls(driver, max_pages=10):
         driver.get(f"{base_url}{p}")
         try:
             WebDriverWait(driver, 15).until(
+                # อัปเดต CSS selector ให้ตรงกับโครงสร้างปัจจุบัน
                 EC.presence_of_all_elements_located((By.CSS_SELECTOR, "div.product-list-card a.product-list-image"))
             )
         except TimeoutException:

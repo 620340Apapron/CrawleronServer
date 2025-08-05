@@ -47,6 +47,12 @@ def main():
         {"name": "se-ed", "scraper": scrape_seed_all_pages},
     ]
 
+    #https://www.naiin.com/search?q=book&page=
+    #https://amarinbooks.com/shop/?orderby=date
+    #https://www.central.co.th/th/b2s/home-lifestyle/books-movies-music/books
+    #https://www.jamsai.com/shop
+    #https://se-ed.com/book-cat.book?filter.productTypes=PRODUCT_TYPE_BOOK_PHYSICAL&page=
+
     # ล้างข้อมูลเก่าก่อนเริ่มดึงข้อมูลใหม่
     clear_raw_books_table(conn)
 
