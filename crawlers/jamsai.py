@@ -1,3 +1,4 @@
+# jamsai.py
 import time, re
 from bs4 import BeautifulSoup
 from selenium.webdriver.common.by import By
@@ -10,71 +11,100 @@ def normalize_text(txt):
         return ""
     return ' '.join(txt.replace('"', '').strip().split())
 
-def get_all_book_urls(driver, max_pages):
-    urls = set()
-    base = "https://www.jamsai.com/shop"
-    for p in range(1, max_pages + 1):
-        driver.get(base.format(p))
-        try:
-            WebDriverWait(driver, 15).until(
-                EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".col-xxl-3 col-xl-3 col-lg-4 col-md-4 col-sm-6 col-6 div"))
-            )
-        except TimeoutException:
-            print(f"[jamsai] ไม่พบข้อมูลในหน้า {p}, สิ้นสุดการทำงาน")
-            break
-        
-        links = driver.find_elements(By.CSS_SELECTOR, ".tp-product-title-2 truncate-text-line-2 h3")
-        for link in links:
-            href = link.get_attribute("href")
-            if href:
-                urls.add(href)
-    return list(urls)
-
-def scrape_one(driver, book_url):
+def scrape_jamsai_detail_page(driver, book_url):
     driver.get(book_url)
     try:
         WebDriverWait(driver, 15).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, ".tp-product-title-2 truncate-text-line-2 h3"))
+            EC.presence_of_element_located((By.CSS_SELECTOR, "h1.product-title"))
         )
     except TimeoutException:
+        print(f"[*] [jamsai] Timeout ขณะรอโหลดหน้ารายละเอียด: {book_url}")
         return None
 
     soup = BeautifulSoup(driver.page_source, "html.parser")
     
-    t = soup.find("h3", class_="tp-product-title-2 truncate-text-line-2")
-    title = normalize_text(t.text) if t else "Unknown"
+    # Title
+    title_tag = soup.find("h1", class_="product-title")
+    title = normalize_text(title_tag.text) if title_tag else "Unknown"
 
-    auth_div = soup.find("h3", class_="tp-product-details-variation-title mb-4")
-    author = normalize_text(auth_div.text.replace("ผู้เขียน/ผู้แปล :","")) if auth_div else "Unknown"
+    # Author
+    author = "Unknown"
+    author_tag = soup.find("div", class_="product-authors")
+    if author_tag:
+        author_span = author_tag.find("span", class_="authors-name")
+        if author_span:
+            author = normalize_text(author_span.text)
 
-    p_tag = soup.find("span", class_="tp-product-details-price new-price")
-    if p_tag:
-        m = re.search(r'[\d,.]+', p_tag.text)
-        if m:
-            price = m.group(0).replace(",", "")
-    else:
-        p_tag = soup.find("span", class_="tp-product-details-price new-price")
-        if p_tag:
-            m = re.search(r'[\d,.]+', p_tag.text)
-            if m:
-                price = m.group(0).replace(",", "")
+    # Publisher
+    publisher = "Unknown"
+    publisher_tag = soup.find("div", class_="product-publisher")
+    if publisher_tag:
+        publisher_span = publisher_tag.find("span", class_="publisher-name")
+        if publisher_span:
+            publisher = normalize_text(publisher_span.text)
 
+    # Price
+    price = 0
+    price_tag = soup.find("div", class_="product-price")
+    if price_tag:
+        price_span = price_tag.find("span", class_="price-value")
+        if price_span:
+            price_text = normalize_text(price_span.text)
+            match = re.search(r'[\d,.]+', price_text)
+            if match:
+                price = int(float(match.group(0).replace(",", "")))
+
+    # Category
+    category = "General"
+    breadcrumb_tags = soup.select("div.breadcrumb a")
+    if len(breadcrumb_tags) > 1:
+        category = normalize_text(breadcrumb_tags[-2].text)
+        
     return {
         "title": title,
         "author": author,
-        "publisher": "Jamsai Publisher",
+        "publisher": publisher,
         "price": price,
+        "category": category,
         "url": book_url,
         "source": "jamsai"
     }
 
-def scrape_jamsai_all_pages(driver, max_pages):
+def get_all_book_urls(driver, max_pages=10):
+    urls = set()
+    base_url = "https://www.jamsai.com/shop"
+    
+    for p in range(1, max_pages + 1):
+        print(f"[*] [jamsai] กำลังรวบรวม URL จากหน้า {p}...")
+        driver.get(f"{base_url}{p}")
+        try:
+            WebDriverWait(driver, 15).until(
+                EC.presence_of_all_elements_located((By.CSS_SELECTOR, "div.product-list a.product-image"))
+            )
+        except TimeoutException:
+            print(f"[*] [jamsai] ไม่พบข้อมูลในหน้า {p}, สิ้นสุดการทำงาน")
+            break
+        
+        links = driver.find_elements(By.CSS_SELECTOR, "div.product-list a.product-image")
+        for link in links:
+            href = link.get_attribute("href")
+            if href and "product" in href:
+                urls.add(href)
+    return list(urls)
+
+def scrape_jamsai_all_pages(driver, max_pages=10):
+    all_products = []
+    
     all_urls = get_all_book_urls(driver, max_pages)
-    results = []
-    for u in all_urls:
-        data = scrape_one(driver, u)
-        if data:
-            results.append(data)
-        time.sleep(0.5)
-    print(f"[jamsai] collected {len(results)} books")
-    return results
+
+    if not all_urls:
+        print("[ERROR] ไม่สามารถรวบรวม URL ใดๆ ได้เลย โปรแกรมจะสิ้นสุดการทำงาน")
+        return []
+
+    for i, url in enumerate(all_urls):
+        print(f"--- กำลังดึงข้อมูลเล่มที่ {i + 1}/{len(all_urls)} ---")
+        book_data = scrape_jamsai_detail_page(driver, url)
+        if book_data:
+            all_products.append(book_data)
+
+    return all_products

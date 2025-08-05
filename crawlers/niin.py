@@ -1,3 +1,4 @@
+# niin.py
 import time, re
 from bs4 import BeautifulSoup
 from selenium.webdriver.common.by import By
@@ -10,74 +11,96 @@ def normalize_text(txt):
         return ""
     return ' '.join(txt.replace('"', '').strip().split())
 
-def get_all_book_urls(driver, max_pages):
-    urls = set()
-    base_url = "https://www.naiin.com/product/view-all?product_type_id=1&product_category=list-book-category"
-    for p in range(1, max_pages + 1):
-        driver.get(base_url.format(p))
-        try:
-            WebDriverWait(driver, 15).until(
-                EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".product_items_list a.link_to_product"))
-            )
-        except TimeoutException:
-            print(f"[niin] ไม่พบข้อมูลในหน้า {p}, สิ้นสุดการทำงาน")
-            break
-        
-        links = driver.find_elements(By.CSS_SELECTOR, ".product_items_list a.link_to_product")
-        for link in links:
-            href = link.get_attribute("href")
-            if href:
-                urls.add(href)
-    return list(urls)
-
-def scrape_one(driver, book_url):
+def scrape_naiin_detail_page(driver, book_url):
     driver.get(book_url)
     try:
         WebDriverWait(driver, 15).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, "div.product-detail-name"))
+            EC.presence_of_element_located((By.CSS_SELECTOR, "h1.product-info-name"))
         )
     except TimeoutException:
+        print(f"[*] [naiin] Timeout ขณะรอโหลดหน้ารายละเอียด: {book_url}")
         return None
 
     soup = BeautifulSoup(driver.page_source, "html.parser")
     
     # Title
-    title_tag = soup.find("h1", class_="name")
+    title_tag = soup.find("h1", class_="product-info-name")
     title = normalize_text(title_tag.text) if title_tag else "Unknown"
 
     # Author
-    author_tag = soup.find("p", class_="writer")
-    author = normalize_text(author_tag.text) if author_tag else "Unknown"
-    
+    author = "Unknown"
+    author_tag = soup.find("div", class_="product-authors")
+    if author_tag:
+        author = normalize_text(author_tag.text)
+
     # Publisher
-    publisher_tag = soup.find("p", class_="publisher-wrapper")
-    publisher = normalize_text(publisher_tag.text) if publisher_tag else "Unknown"
+    publisher = "Unknown"
+    publisher_tag = soup.find("div", class_="product-publisher")
+    if publisher_tag:
+        publisher = normalize_text(publisher_tag.text)
 
     # Price
     price = 0
-    price_tag = soup.find("p", class_="price")
+    price_tag = soup.find("span", class_="special-price")
     if price_tag:
-        match = re.search(r'[\d,.]+', price_tag.text)
-        if match:
-            price_str = match.group(0).replace(",", "")
-            price = int(float(price_str)) if price_str.replace('.', '', 1).isdigit() else 0
-    
+        price_span = price_tag.find("span", class_="price")
+        if price_span:
+            price_text = normalize_text(price_span.text)
+            match = re.search(r'[\d,.]+', price_text)
+            if match:
+                price = int(float(match.group(0).replace(",", "")))
+
+    # Category
+    category = "General"
+    breadcrumb_tags = soup.select("ul.breadcrumb a")
+    if len(breadcrumb_tags) > 1:
+        category = normalize_text(breadcrumb_tags[-2].text)
+        
     return {
         "title": title,
         "author": author,
         "publisher": publisher,
         "price": price,
+        "category": category,
         "url": book_url,
-        "source": "niin"
+        "source": "naiin"
     }
 
-def scrape_niin_all_pages(driver, max_pages):
+def get_all_book_urls(driver, max_pages=10):
+    urls = set()
+    base_url = "https://www.naiin.com/search?q=book&page="
+    
+    for p in range(1, max_pages + 1):
+        print(f"[*] [naiin] กำลังรวบรวม URL จากหน้า {p}...")
+        driver.get(f"{base_url}{p}")
+        try:
+            WebDriverWait(driver, 15).until(
+                EC.presence_of_all_elements_located((By.CSS_SELECTOR, "div.product-card a.product-item-link"))
+            )
+        except TimeoutException:
+            print(f"[*] [naiin] ไม่พบข้อมูลในหน้า {p}, สิ้นสุดการทำงาน")
+            break
+        
+        links = driver.find_elements(By.CSS_SELECTOR, "div.product-card a.product-item-link")
+        for link in links:
+            href = link.get_attribute("href")
+            if href and "product" in href:
+                urls.add(href)
+    return list(urls)
+
+def scrape_naiin_all_pages(driver, max_pages=10):
+    all_products = []
+    
     all_urls = get_all_book_urls(driver, max_pages)
-    results = []
-    for u in all_urls:
-        data = scrape_one(driver, u)
-        if data:
-            results.append(data)
-        time.sleep(0.5)
-    print(f"[niin] collected {len(results)} books")
-    return results
+
+    if not all_urls:
+        print("[ERROR] ไม่สามารถรวบรวม URL ใดๆ ได้เลย โปรแกรมจะสิ้นสุดการทำงาน")
+        return []
+
+    for i, url in enumerate(all_urls):
+        print(f"--- กำลังดึงข้อมูลเล่มที่ {i + 1}/{len(all_urls)} ---")
+        book_data = scrape_naiin_detail_page(driver, url)
+        if book_data:
+            all_products.append(book_data)
+
+    return all_products

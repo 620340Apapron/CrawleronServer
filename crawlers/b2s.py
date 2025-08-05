@@ -1,3 +1,4 @@
+# b2s.py
 import time, re
 from bs4 import BeautifulSoup
 from selenium.webdriver.common.by import By
@@ -10,73 +11,90 @@ def normalize_text(txt):
         return ""
     return ' '.join(txt.replace('"', '').strip().split())
 
-def get_all_book_urls(driver, max_pages):
-    urls = set()
-    base_url = "https://www.central.co.th/th/b2s/home-lifestyle/books-movies-music/books"
-    for p in range(1, max_pages + 1):
-        driver.get(base_url.format(p))
-        try:
-            WebDriverWait(driver, 15).until(
-                EC.presence_of_all_elements_located((By.CSS_SELECTOR, "a.product-card-link"))
-            )
-        except TimeoutException:
-            print(f"[b2s] ไม่พบข้อมูลในหน้า {p}, สิ้นสุดการทำงาน")
-            break
-        
-        links = driver.find_elements(By.CSS_SELECTOR, "a.product-card-link")
-        for link in links:
-            href = link.get_attribute("href")
-            if href:
-                urls.add(href)
-    return list(urls)
-
-def scrape_one(driver, book_url):
+def scrape_b2s_detail_page(driver, book_url):
     driver.get(book_url)
     try:
         WebDriverWait(driver, 15).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, "h1.title"))
+            EC.presence_of_element_located((By.CSS_SELECTOR, "h1.product_title"))
         )
     except TimeoutException:
+        print(f"[*] [b2s] Timeout ขณะรอโหลดหน้ารายละเอียด: {book_url}")
         return None
 
     soup = BeautifulSoup(driver.page_source, "html.parser")
     
-    title_tag = soup.find("h1", class_="title")
+    # Title
+    title_tag = soup.find("h1", class_="product_title")
     title = normalize_text(title_tag.text) if title_tag else "Unknown"
 
+    # Author
     author = "Unknown"
-    auth_tag = soup.find("a", class_="author-text")
-    if auth_tag:
-        author = normalize_text(auth_tag.text)
+    author_tag = soup.find("div", class_="author-name")
+    if author_tag:
+        author = normalize_text(author_tag.text)
 
+    # Publisher
     publisher = "Unknown"
-    pub_tag = soup.find("div", class_="publisher-text")
-    if pub_tag:
-        publisher = normalize_text(pub_tag.text)
+    publisher_tag = soup.find("div", class_="publisher-name")
+    if publisher_tag:
+        publisher = normalize_text(publisher_tag.text)
 
+    # Price
     price = 0
-    price_tag = soup.find("p", class_="price-with-discount-text")
+    price_tag = soup.find("div", class_="product-price")
     if price_tag:
-        match = re.search(r'[\d,.]+', price_tag.text)
+        price_text = normalize_text(price_tag.text)
+        match = re.search(r'[\d,.]+', price_text)
         if match:
             price = int(float(match.group(0).replace(",", "")))
-
+    
+    # Category (B2S doesn't have a clear category in the detail page, so we will not include it for now)
+    
     return {
         "title": title,
         "author": author,
         "publisher": publisher,
         "price": price,
+        "category": "General", # Placeholder for now
         "url": book_url,
         "source": "b2s"
     }
 
-def scrape_b2s_all_pages(driver, max_pages):
+def get_all_book_urls(driver, max_pages=10):
+    urls = set()
+    base_url = "https://www.central.co.th/th/b2s/home-lifestyle/books-movies-music/books"
+    
+    for p in range(1, max_pages + 1):
+        print(f"[*] [b2s] กำลังรวบรวม URL จากหน้า {p}...")
+        driver.get(f"{base_url}{p}")
+        try:
+            WebDriverWait(driver, 15).until(
+                EC.presence_of_all_elements_located((By.CSS_SELECTOR, "div.product-card-wrap a"))
+            )
+        except TimeoutException:
+            print(f"[*] [b2s] ไม่พบข้อมูลในหน้า {p}, สิ้นสุดการทำงาน")
+            break
+        
+        links = driver.find_elements(By.CSS_SELECTOR, "div.product-card-wrap a")
+        for link in links:
+            href = link.get_attribute("href")
+            if href and "product" in href:
+                urls.add(href)
+    return list(urls)
+
+def scrape_b2s_all_pages(driver, max_pages=10):
+    all_products = []
+    
     all_urls = get_all_book_urls(driver, max_pages)
-    results = []
-    for u in all_urls:
-        data = scrape_one(driver, u)
-        if data:
-            results.append(data)
-        time.sleep(0.5)
-    print(f"[b2s] collected {len(results)} books")
-    return results
+
+    if not all_urls:
+        print("[ERROR] ไม่สามารถรวบรวม URL ใดๆ ได้เลย โปรแกรมจะสิ้นสุดการทำงาน")
+        return []
+
+    for i, url in enumerate(all_urls):
+        print(f"--- กำลังดึงข้อมูลเล่มที่ {i + 1}/{len(all_urls)} ---")
+        book_data = scrape_b2s_detail_page(driver, url)
+        if book_data:
+            all_products.append(book_data)
+
+    return all_products
