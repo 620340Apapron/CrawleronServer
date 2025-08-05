@@ -42,9 +42,6 @@ def main():
         print("[ERROR] ไม่สามารถเชื่อมต่อฐานข้อมูลได้")
         return
 
-    create_tables(conn)
-    create_history_table(conn)
-
     driver = get_driver()
     
     sites = [
