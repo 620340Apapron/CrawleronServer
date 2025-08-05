@@ -24,7 +24,7 @@ def scrape_b2s_detail_page(driver, book_url):
     soup = BeautifulSoup(driver.page_source, "html.parser")
     
     # Title
-    title_tag = soup.find("h1", class_="product_title")
+    title_tag = soup.find("div", class_="pdp-productDetail__desc")
     title = normalize_text(title_tag.text) if title_tag else "Unknown"
 
     # Author
@@ -48,15 +48,11 @@ def scrape_b2s_detail_page(driver, book_url):
         if match:
             price = int(float(match.group(0).replace(",", "")))
     
-    # Category
-    category = "General"
-    
     return {
         "title": title,
         "author": author,
         "publisher": publisher,
         "price": price,
-        "category": "General", # Placeholder for now
         "url": book_url,
         "source": "b2s"
     }

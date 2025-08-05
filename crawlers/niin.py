@@ -49,19 +49,12 @@ def scrape_naiin_detail_page(driver, book_url):
             match = re.search(r'[\d,.]+', price_text)
             if match:
                 price = int(float(match.group(0).replace(",", "")))
-
-    # Category
-    category = "General"
-    breadcrumb_tags = soup.select("ul.breadcrumb a")
-    if len(breadcrumb_tags) > 1:
-        category = normalize_text(breadcrumb_tags[-2].text)
         
     return {
         "title": title,
         "author": author,
         "publisher": publisher,
         "price": price,
-        "category": category,
         "url": book_url,
         "source": "naiin"
     }

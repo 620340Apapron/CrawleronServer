@@ -15,7 +15,7 @@ def scrape_seed_detail_page(driver, book_url):
     driver.get(book_url)
     try:
         WebDriverWait(driver, 15).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, "h1.text-book-name"))
+            EC.presence_of_element_located((By.CSS_SELECTOR, "#__next > div > div > main > main > div.MuiContainer-root.MuiContainer-maxWidthContent.w-full.flex.flex-col.min-h-screen.mt-0.desktop\:mt-4.pb-12.css-829q34 > div > div.grow.relative > div.flex.flex-col.gap-12.relative > div > div:nth-child(1) > a > div > div.flex.justify-between.h-full.grow.flex-col.p-2.desktop\:p-4 > div:nth-child(1) > div:nth-child(1) > span"))
         )
     except TimeoutException:
         print(f"[*] [se-ed] Timeout ขณะรอโหลดหน้ารายละเอียด: {book_url}")
@@ -24,42 +24,35 @@ def scrape_seed_detail_page(driver, book_url):
     soup = BeautifulSoup(driver.page_source, "html.parser")
     
     # Title
-    title_tag = soup.find("h1", class_="text-book-name")
+    title_tag = soup.find("h1", class_="MuiTypography-root MuiTypography-h4 css-18oprtn")
     title = normalize_text(title_tag.text) if title_tag else "Unknown"
 
     # Author
     author = "Unknown"
-    author_tag = soup.find("span", class_="author-name")
+    author_tag = soup.find(By.CSS_SELECTOR,"#mpe-editor > div > p:nth-child(1) > a > span")
     if author_tag:
         author = normalize_text(author_tag.text)
 
     # Publisher
     publisher = "Unknown"
-    publisher_tag = soup.find("a", class_="publisher-link")
+    publisher_tag = soup.find(By.CSS_SELECTOR,"#mpe-editor > div > p:nth-child(14) > a > span")
     if publisher_tag:
         publisher = normalize_text(publisher_tag.text)
 
     # Price
     price = 0
-    price_tag = soup.find("span", class_="product-price")
+    price_tag = soup.find("p", class_="MuiTypography-root MuiTypography-h3 truncate css-muszlw")
     if price_tag:
         price_text = normalize_text(price_tag.text)
         match = re.search(r'[\d,.]+', price_text)
         if match:
             price = int(float(match.group(0).replace(",", "")))
-
-    # Category
-    category = "General"
-    breadcrumb_tags = soup.select("ul.breadcrumb a")
-    if len(breadcrumb_tags) > 1:
-        category = normalize_text(breadcrumb_tags[-1].text)
         
     return {
         "title": title,
         "author": author,
         "publisher": publisher,
         "price": price,
-        "category": category,
         "url": book_url,
         "source": "se-ed"
     }
@@ -75,13 +68,13 @@ def get_all_book_urls(driver, max_pages=10):
         try:
             WebDriverWait(driver, 15).until(
                 # อัปเดต CSS selector ให้ตรงกับโครงสร้างปัจจุบัน
-                EC.presence_of_all_elements_located((By.CSS_SELECTOR, "div.product-list-card a.product-list-image"))
+                EC.presence_of_all_elements_located((By.CSS_SELECTOR, "#__next > div > div > main > main > div.MuiContainer-root.MuiContainer-maxWidthContent.w-full.flex.flex-col.min-h-screen.mt-0.desktop\:mt-4.pb-12.css-829q34 > div > div.grow.relative > div.flex.flex-col.gap-12.relative > div > div:nth-child(1)"))
             )
         except TimeoutException:
             print(f"[*] [se-ed] ไม่พบข้อมูลในหน้า {p}, สิ้นสุดการทำงาน")
             break
         
-        links = driver.find_elements(By.CSS_SELECTOR, "div.product-list-card a.product-list-image")
+        links = driver.find_elements(By.CSS_SELECTOR, "#__next > div > div > main > main > div.MuiContainer-root.MuiContainer-maxWidthContent.w-full.flex.flex-col.min-h-screen.mt-0.desktop\:mt-4.pb-12.css-829q34 > div > div.grow.relative > div.flex.flex-col.gap-12.relative > div > div:nth-child(1)")
         for link in links:
             href = link.get_attribute("href")
             if href and "product" in href:

@@ -24,19 +24,19 @@ def scrape_jamsai_detail_page(driver, book_url):
     soup = BeautifulSoup(driver.page_source, "html.parser")
     
     # Title
-    title_tag = soup.find("h1", class_="product-title")
+    title_tag = soup.find("h3", class_="tp-product-details-title mt-1 mb-1")
     title = normalize_text(title_tag.text) if title_tag else "Unknown"
 
     # Author
     author = "Unknown"
-    author_tag = soup.find("div", class_="product-authors")
+    author_tag = soup.find("h3", class_="tp-product-details-variation-title mb-4")
     if author_tag:
         author_span = author_tag.find("span", class_="authors-name")
         if author_span:
             author = normalize_text(author_span.text)
 
     # Publisher
-    publisher = "Unknown"
+    publisher = "Jamsai Publisher"
     publisher_tag = soup.find("div", class_="product-publisher")
     if publisher_tag:
         publisher_span = publisher_tag.find("span", class_="publisher-name")
@@ -45,7 +45,7 @@ def scrape_jamsai_detail_page(driver, book_url):
 
     # Price
     price = 0
-    price_tag = soup.find("div", class_="product-price")
+    price_tag = soup.find("span", class_="tp-product-details-price new-price")
     if price_tag:
         price_span = price_tag.find("span", class_="price-value")
         if price_span:
@@ -54,18 +54,12 @@ def scrape_jamsai_detail_page(driver, book_url):
             if match:
                 price = int(float(match.group(0).replace(",", "")))
 
-    # Category
-    category = "General"
-    breadcrumb_tags = soup.select("div.breadcrumb a")
-    if len(breadcrumb_tags) > 1:
-        category = normalize_text(breadcrumb_tags[-2].text)
         
     return {
         "title": title,
         "author": author,
         "publisher": publisher,
         "price": price,
-        "category": category,
         "url": book_url,
         "source": "jamsai"
     }
