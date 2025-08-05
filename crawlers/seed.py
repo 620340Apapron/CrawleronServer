@@ -22,6 +22,9 @@ def scrape_seed_detail_page(driver, book_url):
         return None
 
     soup = BeautifulSoup(driver.page_source, "html.parser")
+
+    #ISBN
+    isbn_tag = soup.find(By.CSS_SELECTOR,"#mpe-editor > div > p:nth-child(13) > span")
     
     # Title
     title_tag = soup.find("h1", class_="MuiTypography-root MuiTypography-h4 css-18oprtn")
