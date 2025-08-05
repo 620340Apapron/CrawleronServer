@@ -5,11 +5,11 @@ from mysql.connector import Error
 
 def create_connection():
     # ดึงค่าจาก environment variable (ทั้งสองแบบรองรับได้)
-    host     = "hopper.proxy.rlwy.net"
-    port_str = "22749"
-    user     = "root"
-    password = "IjxcLAzTFgXxTnMDklQKTOghdAkvLRVb"
-    database = "railway"
+    host=os.getenv("DB_HOST", "hopper.proxy.rlwy.net"),
+    port=os.getenv("DB_PORT", "22749"),
+    user=os.getenv("DB_USER", "root"),
+    password=os.getenv("DB_PASSWORD", "IjxcLAzTFgXxTnMDklQKTOghdAkvLRVb"),
+    database=os.getenv("DB_DATABASE", "railway")
 
     print(f"[DEBUG] env values: host={host}, port={port_str}, user={user}, database={database}")
 
