@@ -9,6 +9,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.common.exceptions import InvalidSessionIdException
 
+from book_history import create_history_table, update_history
 from db_service import create_connection
 from crawlers.niin import scrape_niin_all_pages
 from crawlers.b2s import scrape_b2s_all_pages
@@ -45,6 +46,7 @@ def get_driver():
     driver = webdriver.Chrome(service=service, options=options)
     return driver
 
+
 def create_table(conn):
     sql = """
     CREATE TABLE IF NOT EXISTS rawbooks (
@@ -61,6 +63,7 @@ def create_table(conn):
     cur.execute(sql)
     conn.commit()
     cur.close()
+
 
 def insert_book(conn, book):
     sql = """
@@ -84,25 +87,21 @@ def insert_book(conn, book):
 def main():
     conn = create_connection()
     create_table(conn)
-    
+    create_history_table(conn)  # สร้างตาราง history ถ้ายังไม่มี
+
     driver = get_driver()
-    
     sites = [
         {"name": "jamsai", "url": "https://www.jamsai.com/shop/"},
-        {"name": "niin", "url": "https://www.naiin.com/category?category_1_code=2&product_type_id=1"},{"name": "niin", "url": "https://www.naiin.com/category?category_1_code=13&product_type_id=1"}, {"name": "niin", "url": "https://www.naiin.com/category?category_1_code=33&product_type_id=1"},{"name": "niin", "url": "https://www.naiin.com/category?category_1_code=14&product_type_id=1"},{"name": "niin", "url": "https://www.naiin.com/category?category_1_code=2&product_type_id=1&categoryLv2Code=134"},{"name": "niin", "url": "https://www.naiin.com/category?category_1_code=19&product_type_id=1"},{"name": "niin", "url": "https://www.naiin.com/category?category_1_code=15&product_type_id=1"},{"name": "niin", "url": " https://www.naiin.com/category?category_1_code=5&product_type_id=1"},
-        {"name": "b2s", "url": "https://shorturl.asia/JgZ0L"},{"name": "b2s", "url": "https://shorturl.asia/AUefZ"},{"name": "b2s", "url": "https://shorturl.asia/sQXyv"},{"name": "b2s", "url": "https://shorturl.asia/Xnrm3"},{"name": "b2s", "url": "https://shorturl.asia/ojOVW"},{"name": "b2s", "url": "https://shorturl.asia/QoKyp"},{"name": "b2s", "url": "https://shorturl.asia/BEAvO"},{"name": "b2s", "url": "https://shorturl.asia/ldz6p"},{"name": "b2s", "url": "https://shorturl.asia/g8b2m"},{"name": "b2s", "url": "https://shorturl.asia/m9nio"},{"name": "b2s", "url": "https://shorturl.asia/5xIER"},{"name": "b2s", "url": "https://shorturl.asia/QZ0Er"},{"name": "b2s", "url": "https://shorturl.asia/ZNRq2"},{"name": "b2s", "url": "https://shorturl.asia/OMYZv"},
+        {"name": "niin", "url": "https://www.naiin.com/category?category_1_code=2&product_type_id=1"},
+        {"name": "b2s", "url": "https://shorturl.asia/JgZ0L"},
         {"name": "amarin", "url": "https://amarinbooks.com/shop/?orderby=date"},
-        
-        {"name": "se-ed", "url": "https://www.se-ed.com/book-cat.book?option.skip=0&filter.productTypes=PRODUCT_TYPE_BOOK_PHYSICAL"},      
-    
+        {"name": "se-ed", "url": "https://www.se-ed.com/book-cat.book?filter.productTypes=PRODUCT_TYPE_BOOK_PHYSICAL"},
     ]
-    
+
     for site in sites:
-        source = site["name"]
-        url = site["url"]
+        source, url = site['name'], site['url']
         print(f"\n=== ดึงข้อมูลจากเว็บ: {source} ===")
         driver.get(url)
-
         try:
             WebDriverWait(driver, 10).until(
                 EC.presence_of_element_located((By.TAG_NAME, "body"))
@@ -110,8 +109,7 @@ def main():
         except Exception as e:
             print(f"[ERROR] ไม่สามารถโหลดหน้าเว็บ {source}: {e}")
             continue
-        
-        products = []
+
         if source == "niin":
             products = scrape_niin_all_pages(driver)
         elif source == "b2s":
@@ -122,22 +120,23 @@ def main():
             products, driver = scrape_seed_all_pages(driver)
         elif source == "amarin":
             products, driver = scrape_amarin_all_pages(driver)
+        else:
+            products = []
 
-        
         print(f"[{source}] พบข้อมูล {len(products)} รายการ")
-
-        # **🛠 แก้ไขการบันทึกข้อมูล**
         for book in products:
             if isinstance(book, dict):
-                insert_book(conn, book)  # ✅ บันทึกทีละเล่ม
+                insert_book(conn, book)
             else:
                 print(f"[ERROR] ข้อมูลหนังสือไม่ถูกต้อง: {book}")
-    
 
-    # ปิด WebDriver
+    # อัพเดต history หลัง insert rawbooks ทั้งหมด
+    print("\n🔄 เริ่มอัพเดตประวัติหนังสือ...")
+    update_history(conn)
+
     driver.quit()
     conn.close()
-    
-    print("✅ ดึงข้อมูลจากทุกเว็บและบันทึกลงฐานข้อมูลเรียบร้อย")
+    print("✅ ดึงข้อมูลและเก็บประวัติสำเร็จ")
 
-main()
+if __name__ == '__main__':
+    main()
