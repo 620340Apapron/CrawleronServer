@@ -17,13 +17,13 @@ def get_all_book_urls(driver, max_pages=10):
         driver.get(base.format(p))
         try:
             WebDriverWait(driver, 15).until(
-                EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".product-card a"))
+                EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".col-xxl-3 col-xl-3 col-lg-4 col-md-4 col-sm-6 col-6 div"))
             )
         except TimeoutException:
             print(f"[jamsai] ไม่พบข้อมูลในหน้า {p}, สิ้นสุดการทำงาน")
             break
         
-        links = driver.find_elements(By.CSS_SELECTOR, ".product-card a")
+        links = driver.find_elements(By.CSS_SELECTOR, ".tp-product-title-2 truncate-text-line-2 h3")
         for link in links:
             href = link.get_attribute("href")
             if href:
@@ -34,36 +34,30 @@ def scrape_one(driver, book_url):
     driver.get(book_url)
     try:
         WebDriverWait(driver, 15).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, "h3.tp-product-title-2"))
+            EC.presence_of_element_located((By.CSS_SELECTOR, "h3.tp-product-title-2 truncate-text-line-2"))
         )
     except TimeoutException:
         return None
 
     soup = BeautifulSoup(driver.page_source, "html.parser")
     
-    t = soup.select_one("h3.tp-product-title-2")
+    t = soup.select_one("h3.tp-product-details-title mt-1 mb-1")
     title = normalize_text(t.text) if t else "Unknown"
 
-    auth_div = soup.find("div", class_="tp-product-tag-2 truncate-text-line-1")
+    auth_div = soup.find("h3", class_="tp-product-details-variation-title mb-4")
     author = normalize_text(auth_div.text.replace("ผู้เขียน/ผู้แปล :","")) if auth_div else "Unknown"
 
-    price = 0
-    p_tag = soup.find("span", class_="tp-product-price-2 new-price")
+    p_tag = soup.find("span", class_="tp-product-details-price new-price")
     if p_tag:
         m = re.search(r'[\d,.]+', p_tag.text)
         if m:
             price = m.group(0).replace(",", "")
     else:
-        p_tag = soup.find("span", class_="tp-product-price-2")
+        p_tag = soup.find("span", class_="tp-product-details-price new-price")
         if p_tag:
             m = re.search(r'[\d,.]+', p_tag.text)
             if m:
                 price = m.group(0).replace(",", "")
-
-    try:
-        price = int(float(price))
-    except (ValueError, TypeError):
-        price = 0
 
     return {
         "title": title,
