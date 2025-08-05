@@ -12,12 +12,12 @@ def normalize_text(text):
         return ""
     return ' '.join(text.replace('"', '').strip().split())
 
-def scrape_niin_detail_page(driver, start_url=None):
+def scrape_niin_detail_page(driver, start_url):
     """
     ดึงข้อมูลจากหน้ารายละเอียดของหนังสือแต่ละเล่ม (ปรับปรุงใหม่)
     """
     try:
-        driver.get(book_url)
+        driver.get(start_url)
         # รอให้ส่วนข้อมูลหลักของสินค้าโหลดเสร็จ
         WebDriverWait(driver, 15).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, "div.product-detail-main"))
