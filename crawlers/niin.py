@@ -12,7 +12,7 @@ def normalize_text(text):
         return ""
     return ' '.join(text.replace('"', '').strip().split())
 
-def scrape_niin_detail_page(driver, book_url):
+def scrape_niin_detail_page(driver, start_url=None):
     """
     ดึงข้อมูลจากหน้ารายละเอียดของหนังสือแต่ละเล่ม (ปรับปรุงใหม่)
     """
@@ -143,10 +143,13 @@ def scrape_niin_cards_on_page(driver):
     
     return products, driver
 
-def scrape_niin_all_pages(driver, start_url, max_pages=10):
+def scrape_niin_all_pages(driver, start_url=None):
     """
     ฟังก์ชันหลักสำหรับวนลูปข้ามหน้าเพื่อดึงข้อมูลทั้งหมด
     """
+    if start_url is None:
+        start_url = driver.current_url
+        
     driver.get(start_url)
     all_products = []
     

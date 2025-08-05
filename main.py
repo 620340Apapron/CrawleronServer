@@ -111,15 +111,15 @@ def main():
             continue
 
         if source == "niin":
-            products = scrape_niin_all_pages(driver)
+            products = scrape_niin_all_pages(driver, url)
         elif source == "b2s":
-            products, driver = scrape_b2s_all_pages(driver)
+            products, driver = scrape_b2s_all_pages(driver, url)
         elif source == "jamsai":
-            products = scrape_jamsai_all_pages(driver)
+            products = scrape_jamsai_all_pages(driver, url)
         elif source == "se-ed":
-            products = scrape_seed_all_pages(driver)
+            products = scrape_seed_all_pages(driver, url)
         elif source == "amarin":
-            products = scrape_amarin_all_pages(driver)
+            products = scrape_amarin_all_pages(driver, url)
         else:
             products = []
 
