@@ -10,12 +10,12 @@ from webdriver_manager.chrome import ChromeDriverManager
 from selenium.common.exceptions import InvalidSessionIdException
 
 from book_history import create_history_table, update_history
-from crawlers.db_service import create_connection
-from amarin import scrape_amarin_all_pages
-from b2s import scrape_b2s_all_pages
-from jamsai import scrape_jamsai_all_page
-from niin import scrape_niin_all_pages
-from seed import scrape_seed_all_pages
+from db_service import create_connection
+from crawlers.amarin import scrape_amarin_all_pages
+from crawlers.b2s import scrape_b2s_all_pages
+from crawlers.jamsai import scrape_jamsai_all_page
+from crawlers.niin import scrape_niin_all_pages
+from crawlers.seed import scrape_seed_all_pages
 
 # แก้ปัญหา SSL handshake failed
 ssl._create_default_https_context = ssl._create_unverified_context
