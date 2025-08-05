@@ -68,13 +68,13 @@ def get_all_book_urls(driver, max_pages=999):
         try:
             WebDriverWait(driver, 15).until(
                 # อัปเดต CSS selector ให้ตรงกับโครงสร้างปัจจุบัน
-                EC.presence_of_all_elements_located("span", class_="MuiTypography-root MuiTypography-body line-clamp-2 css-1yy1czf")
+                EC.presence_of_all_elements_located((By.CSS_SELECTOR,("#__next > div > div > main > main > div.MuiContainer-root.MuiContainer-maxWidthContent.w-full.flex.flex-col.min-h-screen.mt-0.desktop\:mt-4.pb-12.css-829q34 > div > div.grow.relative > div.flex.flex-col.gap-12.relative > div > div:nth-child(1) > a > div > div.flex.justify-between.h-full.grow.flex-col.p-2.desktop\:p-4 > div:nth-child(1) > div:nth-child(1) > span")))
             )
         except TimeoutException:
             print(f"[*] [se-ed] ไม่พบข้อมูลในหน้า {p}, สิ้นสุดการทำงาน")
             break
         
-        links = driver.find_elements("span", class_="MuiTypography-root MuiTypography-body line-clamp-2 css-1yy1czf")
+        links = driver.find_elements(By.CSS_SELECTOR,("#__next > div > div > main > main > div.MuiContainer-root.MuiContainer-maxWidthContent.w-full.flex.flex-col.min-h-screen.mt-0.desktop\:mt-4.pb-12.css-829q34 > div > div.grow.relative > div.flex.flex-col.gap-12.relative > div > div:nth-child(1) > a > div > div.flex.justify-between.h-full.grow.flex-col.p-2.desktop\:p-4 > div:nth-child(1) > div:nth-child(1) > span"))
         for link in links:
             href = link.get_attribute("href")
             if href and "product" in href:

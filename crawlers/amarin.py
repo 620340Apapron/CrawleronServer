@@ -23,7 +23,7 @@ def get_all_book_urls(driver, max_pages=999):
             print(f"[amarin] ไม่พบข้อมูลในหน้า {p}, สิ้นสุดการทำงาน")
             break
         
-        links = driver.find_elements( "a.woocommerce-LoopProduct-link")
+        links = driver.find_elements(By.CSS_SELECTOR, "a.woocommerce-LoopProduct-link")
         for link in links:
             href = link.get_attribute("href")
             if href:
