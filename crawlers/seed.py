@@ -32,15 +32,19 @@ def scrape_seed_detail_page(driver, book_url):
 
     # Author
     author = "Unknown"
-    author_tag = soup.find(By.CSS_SELECTOR,"#mpe-editor > div > p:nth-child(1) > a > span")
-    if author_tag:
+    try:
+        author_tag = driver.find_element(By.XPATH, "//*[@id='mpe-editor']/div/p[1]/a")
         author = normalize_text(author_tag.text)
+    except NoSuchElementException:
+        author = "Unknown"
 
     # Publisher
     publisher = "Unknown"
-    publisher_tag = soup.find(By.CSS_SELECTOR,"#mpe-editor > div > p:nth-child(14) > a > span")
-    if publisher_tag:
+    try:
+        publisher_tag = driver.find_element(By.XPATH, "//*[@id='mpe-editor']/div/p[15]/a")
         publisher = normalize_text(publisher_tag.text)
+    except NoSuchElementException:
+        publisher = "Unknown"
 
     # Price
     price = 0
