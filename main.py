@@ -8,9 +8,10 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.common.exceptions import InvalidSessionIdException
-
+from db_service import create_connection, create_tables, insert_book
 from book_history import create_history_table, update_history
-from db_service import create_connection
+
+# นำเข้า crawler ที่ปรับแก้แล้ว
 from crawlers.amarin import scrape_amarin_all_pages
 from crawlers.b2s import scrape_b2s_all_pages
 from crawlers.jamsai import scrape_jamsai_all_pages
@@ -23,105 +24,46 @@ ssl._create_default_https_context = ssl._create_unverified_context
 def get_driver():
     options = webdriver.ChromeOptions()
     options.add_argument("--headless")  
-    options.add_argument("--disable-dev-shm-usage")  # ลดการใช้ shared memory
-    options.add_argument("--no-sandbox")  # ป้องกันการ crash
-    options.add_argument("--disable-gpu")  # ปิด GPU acceleration
-    options.add_argument("--remote-debugging-port=9222")  # เปิด debugging mode
-    options.add_argument("--disable-software-rasterizer")  # ลดการใช้กราฟิก
-    options.add_argument("--disable-features=VizDisplayCompositor")  # ลดโหลด GPU
-    options.add_argument("--disable-popup-blocking")  # ป้องกัน popups
-    options.add_argument("--disable-extensions")  # ปิดส่วนขยาย
-    options.add_argument("--disable-background-networking")  # ปิดการเชื่อมต่อพื้นหลัง
-    options.add_argument("--disable-background-timer-throttling")  # ปิด timer throttling
-    options.add_argument("--disable-backgrounding-occluded-windows")  # ปิด backgrounding
-    options.add_argument("--disable-breakpad")  # ปิด crash reporting
-    options.add_argument("--disable-component-extensions-with-background-pages")  # ปิด background pages
-    options.add_argument("--disable-infobars")  # ปิดแถบ info
-    options.add_argument("--disable-notifications")  # ปิดการแจ้งเตือน
-    options.add_argument("--ignore-certificate-errors")  # ข้าม SSL errors
-    options.add_argument("--log-level=3")  # ลด log verbosity
-
-    # ใช้ ChromeDriverManager เพื่อติดตั้งเวอร์ชันที่ตรงกับ Chrome เวอร์ชันที่ใช้งาน
+    options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-gpu")
+    options.add_argument("--remote-debugging-port=9222")
+    options.add_argument("--disable-software-rasterizer")
+    
+    # สำหรับการใช้งานบน Docker หรือ Linux server
+    options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
+    
     service = Service(ChromeDriverManager().install())
-    driver = webdriver.Chrome(service=service, options=options)
-    return driver
-
-
-def create_table(conn):
-    sql = """
-    CREATE TABLE IF NOT EXISTS rawbooks (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        source VARCHAR(255),
-        title VARCHAR(500),
-        author VARCHAR(255),
-        publisher VARCHAR(255),
-        price DECIMAL(10,2),
-        url TEXT
-    )
-    """
-    cur = conn.cursor()
-    cur.execute(sql)
-    conn.commit()
-    cur.close()
-
-
-def insert_book(conn, book):
-    sql = """
-    INSERT INTO rawbooks (source, title, author, publisher, price, url)
-    VALUES (%s, %s, %s, %s, %s, %s)
-    """
-    params = (
-        book.get('source'),
-        book.get('title'),
-        book.get('author'),
-        book.get('publisher'),
-        book.get('price'),
-        book.get('url'),
-    )
-    cur = conn.cursor()
-    cur.execute(sql, params)
-    conn.commit()
-    print(f"✅ เพิ่มหนังสือ: {book.get('title')}")
-
+    return webdriver.Chrome(service=service, options=options)
 
 def main():
     conn = create_connection()
-    create_table(conn)
-    create_history_table(conn)  # สร้างตาราง history ถ้ายังไม่มี
+    if conn is None:
+        print("[ERROR] ไม่สามารถเชื่อมต่อฐานข้อมูลได้")
+        return
+
+    create_tables(conn)
+    create_history_table(conn)
 
     driver = get_driver()
+    
     sites = [
-    {"name": "jamsai", "url": "https://www.jamsai.com/shop/"}, 
-    {"name": "niin", "url": "https://www.naiin.com/product/view-all?product_type_id=1&product_category=list-book-category"}, 
-    {"name": "b2s", "url": "https://www.central.co.th/th/b2s/home-lifestyle/books-movies-music/books"}, 
-    {"name": "amarin", "url": "https://amarinbooks.com/shop/?orderby=date"}, 
-    {"name": "se-ed", "url": "https://se-ed.bookcaze.com/"}, 
+        {"name": "niin", "scraper": scrape_niin_all_pages},
+        {"name": "amarin", "scraper": scrape_amarin_all_pages},
+        {"name": "b2s", "scraper": scrape_b2s_all_pages},
+        {"name": "jamsai", "scraper": scrape_jamsai_all_pages},
+        {"name": "se-ed", "scraper": scrape_seed_all_pages},
     ]
 
     for site in sites:
-        source, url = site['name'], site['url']
+        source, scraper = site['name'], site['scraper']
         print(f"\n=== ดึงข้อมูลจากเว็บ: {source} ===")
-        driver.get(url)
+        
         try:
-            WebDriverWait(driver, 10).until(
-                EC.presence_of_element_located((By.TAG_NAME, "body"))
-            )
+            products = scraper(driver) # เรียกใช้ฟังก์ชัน scraper ที่เหมาะสม
         except Exception as e:
-            print(f"[ERROR] ไม่สามารถโหลดหน้าเว็บ {source}: {e}")
+            print(f"[ERROR] ไม่สามารถดึงข้อมูลจาก {source} ได้: {e}")
             continue
-
-        if source == "niin":
-            products = scrape_niin_all_pages(driver, url)
-        elif source == "b2s":
-            products, driver = scrape_b2s_all_pages(driver, url)
-        elif source == "jamsai":
-            products = scrape_jamsai_all_pages(driver, url)
-        elif source == "se-ed":
-            products = scrape_seed_all_pages(driver, url)
-        elif source == "amarin":
-            products = scrape_amarin_all_pages(driver, url)
-        else:
-            products = []
 
         print(f"[{source}] พบข้อมูล {len(products)} รายการ")
         for book in products:
@@ -129,14 +71,13 @@ def main():
                 insert_book(conn, book)
             else:
                 print(f"[ERROR] ข้อมูลหนังสือไม่ถูกต้อง: {book}")
-
-    # อัพเดต history หลัง insert rawbooks ทั้งหมด
-    print("\n🔄 เริ่มอัพเดตประวัติหนังสือ...")
+    
+    # อัปเดตตารางประวัติ
     update_history(conn)
 
+    print("\n✅ การดึงข้อมูลและอัปเดตฐานข้อมูลเสร็จสิ้น")
     driver.quit()
     conn.close()
-    print("✅ ดึงข้อมูลและเก็บประวัติสำเร็จ")
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

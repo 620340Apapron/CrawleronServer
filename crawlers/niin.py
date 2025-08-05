@@ -12,7 +12,7 @@ def normalize_text(txt):
 
 def get_all_book_urls(driver, max_pages=10):
     urls = set()
-    base_url = "https://www.naiin.com/product/view-all?product_type_id=1&product_category=list-book-category&page={}"
+    base_url = "https://www.naiin.com/product/view-all?product_type_id=1&product_category=list-book-category"
     for p in range(1, max_pages + 1):
         driver.get(base_url.format(p))
         try:
