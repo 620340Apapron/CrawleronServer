@@ -8,7 +8,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.common.exceptions import InvalidSessionIdException
-from db_service import create_connection, create_tables, insert_book
+from db_service import create_connection
 from book_history import create_history_table, update_history
 
 # นำเข้า crawler ที่ปรับแก้แล้ว
