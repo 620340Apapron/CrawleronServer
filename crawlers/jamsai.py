@@ -51,7 +51,7 @@ def get_all_book_urls(driver, max_pages=10):
     print(f"[*] [jamsai] รวบรวม URL ทั้งหมดได้ {len(book_urls)} รายการ")
     return list(book_urls)
 
-def scrape_jamsai_detail_page(driver, book_url):
+def scrape_jamsai_all_page(driver):
     """
     ขั้นตอนที่ 2: ดึงข้อมูลจากหน้ารายละเอียดของหนังสือแต่ละเล่ม
     """

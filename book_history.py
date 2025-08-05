@@ -1,4 +1,4 @@
-from db_service import create_connection
+from crawlers.db_service import create_connection
 from mysql.connector import Error
 import datetime
 
