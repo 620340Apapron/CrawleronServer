@@ -10,7 +10,7 @@ def normalize_text(txt):
         return ""
     return ' '.join(txt.replace('"', '').strip().split())
 
-def get_all_book_urls(driver, max_pages=10):
+def get_all_book_urls(driver, max_pages):
     urls = set()
     base_url = "https://www.naiin.com/product/view-all?product_type_id=1&product_category=list-book-category"
     for p in range(1, max_pages + 1):
@@ -71,7 +71,7 @@ def scrape_one(driver, book_url):
         "source": "niin"
     }
 
-def scrape_niin_all_pages(driver, max_pages=10):
+def scrape_niin_all_pages(driver, max_pages):
     all_urls = get_all_book_urls(driver, max_pages)
     results = []
     for u in all_urls:

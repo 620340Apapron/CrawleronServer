@@ -19,10 +19,10 @@ def create_connection():
         return None
     
 def create_tables(conn):
-    """สร้างตาราง raw_books และ book_history หากยังไม่มี"""
+    """สร้างตาราง rawbooks และ book_history หากยังไม่มี"""
     try:
         sql_create_raw_books_table = """
-        CREATE TABLE IF NOT EXISTS raw_books (
+        CREATE TABLE IF NOT EXISTS rawbooks (
             id INTEGER PRIMARY KEY,
             title TEXT NOT NULL,
             author TEXT,
@@ -53,9 +53,9 @@ def create_tables(conn):
         print(f"Error creating tables: {e}")
 
 def insert_book(conn, book):
-    """แทรกข้อมูลหนังสือใหม่ลงในตาราง raw_books"""
+    """แทรกข้อมูลหนังสือใหม่ลงในตาราง rawbooks"""
     sql = """
-    INSERT INTO raw_books (title, author, publisher, price, url, source)
+    INSERT INTO rawbooks (title, author, publisher, price, url, source)
     VALUES (?, ?, ?, ?, ?, ?);
     """
     try:
@@ -65,15 +65,15 @@ def insert_book(conn, book):
         print(f"Error inserting book: {e}")
 
 def get_all_books(conn):
-    """ดึงข้อมูลหนังสือทั้งหมดจาก raw_books"""
+    """ดึงข้อมูลหนังสือทั้งหมดจาก rawbooks"""
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM raw_books")
+    cursor.execute("SELECT * FROM rawbooks")
     return cursor.fetchall()
 
 def clear_raw_books_table(conn):
-    """ล้างข้อมูลในตาราง raw_books"""
+    """ล้างข้อมูลในตาราง rawbooks"""
     try:
-        conn.execute("DELETE FROM raw_books")
+        conn.execute("DELETE FROM rawbooks")
         conn.commit()
     except sqlite3.Error as e:
         print(f"Error clearing table: {e}")

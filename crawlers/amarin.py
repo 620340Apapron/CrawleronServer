@@ -10,7 +10,7 @@ def normalize_text(txt):
         return ""
     return ' '.join(txt.replace('"', '').strip().split())
 
-def get_all_book_urls(driver, max_pages=10):
+def get_all_book_urls(driver, max_pages):
     urls = set()
     base_url = "https://amarinbooks.com/shop/?orderby=date"
     for p in range(1, max_pages + 1):
@@ -71,7 +71,7 @@ def scrape_one(driver, book_url):
         "source": "amarin"
     }
 
-def scrape_amarin_all_pages(driver, max_pages=10):
+def scrape_amarin_all_pages(driver, max_pages):
     all_urls = get_all_book_urls(driver, max_pages)
     results = []
     for u in all_urls:

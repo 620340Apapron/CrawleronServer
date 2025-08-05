@@ -24,24 +24,24 @@ def create_history_table(conn):
 
 def update_history(conn):
     """
-    ดึงข้อมูลจาก raw_books มาอัปเดตใน book_history
+    ดึงข้อมูลจาก rawbooks มาอัปเดตใน book_history
     และจัดการข้อมูลซ้ำ
     """
     cursor = conn.cursor()
     
-    # ดึงข้อมูลทั้งหมดจาก raw_books
+    # ดึงข้อมูลทั้งหมดจาก rawbooks
     cursor.execute("SELECT title, author, publisher, price, url, source FROM raw_books")
-    raw_books = cursor.fetchall()
+    rawbooks = cursor.fetchall()
     
-    # ล้างข้อมูลเดิมใน raw_books
-    conn.execute("DELETE FROM raw_books")
+    # ล้างข้อมูลเดิมใน rawbooks
+    conn.execute("DELETE FROM rawbooks")
     conn.commit()
     
-    if not raw_books:
-        print("ไม่มีข้อมูลใหม่ใน raw_books")
+    if not rawbooks:
+        print("ไม่มีข้อมูลใหม่ใน rawbooks")
         return
 
-    for book in raw_books:
+    for book in rawbooks:
         title, author, publisher, price, url, source = book
         
         # ตรวจสอบว่าหนังสือเล่มนี้มีอยู่แล้วใน book_history หรือไม่
