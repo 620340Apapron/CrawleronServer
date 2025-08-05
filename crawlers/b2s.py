@@ -57,7 +57,7 @@ def scrape_b2s_detail_page(driver, book_url):
         "source": "b2s"
     }
 
-def get_all_book_urls(driver, max_pages=10):
+def get_all_book_urls(driver, max_pages=999):
     urls = set()
     # เปลี่ยน URL หน้ารวมสินค้า
     base_url = "https://www.central.co.th/th/b2s/home-lifestyle/books-movies-music/books"
@@ -81,7 +81,7 @@ def get_all_book_urls(driver, max_pages=10):
                 urls.add(href)
     return list(urls)
 
-def scrape_b2s_all_pages(driver, max_pages=10):
+def scrape_b2s_all_pages(driver, max_pages=999):
     all_products = []
     
     all_urls = get_all_book_urls(driver, max_pages)

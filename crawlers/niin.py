@@ -59,7 +59,7 @@ def scrape_naiin_detail_page(driver, book_url):
         "source": "naiin"
     }
 
-def get_all_book_urls(driver, max_pages=10):
+def get_all_book_urls(driver, max_pages=999):
     urls = set()
     base_url = "https://www.naiin.com/search?q=book&page="
     
@@ -81,7 +81,7 @@ def get_all_book_urls(driver, max_pages=10):
                 urls.add(href)
     return list(urls)
 
-def scrape_naiin_all_pages(driver, max_pages=10):
+def scrape_naiin_all_pages(driver, max_pages=999):
     all_products = []
     
     all_urls = get_all_book_urls(driver, max_pages)
