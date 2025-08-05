@@ -91,11 +91,11 @@ def main():
 
     driver = get_driver()
     sites = [
-        {"name": "jamsai", "url": "https://www.jamsai.com/shop/"},
-        {"name": "niin", "url": "https://www.naiin.com/category?category_1_code=2&product_type_id=1"},
-        {"name": "b2s", "url": "https://shorturl.asia/JgZ0L"},
-        {"name": "amarin", "url": "https://amarinbooks.com/shop/?orderby=date"},
-        {"name": "se-ed", "url": "https://www.se-ed.com/book-cat.book?filter.productTypes=PRODUCT_TYPE_BOOK_PHYSICAL"},
+    {"name": "jamsai", "url": "https://www.jamsai.com/shop/products/all"}, # URL สำหรับหนังสือทั้งหมดของแจ่มใส
+    {"name": "niin", "url": "https://www.naiin.com/product/view-all?product_type_id=1&product_category=list-book-category"}, # URL สำหรับหนังสือทั้งหมดของนายอินทร์
+    {"name": "b2s", "url": "https://www.central.co.th/th/b2s/home-lifestyle/books-movies-music/books"}, # URL สำหรับหนังสือทั้งหมดของ B2S
+    {"name": "amarin", "url": "https://amarinbooks.com/shop/?orderby=date"}, # URL สำหรับหนังสือทั้งหมดของอมรินทร์
+    {"name": "se-ed", "url": "https://www.se-ed.com/book-cat.book?filter.productTypes=PRODUCT_TYPE_BOOK_PHYSICAL"}, # URL สำหรับหนังสือทั้งหมดของซีเอ็ด
     ]
 
     for site in sites:
