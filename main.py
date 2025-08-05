@@ -9,7 +9,8 @@ from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.common.exceptions import InvalidSessionIdException
 from db_service import create_connection
-from book_history import create_history_table, update_history
+from book_history import update_history
+from db_service import create_connection, insert_book
 
 # นำเข้า crawler ที่ปรับแก้แล้ว
 from crawlers.amarin import scrape_amarin_all_pages
@@ -41,7 +42,9 @@ def main():
     if conn is None:
         print("[ERROR] ไม่สามารถเชื่อมต่อฐานข้อมูลได้")
         return
-
+    
+    # คำสั่งสร้างตารางถูกย้ายไปที่ db_service เพื่อใช้สำหรับ initial setup
+    
     driver = get_driver()
     
     sites = [
@@ -57,7 +60,7 @@ def main():
         print(f"\n=== ดึงข้อมูลจากเว็บ: {source} ===")
         
         try:
-            products = scraper(driver) # เรียกใช้ฟังก์ชัน scraper ที่เหมาะสม
+            products = scraper(driver)
         except Exception as e:
             print(f"[ERROR] ไม่สามารถดึงข้อมูลจาก {source} ได้: {e}")
             continue
@@ -69,7 +72,6 @@ def main():
             else:
                 print(f"[ERROR] ข้อมูลหนังสือไม่ถูกต้อง: {book}")
     
-    # อัปเดตตารางประวัติ
     update_history(conn)
 
     print("\n✅ การดึงข้อมูลและอัปเดตฐานข้อมูลเสร็จสิ้น")
