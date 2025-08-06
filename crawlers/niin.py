@@ -58,7 +58,7 @@ def scrape_naiin_detail_page(driver, book_url):
 
 def get_all_book_urls(driver, max_pages=999):
     urls = set()
-    base_url = "https://www.naiin.com/search?q=book&page="
+    base_url = "https://www.naiin.com/category?category_1_code=13&product_type_id=1"
     
     for p in range(1, max_pages + 1):
         print(f"[*] [naiin] กำลังรวบรวม URL จากหน้า {p}...")
