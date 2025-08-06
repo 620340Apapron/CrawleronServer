@@ -70,12 +70,15 @@ def get_all_book_urls(driver, max_pages=999):
         driver.get(f"{base_url}{p}")
         try:
             WebDriverWait(driver, 15).until(
-                EC.presence_of_all_elements_located(By.XPATH,"/html/body/div[1]/div/div/main/main/div[2]/div/div[2]/div[2]/div/div[1]/a")
+                EC.presence_of_all_elements_located((
+                    By.XPATH,
+                    "/html/body/div[1]/div/div/main/main/div[2]/div/div[2]/div[2]/div/div[1]/a"
+                ))
             )
         except TimeoutException:
             print(f"[*] [se-ed] ไม่พบข้อมูลในหน้า {p}, สิ้นสุดการทำงาน")
             break
-        
+
         links = driver.find_elements(By.XPATH,"/html/body/div[1]/div/div/main/main/div[2]/div/div[2]/div[2]/div/div[1]/a")
         for link in links:
             href = link.get_attribute("href")
