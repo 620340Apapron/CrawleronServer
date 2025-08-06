@@ -60,23 +60,33 @@ def get_all_book_urls(driver, max_pages=999):
     urls = set()
     base_url = ["https://www.naiin.com/category?category_1_code=13&product_type_id=1","https://www.naiin.com/category?category_1_code=2&product_type_id=1&categoryLv2Code=8","https://www.naiin.com/category?categoryLv2Code=95&category_1_code=3&product_type_id=1","https://www.naiin.com/category?category_1_code=28&product_type_id=1","https://www.naiin.com/category?category_1_code=33&product_type_id=1","https://www.naiin.com/category?category_1_code=33&product_type_id=1","https://www.naiin.com/category?category_1_code=14&product_type_id=1","https://www.naiin.com/category?category_1_code=2&product_type_id=1&categoryLv2Code=134","https://www.naiin.com/category?category_1_code=15&product_type_id=1","https://www.naiin.com/category?category_1_code=5&product_type_id=1"]
     
-    for p in base_url:
+    for cat_url in base_url:
         for p in range(1, max_pages + 1):
-            print(f"[*] [naiin] กำลังรวบรวม URL จากหน้า {p}...")
-            driver.get(f"{base_url}{p}")
+            page_url = f"{cat_url}&page={p}"
+            print(f"[*] [naiin] จะโหลด: {page_url}")
+
+            try:
+                driver.get(page_url)
+            except TimeoutException:
+                print(f"[ERROR] ไม่สามารถโหลด URL นี้ได้ → {page_url} : {e}")
+                break
+
             try:
                 WebDriverWait(driver, 15).until(
-                    EC.presence_of_all_elements_located((By.XPATH, "/html/body/div[1]/div[2]/div/div/div/div[3]/div[2]/div[1]/div[2]/div/div[1]/div[3]/p[1]/a"))
+                    EC.presence_of_element_located((By.XPATH,
+                        "/html/body/div[1]/div[2]/div/div/div/div[3]/div[2]/div[1]/div[2]/div/div[1]/div[3]/p[1]/a"
+                    ))
                 )
             except TimeoutException:
-                print(f"[*] [naiin] ไม่พบข้อมูลในหน้า {p}, สิ้นสุดการทำงาน")
+                print(f"[*] [naiin] ไม่มีสินค้าในหน้า {p}, จบหมวดนี้")
                 break
         
             links = driver.find_elements(By.XPATH, "/html/body/div[1]/div[2]/div/div/div/div[3]/div[2]/div[1]/div[2]/div/div[1]/div[3]/p[1]/a")
+            print(f"    เจอ {len(links)} ลิงก์")
             for link in links:
                 href = link.get_attribute("href")
-                if href and "product" in href:
-                    urls.add(href)
+                urls.add(href)
+
     return list(urls)
 
 def scrape_naiin_all_pages(driver, max_pages=999):
