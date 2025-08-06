@@ -40,11 +40,11 @@ def main():
     driver = get_driver()
     
     sites = [
-       # {"name": "se-ed", "scraper": scrape_seed_all_pages},
+        {"name": "se-ed", "scraper": scrape_seed_all_pages},
         {"name": "niin", "scraper": scrape_naiin_all_pages},
-       # {"name": "amarin", "scraper": scrape_amarin_all_pages},
-       # {"name": "b2s", "scraper": scrape_b2s_all_pages},
-       # {"name": "jamsai", "scraper": scrape_jamsai_all_pages},
+        {"name": "amarin", "scraper": scrape_amarin_all_pages},
+        {"name": "b2s", "scraper": scrape_b2s_all_pages},
+        {"name": "jamsai", "scraper": scrape_jamsai_all_pages},
         
     ]
 

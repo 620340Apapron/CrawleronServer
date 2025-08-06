@@ -28,7 +28,6 @@ def scrape_jamsai_detail_page(driver, book_url):
     title = normalize_text(title_tag.text) if title_tag else "Unknown"
 
     # Author
-    author = "Unknown"
     author_tag = soup.find("h3", class_="tp-product-details-variation-title mb-4")
     if author_tag:
         author_span = author_tag.find("span", class_="authors-name")
@@ -44,7 +43,6 @@ def scrape_jamsai_detail_page(driver, book_url):
             publisher = normalize_text(publisher_span.text)
 
     # Price
-    price = 0
     price_tag = soup.find("span", class_="tp-product-details-price new-price")
     if price_tag:
         price_span = price_tag.find("span", class_="price-value")
@@ -71,17 +69,22 @@ def get_all_book_urls(driver, max_pages=999):
     
     for p in range(1, max_pages + 1):
         print(f"[*] [jamsai] กำลังรวบรวม URL จากหน้า {p}...")
-        driver.get(f"{base_url}{p}")
+        
         try:
-            WebDriverWait(driver, 15).until(
-                # อัปเดต CSS selector ให้ตรงกับโครงสร้างปัจจุบัน
-                EC.presence_of_all_elements_located((By.CSS_SELECTOR, "div.product-list a.product-image"))
-            )
+            driver.get(f"{base_url}{p}")
         except TimeoutException:
             print(f"[*] [jamsai] ไม่พบข้อมูลในหน้า {p}, สิ้นสุดการทำงาน")
             break
+
+        try:
+            WebDriverWait(driver, 15).until(
+                EC.presence_of_all_elements_located((By.XPATH, "/html/body/div/div/div/section[2]/div/div/div[2]/div/div[2]/div/div/div/div[1]/div/div[2]/h3/a"))
+            )
+        except TimeoutException:
+                print(f"[*] [naiin] ไม่มีสินค้าในหน้า {p}, จบหมวดนี้")
+                break
         
-        links = driver.find_elements(By.CSS_SELECTOR, "div.product-list a.product-image")
+        links = driver.find_elements(By.XPATH, "/html/body/div/div/div/section[2]/div/div/div[2]/div/div[2]/div/div/div/div[1]/div/div[2]/h3/a")
         for link in links:
             href = link.get_attribute("href")
             if href and "product" in href:

@@ -28,19 +28,16 @@ def scrape_b2s_detail_page(driver, book_url):
     title = normalize_text(title_tag.text) if title_tag else "Unknown"
 
     # Author
-    author = "Unknown"
     author_tag = soup.find("div", class_="author-name")
     if author_tag:
         author = normalize_text(author_tag.text)
 
     # Publisher
-    publisher = "Unknown"
     publisher_tag = soup.find("div", class_="publisher-name")
     if publisher_tag:
         publisher = normalize_text(publisher_tag.text)
 
     # Price
-    price = 0
     price_tag = soup.find("div", class_="product-price")
     if price_tag:
         price_text = normalize_text(price_tag.text)
