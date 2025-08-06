@@ -83,7 +83,7 @@ def get_all_book_urls(driver, max_pages=999):
                 break
         
             links = driver.find_elements(By.XPATH, "/html/body/div[1]/div[2]/div/div/div/div[3]/div[2]/div[1]/div[2]/div/div[1]/div[3]/p[1]/a")
-            print(f"    เจอ {len(links)} ลิงก์")
+            print(f"เจอ {len(links)} ลิงก์")
             for link in links:
                 href = link.get_attribute("href")
                 urls.add(href)
