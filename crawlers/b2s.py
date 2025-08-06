@@ -5,6 +5,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
+from db_service import insert_book
 
 def normalize_text(txt):
     if not txt:
@@ -78,7 +79,7 @@ def get_all_book_urls(driver, max_pages=999):
                 urls.add(href)
     return list(urls)
 
-def scrape_b2s_all_pages(driver, max_pages=999):
+def scrape_b2s_all_pages(driver, conn,  max_pages=999):
     all_products = []
     
     all_urls = get_all_book_urls(driver, max_pages)
@@ -91,6 +92,6 @@ def scrape_b2s_all_pages(driver, max_pages=999):
         print(f"--- กำลังดึงข้อมูลเล่มที่ {i + 1}/{len(all_urls)} ---")
         book_data = scrape_b2s_detail_page(driver, url)
         if book_data:
-            all_products.append(book_data)
+            insert_book(conn, book_data)
 
-    return all_products
+    return 

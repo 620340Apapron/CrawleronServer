@@ -4,6 +4,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
+from db_service import insert_book
 
 def normalize_text(txt):
     if not txt:
@@ -30,7 +31,7 @@ def get_all_book_urls(driver, max_pages=999):
                 urls.add(href)
     return list(urls)
 
-def scrape_one(driver, book_url):
+def scrape_amarin_detail_page(driver, book_url):
     driver.get(book_url)
     try:
         WebDriverWait(driver, 15).until(
@@ -70,13 +71,19 @@ def scrape_one(driver, book_url):
         "source": "amarin"
     }
 
-def scrape_amarin_all_pages(driver, max_pages=999):
+def scrape_amarin_all_pages(driver, conn, max_pages=999):
+    all_products = []
+    
     all_urls = get_all_book_urls(driver, max_pages)
-    results = []
-    for u in all_urls:
-        data = scrape_one(driver, u)
-        if data:
-            results.append(data)
-        time.sleep(0.5)
-    print(f"[amarin] collected {len(results)} books")
-    return results
+
+    if not all_urls:
+        print("[ERROR] ไม่สามารถรวบรวม URL ใดๆ ได้เลย โปรแกรมจะสิ้นสุดการทำงาน")
+        return []
+
+    for i, url in enumerate(all_urls):
+        print(f"--- กำลังดึงข้อมูลเล่มที่ {i + 1}/{len(all_urls)} ---")
+        book_data = scrape_amarin_detail_page(driver, url)
+        if book_data:
+            insert_book(conn, book_data)
+
+    return 
