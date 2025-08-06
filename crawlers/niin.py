@@ -24,26 +24,23 @@ def scrape_naiin_detail_page(driver, book_url):
     soup = BeautifulSoup(driver.page_source, "html.parser")
     
     # Title
-    title_tag = soup.find("h1", class_="product-info-name")
+    title_tag = soup.find("h1", class_="title-topic")
     title = normalize_text(title_tag.text) if title_tag else "Unknown"
 
     # Author
-    author = "Unknown"
-    author_tag = soup.find("div", class_="product-authors")
+    author_tag = soup.find("div", class_="inline-block link-book-detail")
     if author_tag:
         author = normalize_text(author_tag.text)
 
     # Publisher
-    publisher = "Unknown"
-    publisher_tag = soup.find("div", class_="product-publisher")
+    publisher_tag = driver.find_elements(By.XPATH,"/html/body/div/div[2]/div[1]/div/div/div[3]/div[2]/div[1]/div[1]/p[2]/a")
     if publisher_tag:
         publisher = normalize_text(publisher_tag.text)
 
     # Price
-    price = 0
-    price_tag = soup.find("span", class_="special-price")
+    price_tag = soup.find("p", class_="price")
     if price_tag:
-        price_span = price_tag.find("span", class_="price")
+        price_span = price_tag.find("p", class_="price")
         if price_span:
             price_text = normalize_text(price_span.text)
             match = re.search(r'[\d,.]+', price_text)
