@@ -72,14 +72,14 @@ def get_all_book_urls(driver, max_pages=999):
         try:
             WebDriverWait(driver, 15).until(
                 EC.presence_of_all_elements_located((
-                    By.CSS_SELECTOR,"div.h-full css-1g7jf02 a"
+                    By.CSS_SELECTOR,"a[href*='/product/']"
                 ))
             )
         except TimeoutException:
             print(f"[*] [se-ed] ไม่พบข้อมูลในหน้า {p}, สิ้นสุดการทำงาน")
             break
 
-        links = driver.find_elements(By.CSS_SELECTOR,"div.h-full css-1g7jf02 a")
+        links = driver.find_elements(By.CSS_SELECTOR,"a[href*='/product/']")
         for link in links:
             href = link.get_attribute("href")
             if href and "product" in href:
