@@ -31,7 +31,6 @@ def scrape_seed_detail_page(driver, book_url):
     title = normalize_text(title_tag.text) if title_tag else "Unknown"
 
     # Author
-    author = "Unknown"
     try:
         author_tag = driver.find_element(By.XPATH, "//*[@id='mpe-editor']/div/p[1]/a")
         author = normalize_text(author_tag.text)
@@ -39,7 +38,6 @@ def scrape_seed_detail_page(driver, book_url):
         author = "Unknown"
 
     # Publisher
-    publisher = "Unknown"
     try:
         publisher_tag = driver.find_element(By.XPATH, "//*[@id='mpe-editor']/div/p[15]/a")
         publisher = normalize_text(publisher_tag.text)
@@ -47,7 +45,6 @@ def scrape_seed_detail_page(driver, book_url):
         publisher = "Unknown"
 
     # Price
-    price = 0
     price_tag = soup.find("p", class_="MuiTypography-root MuiTypography-h3 truncate css-muszlw")
     if price_tag:
         price_text = normalize_text(price_tag.text)
