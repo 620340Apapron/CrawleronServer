@@ -25,21 +25,21 @@ def scrape_b2s_detail_page(driver, book_url):
     soup = BeautifulSoup(driver.page_source, "html.parser")
     
     # Title
-    title_tag = soup.find("div", class_="pdp-productDetail__desc")
+    title_tag = soup.find("h1", class_="title mb-2 fw-bold fs-24")
     title = normalize_text(title_tag.text) if title_tag else "Unknown"
 
     # Author
-    author_tag = soup.find("div", class_="author-name")
+    author_tag = soup.find("span", class_="author-name")
     if author_tag:
         author = normalize_text(author_tag.text)
 
     # Publisher
-    publisher_tag = soup.find("div", class_="publisher-name")
+    publisher_tag = soup.find("a", class_="mr-3 fw-bold")
     if publisher_tag:
         publisher = normalize_text(publisher_tag.text)
 
     # Price
-    price_tag = soup.find("div", class_="product-price")
+    price_tag = soup.find("label", class_="price")
     if price_tag:
         price_text = normalize_text(price_tag.text)
         match = re.search(r'[\d,.]+', price_text)
