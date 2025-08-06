@@ -72,8 +72,3 @@ def update_history(conn):
             cursor.execute("UPDATE book_history SET book_id = %s WHERE id = %s", (book_id, book_id))
             conn.commit()
             print(f"✅ เพิ่มหนังสือใหม่: {title}")
-    
-    # ล้างข้อมูลเดิมใน raw_books หลังจากอัปเดตเสร็จ
-    cursor.execute("DELETE FROM raw_books")
-    conn.commit()
-    print("✅ ล้างข้อมูลใน raw_books เรียบร้อยแล้ว")
