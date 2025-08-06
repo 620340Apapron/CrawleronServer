@@ -64,7 +64,7 @@ def scrape_seed_detail_page(driver, book_url):
 
 def get_all_book_urls(driver, max_pages=999):
     urls = set()
-    base_url = "https://se-ed.com/book-cat.book?filter.productTypes=PRODUCT_TYPE_BOOK_PHYSICAL&page="
+    base_url = "https://www.se-ed.com/book-cat.book?filter.productTypes=PRODUCT_TYPE_BOOK_PHYSICAL&page="
     
     for p in range(1, max_pages + 1):
         print(f"[*] [se-ed] กำลังรวบรวม URL จากหน้า {p}...")
@@ -72,15 +72,14 @@ def get_all_book_urls(driver, max_pages=999):
         try:
             WebDriverWait(driver, 15).until(
                 EC.presence_of_all_elements_located((
-                    By.XPATH,
-                    "/html/body/div[1]/div/div/main/main/div[2]/div/div[2]/div[2]/div/div[3]/a"
+                    By.CSS_SELECTOR,"div.h-full css-1g7jf02 a"
                 ))
             )
         except TimeoutException:
             print(f"[*] [se-ed] ไม่พบข้อมูลในหน้า {p}, สิ้นสุดการทำงาน")
             break
 
-        links = driver.find_elements(By.XPATH,"/html/body/div[1]/div/div/main/main/div[2]/div/div[2]/div[2]/div/div[3]/a")
+        links = driver.find_elements(By.CSS_SELECTOR,"div.h-full css-1g7jf02 a")
         for link in links:
             href = link.get_attribute("href")
             if href and "product" in href:
