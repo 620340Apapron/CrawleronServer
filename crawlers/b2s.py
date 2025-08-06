@@ -58,24 +58,33 @@ def scrape_b2s_detail_page(driver, book_url):
 def get_all_book_urls(driver, max_pages=999):
     urls = set()
     # เปลี่ยน URL หน้ารวมสินค้า
-    base_url = "https://www.central.co.th/th/b2s/home-lifestyle/books-movies-music/books"
+    base_url = ["https://shorturl.at/xMaPH","https://shorturl.at/nwkp9","https://shorturl.at/oCfXO","https://shorturl.at/Bqqpu","https://shorturl.asia/BEAvO","https://shorturl.asia/AUefZ","https://shorturl.asia/5xIER"]
     
-    for p in range(1, max_pages + 1):
-        print(f"[*] [b2s] กำลังรวบรวม URL จากหน้า {p}...")
-        driver.get(f"{base_url}{p}")
-        try:
-            WebDriverWait(driver, 15).until(
-                # อัปเดต CSS selector ให้ตรงกับโครงสร้างปัจจุบัน
-                EC.presence_of_all_elements_located((By.CSS_SELECTOR, "div.product-card-wrap a"))
-            )
-        except TimeoutException:
-            print(f"[*] [b2s] ไม่พบข้อมูลในหน้า {p}, สิ้นสุดการทำงาน")
-            break
+    for cat_url in base_url:
+        for p in range(1, max_pages + 1):
+            page_url = f"{cat_url}&page={p}"
+            print(f"[*] [b2s] จะโหลด: {page_url}")
         
-        links = driver.find_elements(By.CSS_SELECTOR, "div.product-card-wrap a")
-        for link in links:
-            href = link.get_attribute("href")
-            if href and "product" in href:
+            try:
+                driver.get(page_url)
+            except TimeoutException:
+                print(f"[ERROR] ไม่สามารถโหลด URL นี้ได้ → {page_url} : {e}")
+                break
+
+            try:
+                WebDriverWait(driver, 15).until(
+                    EC.presence_of_element_located((By.XPATH,
+                        "/html/body/div[1]/div/div/div[3]/div/div/div[2]/div[2]/div[2]/div[3]/div/div[1]/div/div[1]/div[1]/div[1]/a"
+                    ))
+                )
+            except TimeoutException:
+                print(f"[*] [b2s] ไม่มีสินค้าในหน้า {p}, จบหมวดนี้")
+                break
+        
+            links = driver.find_elements(By.XPATH, "/html/body/div[1]/div/div/div[3]/div/div/div[2]/div[2]/div[2]/div[3]/div/div[1]/div/div[1]/div[1]/div[1]/a")
+            print(f"เจอ {len(links)} ลิงก์")
+            for link in links:
+                href = link.get_attribute("href")
                 urls.add(href)
     return list(urls)
 
