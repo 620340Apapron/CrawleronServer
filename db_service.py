@@ -10,7 +10,7 @@ def create_connection():
         connection = mysql.connector.connect(
             host=os.getenv("MYSQLHOST", "mysql.railway.internal"),
             port=os.getenv("MYSQLPORT", "3306"),
-            user=os.getenv("MYSQLUSER", "bookroot"),
+            user=os.getenv("MYSQLUSER", "root"),
             password=os.getenv("MYSQLPASSWORD", "Morigan3003"),
             database=os.getenv("MYSQLDATABASE", "railway"),
             auth_plugin='mysql_native_password',
