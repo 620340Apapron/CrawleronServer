@@ -57,11 +57,11 @@ def insert_book(conn, book):
     """แทรกข้อมูลหนังสือใหม่ลงในตาราง raw_books"""
     cursor = conn.cursor()
     sql = """
-    INSERT INTO raw_books (ibsn, title, author, publisher, price, url, source)
+    INSERT INTO raw_books (isbn, title, author, publisher, price, url, source)
     VALUES (%s, %s, %s, %s, %s, %s, %s);
     """
     try:
-        cursor.execute(sql, (book['ibsn'], book['title'], book['author'], book['publisher'], book['price'], book['url'], book['source']))
+        cursor.execute(sql, (book['isbn'], book['title'], book['author'], book['publisher'], book['price'], book['url'], book['source']))
         conn.commit()
     except mysql.connector.Error as e:
         print(f"Error inserting book: {e}")

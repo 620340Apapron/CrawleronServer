@@ -1,5 +1,5 @@
 # jamsai.py
-import time, re
+import time, re, json
 from bs4 import BeautifulSoup
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -15,7 +15,6 @@ def normalize_text(txt):
 def scrape_jamsai_detail_page(driver, book_url):
     driver.get(book_url)
     try:
-        # 1. เปลี่ยนจากรอ h1 เป็นรอแท็ก script ที่มีข้อมูล JSON แทน (โหลดเร็วและชัวร์กว่า)
         WebDriverWait(driver, 15).until(
             EC.presence_of_element_located((By.ID, "__NEXT_DATA__"))
         )
@@ -26,20 +25,18 @@ def scrape_jamsai_detail_page(driver, book_url):
     soup = BeautifulSoup(driver.page_source, "html.parser")
     
     try:
-        # 2. ดึงก้อน JSON ออกมา (ก้อนเดียวจบ ไม่ต้องหาแท็บอื่น)
         json_tag = soup.find('script', id='__NEXT_DATA__')
         if not json_tag: return None
         
         js_data = json.loads(json_tag.string)
         product = js_data['props']['pageProps']['product']
 
-        # 3. แมพข้อมูลจาก JSON เข้า Dictionary (สะอาดและแม่นยำ)
         return {
-            "isbn": product.get('skuid', 'Unknown'), # ISBN อยู่ตรงนี้
+            "isbn": product.get('skuid', 'Unknown'), 
             "title": normalize_text(product.get('display_name')),
             "author": product['writers'][0]['name'] if product.get('writers') else "Unknown",
             "publisher": product['brands'][0]['name'] if product.get('brands') else "Jamsai",
-            "price": int(product.get('special_price', 0)), # ราคาขายจริง
+            "price": int(product.get('special_price', 0)),
             "url": book_url,
             "source": "jamsai"
         }

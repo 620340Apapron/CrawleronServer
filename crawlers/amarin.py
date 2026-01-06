@@ -66,6 +66,7 @@ def scrape_amarin_detail_page(driver, book_url):
         price = 0
 
     return {
+        "isbn": isbn,
         "title": title,
         "author": author,
         "publisher": publisher,

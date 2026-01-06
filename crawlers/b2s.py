@@ -50,6 +50,7 @@ def scrape_b2s_detail_page(driver, book_url):
             price = int(float(match.group(0).replace(",", "")))
     
     return {
+        "isbn": isbn,
         "title": title,
         "author": author,
         "publisher": publisher,
