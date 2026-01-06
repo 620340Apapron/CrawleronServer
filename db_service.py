@@ -8,8 +8,8 @@ def create_connection():
         connection = mysql.connector.connect(
         host=os.getenv("DB_HOST", "turntable.proxy.rlwy.net"),
         port=os.getenv("DB_PORT", "3306"),
-        user=os.getenv("DB_USER", "root"),
-        password=os.getenv("DB_PASSWORD", ""),
+        user=os.getenv("DB_USER", "bookroot"),
+        password=os.getenv("DB_PASSWORD", "Morigan3003"),
         database=os.getenv("DB_DATABASE", "railway")
         )
         return connection
