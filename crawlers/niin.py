@@ -5,6 +5,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
 from db_service import insert_book
+from image_service import upload_book_cover
 
 def normalize_text(txt):
     if not txt: return ""
@@ -56,12 +57,17 @@ def scrape_naiin_detail_page(driver, book_url):
         if pub_match:
             publisher = pub_match.group(1).strip()
 
+    #img
+    raw_img_url = soup.find("meta", attrs={"property": "og:image"}).get("content")
+    final_image_url = upload_book_cover(raw_img_url, isbn)
+
     return {
         "isbn": isbn,
         "title": title,
         "author": author,
         "publisher": publisher,
         "price": price,
+        "image_url": final_image_url,
         "url": book_url,
         "source": "naiin"
     }

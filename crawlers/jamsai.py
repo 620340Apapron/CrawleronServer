@@ -37,6 +37,7 @@ def scrape_jamsai_detail_page(driver, book_url):
             "author": product['writers'][0]['name'] if product.get('writers') else "Unknown",
             "publisher": product['brands'][0]['name'] if product.get('brands') else "Jamsai",
             "price": int(product.get('special_price', 0)),
+            "image_url": image_url,
             "url": book_url,
             "source": "jamsai"
         }

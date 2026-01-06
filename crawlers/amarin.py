@@ -71,6 +71,7 @@ def scrape_amarin_detail_page(driver, book_url):
         "author": author,
         "publisher": publisher,
         "price": price,
+        "image_url": image_url,
         "url": book_url,
         "source": "amarin"
     }

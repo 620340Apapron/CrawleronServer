@@ -1,76 +1,62 @@
-import sqlite3
 from datetime import datetime
+from mysql.connector import Error
 
 def update_history(conn):
     """
-    ดึงข้อมูลจาก raw_books มาอัปเดตใน book_history
-    และจัดการข้อมูลซ้ำ
+    ย้ายข้อมูลจาก raw_books ไปยัง book_history 
+    ถ้า ISBN เดิมมีอยู่แล้วและราคาเปลี่ยน จะเก็บเป็น Record ใหม่ (History)
     """
     cursor = conn.cursor()
     
-    # ดึงข้อมูลทั้งหมดจาก raw_books
-    cursor.execute("SELECT isbn,title, author, publisher, price, url, source FROM raw_books")
+    # 1. ดึงข้อมูลจาก raw_books
+    cursor.execute("SELECT isbn, title, author, publisher, price, image_url, url, source FROM raw_books")
     raw_books = cursor.fetchall()
     
     if not raw_books:
         print("ไม่มีข้อมูลใหม่ใน raw_books")
-        # ใช้ cursor ในการล้างตาราง
-        cursor.execute("DELETE FROM raw_books")
-        conn.commit()
         return
 
-    # สร้าง Dictionary เพื่อเก็บข้อมูลล่าสุดของหนังสือแต่ละเล่ม
-    book_info = {}
-    for book in raw_books:
-        isbn, title, author, publisher, price, url, source = book
-        # ใช้ (title, publisher) เป็น key เพื่อหาหนังสือซ้ำ
-        key = (isbn, title)
-        if key not in book_info:
-            book_info[key] = {
-                'isbn': isbn,
-                'title': title,
-                'author': author,
-                'publisher': publisher,
-                'price': price,
-                'url': url,
-                'source': source
-            }
-    
-    # นำข้อมูลที่ผ่านการกรองแล้วไปอัปเดตใน book_history
-    for key, book in book_info.items():
-        isbn = book['isbn']
-        title = book['title']
-        publisher = book['publisher']
-        price = book['price']
-        url = book['url']
-        source = book['source']
-        author = book['author']
+    # 2. จัดการข้อมูลซ้ำในก้อนที่เพิ่งสเกรปมา (เผื่อสเกรปซ้ำในวันเดียวกัน)
+    unique_books = {}
+    for b in raw_books:
+        isbn = b[0]
+        if isbn not in unique_books:
+            unique_books[isbn] = b
 
+    # 3. ตรวจสอบและอัปเดตลง book_history
+    for isbn, book in unique_books.items():
+        isbn, title, author, publisher, price, image_url, url, source = book
+
+        # หาข้อมูลล่าสุดของเล่มนี้ใน history
         cursor.execute("""
-            SELECT id, price FROM book_history
-            WHERE title = %s AND publisher = %s
-            ORDER BY created_at DESC
-            LIMIT 1
-        """, (isbn, title))
+            SELECT price FROM book_history 
+            WHERE isbn = %s 
+            ORDER BY created_at DESC LIMIT 1
+        """, (isbn,))
         
-        existing_book = cursor.fetchone()
+        existing = cursor.fetchone()
         
-        if existing_book:
-            book_id, existing_price = existing_book
-            if existing_price != price:
-                cursor.execute("""
-                    INSERT INTO book_history (isbn, title, author, publisher, price, url, source)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s)
-                """, (isbn, title, author, publisher, price, url, source))
-                conn.commit()
-                print(f"✅ อัปเดตราคาหนังสือ: {title} จาก {existing_price} เป็น {price}")
+        if existing:
+            last_price = existing[0]
+            # ถ้าราคาเปลี่ยน ถึงจะบันทึก record ใหม่เข้าไป
+            if float(last_price) != float(price):
+                insert_history(cursor, book)
+                print(f"📈 ราคาเปลี่ยน [{title}]: {last_price} -> {price}")
         else:
-            cursor.execute("""
-                INSERT INTO book_history (isbn, title, author, publisher, price, url, source)
-                VALUES (%s, %s, %s, %s, %s, %s, %s)
-            """, (isbn, title, author, publisher, price, url, source))
-            book_id = cursor.lastrowid
-            conn.commit()
-            cursor.execute("UPDATE book_history SET book_id = %s WHERE id = %s", (book_id, book_id))
-            conn.commit()
-            print(f"✅ เพิ่มหนังสือใหม่: {title}")
+            # ถ้าเป็นหนังสือใหม่ ไม่เคยมีในระบบเลย
+            insert_history(cursor, book)
+            print(f"🆕 เพิ่มหนังสือใหม่: {title}")
+    
+    conn.commit()
+    
+    # 4. ล้างตารางพักข้อมูล (raw_books) เพื่อรอการสเกรปรอบถัดไป
+    cursor.execute("DELETE FROM raw_books")
+    conn.commit()
+    print("🧹 ล้างข้อมูลใน raw_books เรียบร้อย")
+
+def insert_history(cursor, b):
+    sql = """
+    INSERT INTO book_history (isbn, title, author, publisher, price, image_url, url, source)
+    VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+    """
+    cursor.execute(sql, b)
