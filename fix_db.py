@@ -2,8 +2,8 @@ import mysql.connector
 
 def fix_mysql_9_login():
     config = {
-        'host': 'shinkansen.proxy.rlwy.net', # จากโดเมนภายนอกของคุณ
-        'port': 14549,                        # จากพอร์ตภายนอกของคุณ
+        'host': 'shinkansen.proxy.rlwy.net', 
+        'port': 14549,                        
         'user': 'root',
         'password': 'Morigan3003',
         'database': 'railway'
