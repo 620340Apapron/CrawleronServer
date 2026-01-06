@@ -24,6 +24,9 @@ def scrape_b2s_detail_page(driver, book_url):
 
     soup = BeautifulSoup(driver.page_source, "html.parser")
     
+    isbn_tag = soup.find("meta", attrs={"property": "book:isbn"})
+    isbn = isbn_tag.get("content") if isbn_tag else "Unknown"
+
     # Title
     title_tag = soup.find("h1", class_="title mb-2 fw-bold fs-24")
     title = normalize_text(title_tag.text) if title_tag else "Unknown"

@@ -41,6 +41,9 @@ def scrape_amarin_detail_page(driver, book_url):
         return None
 
     soup = BeautifulSoup(driver.page_source, "html.parser")
+
+    isbn_tag = soup.find("meta", attrs={"property": "book:isbn"})
+    isbn = isbn_tag.get("content") if isbn_tag else "Unknown"
     
     title_tag = soup.find(By.CSS_SELECTOR,"#product-746196 > div > div.product-main > div > div.product-info.summary.col-fit.col.entry-summary.product-summary.text-left > h1")
     title = normalize_text(title_tag.text) if title_tag else "Unknown"
