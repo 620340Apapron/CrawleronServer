@@ -5,6 +5,7 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
+from fix_mysql import run_emergency_fix
 
 # ฟังก์ชันจัดการฐานข้อมูล
 from db_service import create_connection, create_tables
@@ -32,6 +33,7 @@ def get_driver():
     return webdriver.Chrome(service=service, options=options)
 
 def main():
+    run_emergency_fix() 
     # เชื่อมต่อฐานข้อมูล
     conn = create_connection()
     if conn is None:
