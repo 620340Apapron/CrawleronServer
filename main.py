@@ -1,12 +1,16 @@
 import time
 import ssl
+import os
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
-# นำเข้า create_tables
-from db_service import create_connection, create_tables, insert_book, get_all_books, clear_raw_books_table
+
+# ฟังก์ชันจัดการฐานข้อมูล
+from db_service import create_connection, create_tables
 from book_history import update_history
+
+# Scrapers
 from crawlers.amarin import scrape_amarin_all_pages
 from crawlers.b2s import scrape_b2s_all_pages
 from crawlers.jamsai import scrape_jamsai_all_pages
@@ -16,71 +20,59 @@ from crawlers.seed import scrape_seed_all_pages
 ssl._create_default_https_context = ssl._create_unverified_context
 
 def get_driver():
-    options = webdriver.ChromeOptions()
+    """ตั้งค่า Chrome Driver ให้ทำงานบน Server (Headless)"""
+    options = Options()
     options.add_argument("--headless")
-    options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--no-sandbox")
+    options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--disable-gpu")
-    options.add_argument("--remote-debugging-port=9222")
-    options.add_argument("--disable-software-rasterizer")
-    options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
+    options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36")
     
     service = Service(ChromeDriverManager().install())
     return webdriver.Chrome(service=service, options=options)
 
 def main():
+    # เชื่อมต่อฐานข้อมูล
     conn = create_connection()
     if conn is None:
-        print("[ERROR] ไม่สามารถเชื่อมต่อฐานข้อมูลได้")
+        print("[ERROR] ไม่สามารถเชื่อมต่อ MySQL ได้ ตรวจสอบ Variables บน Railway")
         return
 
-    # เรียกใช้ฟังก์ชันนี้เพื่อสร้างตารางหากยังไม่มี
+    # เตรียมตาราง
     create_tables(conn)
 
+    # เปิด Browser
     driver = get_driver()
     
+    # รายการเว็บที่จะไปดึง
     sites = [
-        {"name": "se-ed", "scraper": scrape_seed_all_pages},
         {"name": "niin", "scraper": scrape_naiin_all_pages},
+        {"name": "se-ed", "scraper": scrape_seed_all_pages},
+        {"name": "jamsai", "scraper": scrape_jamsai_all_pages},
         {"name": "amarin", "scraper": scrape_amarin_all_pages},
         {"name": "b2s", "scraper": scrape_b2s_all_pages},
-        {"name": "jamsai", "scraper": scrape_jamsai_all_pages},
-        
     ]
 
-    #https://www.naiin.com/search?q=book&page=
-    #https://amarinbooks.com/shop/?orderby=date
-    #https://www.central.co.th/th/b2s/home-lifestyle/books-movies-music/books
-    #https://www.jamsai.com/shop
-    #https://se-ed.com/book-cat.book?filter.productTypes=PRODUCT_TYPE_BOOK_PHYSICAL&page=
-
-    # ล้างข้อมูลเก่าก่อนเริ่มดึงข้อมูลใหม่
-    clear_raw_books_table(conn)
+    max_pages_to_scrape = 100
 
     for site in sites:
-        source, scraper = site['name'], site['scraper']
-        print(f"\n=== ดึงข้อมูลจากเว็บ: {source} ===")
+        source = site['name']
+        scraper_func = site['scraper']
         
+        print(f"\n🚀 เริ่มดึงข้อมูลจาก: {source.upper()}")
         try:
-            products = scraper(driver, 10)
+            scraper_func(driver, conn, max_pages=max_pages_to_scrape)
         except Exception as e:
-            print(f"[ERROR] ไม่สามารถดึงข้อมูลจาก {source} ได้: {e}")
+            print(f"[ERROR] เว็บ {source} เกิดปัญหา: {e}")
             continue
 
-        print(f"[{source}] พบข้อมูล {len(products)} รายการ")
-        for book in products:
-            if isinstance(book, dict):
-                insert_book(conn, book)
-            else:
-                print(f"[ERROR] ข้อมูลหนังสือไม่ถูกต้อง: {book}")
-    
+    print("\n📊 กำลังวิเคราะห์ข้อมูลและอัปเดตประวัติราคา (update_history)...")
     update_history(conn)
 
-    print("\n✅ การดึงข้อมูลและอัปเดตฐานข้อมูลเสร็จสิ้น")
+    print("\n✨ ภารกิจเสร็จสิ้น! ข้อมูลถูกเก็บลง Database และรูปถูกส่งไป Supabase แล้ว")
+    
     driver.quit()
     conn.close()
-
-
 
 if __name__ == "__main__":
     main()

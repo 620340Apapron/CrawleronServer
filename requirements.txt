@@ -1,6 +1,7 @@
-beautifulsoup4
-pandas
 selenium
-schedule
 webdriver-manager
+beautifulsoup4
 mysql-connector-python
+requests
+Pillow
+supabase

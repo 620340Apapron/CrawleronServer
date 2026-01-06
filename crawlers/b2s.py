@@ -6,6 +6,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
 from db_service import insert_book
+from image_service import upload_book_cover
 
 def normalize_text(txt):
     if not txt:
