@@ -3,24 +3,43 @@ import os
 from mysql.connector import Error
 
 def create_connection():
-    """สร้างการเชื่อมต่อกับ MySQL บน Railway"""
+    host = os.getenv("MYSQLHOST", "mysql.railway.internal")
+    user = os.getenv("MYSQLUSER", "root")
+    password = os.getenv("MYSQLPASSWORD", "Morigan3003")
+    database = os.getenv("MYSQLDATABASE", "railway")
+    port = int(os.getenv("MYSQLPORT", 3306))
+
     try:
-        # พยายามดึงค่าจาก Variables ของ Railway
+        # ลองเชื่อมต่อแบบปกติก่อน (MySQL 9 มักใช้ caching_sha2_password)
         connection = mysql.connector.connect(
-            host=os.getenv("MYSQLHOST", "mysql.railway.internal"),
-            user=os.getenv("MYSQLUSER", "root"),
-            password=os.getenv("MYSQLPASSWORD", "Morigan3003"),
-            database=os.getenv("MYSQLDATABASE", "railway"),
-            port=int(os.getenv("MYSQLPORT", 3306)),
-            # บังคับใช้ plugin นี้เพื่อแก้ Error 1045 ใน MySQL 9
-            auth_plugin='mysql_native_password',
+            host=host,
+            user=user,
+            password=password,
+            database=database,
+            port=port,
             connect_timeout=20
         )
         if connection.is_connected():
             print("✅ เชื่อมต่อฐานข้อมูลสำเร็จ")
             return connection
-    except Error as err:
-        print(f"❌ Error เชื่อมต่อ DB: {err}")
+    except mysql.connector.Error as err:
+        # ถ้าติด Error 1045 ให้ลองใส่ auth_plugin='mysql_native_password'
+        if err.errno == 1045:
+            try:
+                print("🔄 พยายามเชื่อมต่อด้วย auth_plugin สำรอง...")
+                connection = mysql.connector.connect(
+                    host=host,
+                    user=user,
+                    password=password,
+                    database=database,
+                    port=port,
+                    auth_plugin='mysql_native_password',
+                    connect_timeout=20
+                )
+                return connection
+            except:
+                pass
+        print(f"❌ ไม่สามารถเชื่อมต่อ MySQL ได้: {err}")
         return None
 
 def create_tables(conn):
