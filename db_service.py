@@ -3,9 +3,9 @@ import os
 from mysql.connector import Error
 
 def create_connection():
-    host = os.getenv("MYSQLHOST", "mysql.railway.internal")
+    host = os.getenv("MYSQLHOST", "mysql-k65u.railway.internal")
     user = os.getenv("MYSQLUSER", "root")
-    password = os.getenv("MYSQLPASSWORD", "Morigan3003")
+    password = os.getenv("MYSQLPASSWORD", "TpmaxCTXjtHqhDnvlUCXbNIhZlmjfnnn")
     database = os.getenv("MYSQLDATABASE", "railway")
     port = int(os.getenv("MYSQLPORT", 3306))
 
@@ -28,11 +28,11 @@ def create_connection():
             try:
                 print("🔄 พยายามเชื่อมต่อด้วย auth_plugin สำรอง...")
                 connection = mysql.connector.connect(
-                    host=host,
-                    user=user,
-                    password=password,
-                    database=database,
-                    port=port,
+                    host: 'process.env.MYSQLHOST',
+                    user: 'process.env.MYSQLUSER',
+                    password: 'process.env.MYSQLPASSWORD',
+                    database: 'process.env.MYSQLDATABASE',
+                    port: 'process.env.MYSQLPORT',
                     auth_plugin='mysql_native_password',
                     connect_timeout=20
                 )
