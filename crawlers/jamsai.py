@@ -15,53 +15,37 @@ def normalize_text(txt):
 def scrape_jamsai_detail_page(driver, book_url):
     driver.get(book_url)
     try:
+        # 1. เปลี่ยนจากรอ h1 เป็นรอแท็ก script ที่มีข้อมูล JSON แทน (โหลดเร็วและชัวร์กว่า)
         WebDriverWait(driver, 15).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, "h1.product-title"))
+            EC.presence_of_element_located((By.ID, "__NEXT_DATA__"))
         )
     except TimeoutException:
-        print(f"[*] [jamsai] Timeout ขณะรอโหลดหน้ารายละเอียด: {book_url}")
+        print(f"[*] [jamsai] Timeout: {book_url}")
         return None
 
     soup = BeautifulSoup(driver.page_source, "html.parser")
     
-    # Title
-    title_tag = soup.find("h3", class_="tp-product-details-title mt-1 mb-1")
-    title = normalize_text(title_tag.text) if title_tag else "Unknown"
-
-    # Author
-    author_tag = soup.find("h3", class_="tp-product-details-variation-title mb-4")
-    if author_tag:
-        author_span = author_tag.find("span", class_="authors-name")
-        if author_span:
-            author = normalize_text(author_span.text)
-
-    # Publisher
-    publisher = "Jamsai Publisher"
-    publisher_tag = soup.find("div", class_="product-publisher")
-    if publisher_tag:
-        publisher_span = publisher_tag.find("span", class_="publisher-name")
-        if publisher_span:
-            publisher = normalize_text(publisher_span.text)
-
-    # Price
-    price_tag = soup.find("span", class_="tp-product-details-price new-price")
-    if price_tag:
-        price_span = price_tag.find("span", class_="price-value")
-        if price_span:
-            price_text = normalize_text(price_span.text)
-            match = re.search(r'[\d,.]+', price_text)
-            if match:
-                price = int(float(match.group(0).replace(",", "")))
-
+    try:
+        # 2. ดึงก้อน JSON ออกมา (ก้อนเดียวจบ ไม่ต้องหาแท็บอื่น)
+        json_tag = soup.find('script', id='__NEXT_DATA__')
+        if not json_tag: return None
         
-    return {
-        "title": title,
-        "author": author,
-        "publisher": publisher,
-        "price": price,
-        "url": book_url,
-        "source": "jamsai"
-    }
+        js_data = json.loads(json_tag.string)
+        product = js_data['props']['pageProps']['product']
+
+        # 3. แมพข้อมูลจาก JSON เข้า Dictionary (สะอาดและแม่นยำ)
+        return {
+            "isbn": product.get('skuid', 'Unknown'), # ISBN อยู่ตรงนี้
+            "title": normalize_text(product.get('display_name')),
+            "author": product['writers'][0]['name'] if product.get('writers') else "Unknown",
+            "publisher": product['brands'][0]['name'] if product.get('brands') else "Jamsai",
+            "price": int(product.get('special_price', 0)), # ราคาขายจริง
+            "url": book_url,
+            "source": "jamsai"
+        }
+    except Exception as e:
+        print(f"[!] Error แกะ JSON บน {book_url}: {e}")
+        return None
 
 def get_all_book_urls(driver, max_pages=999):
     urls = set()

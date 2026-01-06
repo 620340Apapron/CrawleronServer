@@ -80,21 +80,7 @@ def main():
     driver.quit()
     conn.close()
 
-@app.route('/search', methods=['GET'])
-def search_books():
-    keyword = request.args.get('key', '')
-    conn = get_connection()
-    cursor = conn.cursor(dictionary=True)
 
-    sql = """
-        SELECT * FROM books 
-        WHERE title LIKE %s OR author LIKE %s OR publisher LIKE %s
-    """
-    like_keyword = f"%{keyword}%"
-    cursor.execute(sql, (like_keyword, like_keyword, like_keyword))
-    results = cursor.fetchall()
-
-    return jsonify(results)
 
 if __name__ == "__main__":
     main()
