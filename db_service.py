@@ -6,10 +6,10 @@ from mysql.connector import Error
 def create_connection():
     try:
         connection = mysql.connector.connect(
-        host=os.getenv("DB_HOST", "hopper.proxy.rlwy.net"),
+        host=os.getenv("DB_HOST", "turntable.proxy.rlwy.net"),
         port=os.getenv("DB_PORT", "3306"),
         user=os.getenv("DB_USER", "root"),
-        password=os.getenv("DB_PASSWORD", "IjxcLAzTFgXxTnMDklQKTOghdAkvLRVb"),
+        password=os.getenv("DB_PASSWORD", ""),
         database=os.getenv("DB_DATABASE", "railway")
         )
         return connection
