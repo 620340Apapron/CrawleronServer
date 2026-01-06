@@ -8,7 +8,7 @@ def create_connection():
     try:
         # ดึงค่าจาก Variables ใน Railway (ถ้าไม่มีให้ใช้ค่า Default ที่คุณใส่ไว้)
         connection = mysql.connector.connect(
-            host=os.getenv("MYSQLHOST", "shinkansen.proxy.rlwy.net"),
+            host=os.getenv("MYSQLHOST", "mysql-production-6485.up.railway.app"),
             port=os.getenv("MYSQLPORT", "14549"),
             user=os.getenv("MYSQLUSER", "bookroot"),
             password=os.getenv("MYSQLPASSWORD", "Morigan3003"),
