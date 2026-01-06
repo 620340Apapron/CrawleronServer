@@ -1,27 +1,93 @@
 import mysql.connector
 import os
+from mysql.connector import Error
 
 def create_connection():
-    
-    host = os.getenv("MYSQLHOST") 
-    user = os.getenv("MYSQLUSER")
-    password = os.getenv("MYSQLPASSWORD") 
-    database = os.getenv("MYSQLDATABASE") 
-    port = os.getenv("MYSQLPORT") 
-
+    """สร้างการเชื่อมต่อกับ MySQL บน Railway"""
     try:
+        # พยายามดึงค่าจาก Variables ของ Railway
         connection = mysql.connector.connect(
-            host="mysql.railway.internal",
-            user="root",
-            password="Morigan3003",
-            database="railway",
-            port=int(3306),
+            host=os.getenv("MYSQLHOST", "mysql.railway.internal"),
+            user=os.getenv("MYSQLUSER", "root"),
+            password=os.getenv("MYSQLPASSWORD", "Morigan3003"),
+            database=os.getenv("MYSQLDATABASE", "railway"),
+            port=int(os.getenv("MYSQLPORT", 3306)),
+            # บังคับใช้ plugin นี้เพื่อแก้ Error 1045 ใน MySQL 9
             auth_plugin='mysql_native_password',
-            connect_timeout=15
+            connect_timeout=20
         )
         if connection.is_connected():
-            print("✅ บอทเชื่อมต่อฐานข้อมูลสำเร็จ!")
+            print("✅ เชื่อมต่อฐานข้อมูลสำเร็จ")
             return connection
-    except Exception as e:
-        print(f"❌ บอทเชื่อมต่อไม่ได้: {e}")
+    except Error as err:
+        print(f"❌ Error เชื่อมต่อ DB: {err}")
         return None
+
+def create_tables(conn):
+    """สร้างตารางที่จำเป็น (ฟังก์ชันที่ Error แจ้งว่าหายไป)"""
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS raw_books (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            isbn VARCHAR(255),
+            title TEXT,
+            author TEXT,
+            publisher TEXT,
+            price DECIMAL(10, 2),
+            image_url TEXT,
+            url TEXT,
+            source TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );""")
+        
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS book_history (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            isbn VARCHAR(255),
+            title TEXT,
+            author TEXT,
+            publisher TEXT,
+            price DECIMAL(10, 2),
+            image_url TEXT,
+            url TEXT,
+            source TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );""")
+        conn.commit()
+        print("✅ สร้าง/ตรวจสอบตารางเรียบร้อย")
+    except Error as e:
+        print(f"❌ Error สร้างตาราง: {e}")
+    finally:
+        cursor.close()
+
+def insert_book(conn, book):
+    """บันทึกข้อมูลลง raw_books"""
+    cursor = conn.cursor()
+    sql = """
+    INSERT INTO raw_books (isbn, title, author, publisher, price, image_url, url, source)
+    VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+    """
+    try:
+        cursor.execute(sql, (
+            book.get('isbn'), book.get('title'), book.get('author'),
+            book.get('publisher'), book.get('price'), book.get('image_url'),
+            book.get('url'), book.get('source')
+        ))
+        conn.commit()
+    except Error as e:
+        print(f"❌ Error บันทึกหนังสือ: {e}")
+    finally:
+        cursor.close()
+
+def clear_raw_books_table(conn):
+    """ล้างตาราง raw_books"""
+    cursor = conn.cursor()
+    try:
+        cursor.execute("DELETE FROM raw_books")
+        conn.commit()
+        print("🧹 ล้างข้อมูลดิบเรียบร้อย")
+    except Error as e:
+        print(f"❌ Error ล้างตาราง: {e}")
+    finally:
+        cursor.close()
