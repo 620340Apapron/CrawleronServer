@@ -24,7 +24,7 @@ def create_tables(conn):
     try:
         sql_create_raw_books_table = """
         CREATE TABLE IF NOT EXISTS raw_books (
-            id INT AUTO_INCREMENT PRIMARY KEY,
+            id INT PRIMARY KEY,
             title TEXT NOT NULL,
             author TEXT,
             publisher TEXT,
@@ -36,7 +36,7 @@ def create_tables(conn):
         
         sql_create_history_table = """
         CREATE TABLE IF NOT EXISTS book_history (
-            id INT AUTO_INCREMENT PRIMARY KEY,
+            id INT PRIMARY KEY,
             book_id INT,
             title TEXT NOT NULL,
             author TEXT,
@@ -57,11 +57,11 @@ def insert_book(conn, book):
     """แทรกข้อมูลหนังสือใหม่ลงในตาราง raw_books"""
     cursor = conn.cursor()
     sql = """
-    INSERT INTO raw_books (title, author, publisher, price, url, source)
-    VALUES (%s, %s, %s, %s, %s, %s);
+    INSERT INTO raw_books (ibsn, title, author, publisher, price, url, source)
+    VALUES (%s, %s, %s, %s, %s, %s, %s);
     """
     try:
-        cursor.execute(sql, (book['title'], book['author'], book['publisher'], book['price'], book['url'], book['source']))
+        cursor.execute(sql, (book['ibsn'], book['title'], book['author'], book['publisher'], book['price'], book['url'], book['source']))
         conn.commit()
     except mysql.connector.Error as e:
         print(f"Error inserting book: {e}")
