@@ -1,7 +1,7 @@
 selenium
 webdriver-manager
 beautifulsoup4
-mysql-connector-python
+mysql-connector-python>=8.0.33
 requests
 Pillow
 supabase
