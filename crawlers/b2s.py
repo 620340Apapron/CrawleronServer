@@ -49,7 +49,10 @@ def scrape_b2s_detail_page(driver, book_url):
         match = re.search(r'[\d,.]+', price_text)
         if match:
             price = int(float(match.group(0).replace(",", "")))
-    
+
+    image_tag = soup.find("meta", attrs={"property": "og:image"})  
+    image_url = image_tag.get("content")
+
     return {
         "isbn": isbn,
         "title": title,
