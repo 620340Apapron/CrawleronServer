@@ -60,6 +60,9 @@ def scrape_amarin_detail_page(driver, book_url):
         m = re.search(r'[\d,.]+', p_tag.text)
         if m:
             price = m.group(0).replace(",", "")
+
+    image_url_tag = soup.find("meta", attrs={"property": "og:image"})  
+    image_url = image_url_tag.get("content")
     
     try:
         price = int(float(price))

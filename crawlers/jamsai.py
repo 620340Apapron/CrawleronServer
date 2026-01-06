@@ -31,19 +31,29 @@ def scrape_jamsai_detail_page(driver, book_url):
         
         js_data = json.loads(json_tag.string)
         product = js_data['props']['pageProps']['product']
+        
+        isbn = product.get('skuid', 'Unknown')
+
+        rel_path = product.get('image_path')
+        if rel_path:
+            raw_image_url = f"https://images.www.jamsai.com/{rel_path}"
+        else:
+            raw_image_url = ""
+
+        final_image_url = upload_book_cover(raw_image_url, isbn)
 
         return {
-            "isbn": product.get('skuid', 'Unknown'), 
+            "isbn": isbn, 
             "title": normalize_text(product.get('display_name')),
             "author": product['writers'][0]['name'] if product.get('writers') else "Unknown",
             "publisher": product['brands'][0]['name'] if product.get('brands') else "Jamsai",
             "price": int(product.get('special_price', 0)),
-            "image_url": image_url,
+            "image_url": final_image_url,
             "url": book_url,
             "source": "jamsai"
         }
     except Exception as e:
-        print(f"[!] Error แกะ JSON บน {book_url}: {e}")
+        print(f"❌ [jamsai] Error parsing JSON: {e}")
         return None
 
 def get_all_book_urls(driver, max_pages=999):
