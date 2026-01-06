@@ -9,7 +9,7 @@ def update_history(conn):
     cursor = conn.cursor()
     
     # ดึงข้อมูลทั้งหมดจาก raw_books
-    cursor.execute("SELECT title, author, publisher, price, url, source FROM raw_books")
+    cursor.execute("SELECT ibsn,title, author, publisher, price, url, source FROM raw_books")
     raw_books = cursor.fetchall()
     
     if not raw_books:
@@ -22,11 +22,12 @@ def update_history(conn):
     # สร้าง Dictionary เพื่อเก็บข้อมูลล่าสุดของหนังสือแต่ละเล่ม
     book_info = {}
     for book in raw_books:
-        title, author, publisher, price, url, source = book
+        ibsn, title, author, publisher, price, url, source = book
         # ใช้ (title, publisher) เป็น key เพื่อหาหนังสือซ้ำ
-        key = (title, publisher)
+        key = (ibsn, title)
         if key not in book_info:
             book_info[key] = {
+                'ibsn': ibsn,
                 'title': title,
                 'author': author,
                 'publisher': publisher,
@@ -37,6 +38,7 @@ def update_history(conn):
     
     # นำข้อมูลที่ผ่านการกรองแล้วไปอัปเดตใน book_history
     for key, book in book_info.items():
+        ibsn = book['ibsn']
         title = book['title']
         publisher = book['publisher']
         price = book['price']
@@ -49,7 +51,7 @@ def update_history(conn):
             WHERE title = %s AND publisher = %s
             ORDER BY created_at DESC
             LIMIT 1
-        """, (title, publisher))
+        """, (ibsn, title))
         
         existing_book = cursor.fetchone()
         
@@ -57,16 +59,16 @@ def update_history(conn):
             book_id, existing_price = existing_book
             if existing_price != price:
                 cursor.execute("""
-                    INSERT INTO book_history (book_id, title, author, publisher, price, url, source)
+                    INSERT INTO book_history (ibsn, title, author, publisher, price, url, source)
                     VALUES (%s, %s, %s, %s, %s, %s, %s)
-                """, (book_id, title, author, publisher, price, url, source))
+                """, (ibsn, title, author, publisher, price, url, source))
                 conn.commit()
                 print(f"✅ อัปเดตราคาหนังสือ: {title} จาก {existing_price} เป็น {price}")
         else:
             cursor.execute("""
-                INSERT INTO book_history (book_id, title, author, publisher, price, url, source)
+                INSERT INTO book_history (ibsn, title, author, publisher, price, url, source)
                 VALUES (%s, %s, %s, %s, %s, %s, %s)
-            """, (None, title, author, publisher, price, url, source))
+            """, (ibsn, title, author, publisher, price, url, source))
             book_id = cursor.lastrowid
             conn.commit()
             cursor.execute("UPDATE book_history SET book_id = %s WHERE id = %s", (book_id, book_id))
