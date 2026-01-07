@@ -52,6 +52,7 @@ def scrape_b2s_detail_page(driver, book_url):
 
     image_tag = soup.find("meta", attrs={"property": "og:image"})  
     image_url = image_tag.get("content")
+    final_image_url = upload_book_cover(image_url, isbn)
 
     return {
         "isbn": isbn,
@@ -59,7 +60,7 @@ def scrape_b2s_detail_page(driver, book_url):
         "author": author,
         "publisher": publisher,
         "price": price,
-        "image_url": image_url,
+        "image_url": final_image_url,
         "url": book_url,
         "source": "b2s"
     }
