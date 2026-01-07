@@ -88,7 +88,7 @@ def get_all_book_urls(driver, max_pages=999):
                 urls.add(href)
     return list(urls)
 
-def scrape_jamsai_all_pages(driver, conn, max_pages=999):
+def scrape_jamsai_all_pages(driver, conn, max_pages=10):
     all_products = []
     
     all_urls = get_all_book_urls(driver, max_pages)

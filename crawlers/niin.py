@@ -22,7 +22,6 @@ def scrape_naiin_detail_page(driver, conn, book_url): # เพิ่ม conn เ
 
     soup = BeautifulSoup(driver.page_source, "html.parser")
     
-    # --- ดึงข้อมูลเหมือนเดิม ---
     isbn_tag = soup.find("meta", attrs={"property": "book:isbn"})
     isbn = isbn_tag.get("content") if isbn_tag else "Unknown"
 
@@ -47,7 +46,6 @@ def scrape_naiin_detail_page(driver, conn, book_url): # เพิ่ม conn เ
     final_image_url = ""
     if image_tag:
         raw_img_url = image_tag.get("content")
-        # เรียกใช้ image_service
         final_image_url = upload_book_cover(raw_img_url, isbn)
     else:
         print(f"⚠️ [naiin] ไม่พบรูปภาพสำหรับ ISBN: {isbn}")
@@ -69,7 +67,7 @@ def scrape_naiin_detail_page(driver, conn, book_url): # เพิ่ม conn เ
     
     return book_data
 
-def scrape_naiin_all_pages(driver, conn, max_pages=999):
+def scrape_naiin_all_pages(driver, conn, max_pages=10):
     all_urls = get_all_book_urls(driver, max_pages)
     for i, url in enumerate(all_urls):
         print(f"--- [naiin] เล่มที่ {i+1}/{len(all_urls)} ---")
@@ -87,8 +85,7 @@ def get_all_book_urls(driver, max_pages=999):
             driver.get(target_url)
 
             time.sleep(2) 
-            
-            # หาลิงก์สินค้า
+
             links = driver.find_elements(By.CSS_SELECTOR, "a.item-name")
             
             if not links:

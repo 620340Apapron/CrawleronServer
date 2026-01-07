@@ -85,7 +85,7 @@ def scrape_amarin_detail_page(driver, conn, book_url):
     
     return book_data
 
-def scrape_amarin_all_pages(driver, conn, max_pages=999):
+def scrape_amarin_all_pages(driver, conn, max_pages=10):
     all_products = []
     
     all_urls = get_all_book_urls(driver, max_pages)

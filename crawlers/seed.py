@@ -72,7 +72,7 @@ def scrape_seed_detail_page(driver, conn, book_url):
     
     return book_data
 
-def get_all_book_urls(driver, max_pages=999):
+def get_all_book_urls(driver, max_pages=10):
     urls = set()
     # URL สำหรับหนังสือเล่ม (Physical Books)
     base_url = "https://www.se-ed.com/book-cat.book?filter.productTypes=PRODUCT_TYPE_BOOK_PHYSICAL&page="
