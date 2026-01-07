@@ -76,7 +76,6 @@ def insert_book(conn, book):
             book.get('title', 'Unknown'),
             book.get('author', 'Unknown'),
             book.get('publisher', 'Unknown'),
-            # แปลงเป็น float เพื่อให้เข้ากับ DECIMAL(10,2)
             float(book.get('price', 0) or 0), 
             book.get('image_url', ''),
             book.get('url', ''),

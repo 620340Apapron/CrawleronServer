@@ -13,54 +13,41 @@ def normalize_text(txt):
     txt = txt.replace("Books | ร้านหนังสือนายอินทร์", "")
     return ' '.join(txt.replace('"', '').strip().split())
 
-def scrape_naiin_detail_page(driver, conn, book_url):
+def scrape_naiin_detail_page(driver, conn, book_url): # เพิ่ม conn เข้ามา
     driver.get(book_url)
     try:
-        # รอแค่ให้หน้าเว็บโหลดเสร็จ
         WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "//meta[@property='book:isbn']")))
     except:
-        print(f"[*] [naiin] ไม่สามารถโหลดหน้าหรือหา ISBN ไม่เจอ: {book_url}")
         return None
 
     soup = BeautifulSoup(driver.page_source, "html.parser")
     
-    # ISBN
+    # --- ดึงข้อมูลเหมือนเดิม ---
     isbn_tag = soup.find("meta", attrs={"property": "book:isbn"})
     isbn = isbn_tag.get("content") if isbn_tag else "Unknown"
 
-    # Title 
     title_tag = soup.find("meta", attrs={"property": "og:title"})
     title = normalize_text(title_tag.get("content")) if title_tag else "Unknown"
 
-    # Price
     price = 0
     price_tag = soup.find("meta", attrs={"property": "og:product:sale_price:amount"})
-    if not price_tag: # ถ้าไม่มีราคาลด ให้หาราคาเต็ม
-        price_tag = soup.find("meta", attrs={"property": "og:product:price:amount"})
-    
-    if price_tag:
-        price = int(float(price_tag.get("content")))
+    if not price_tag: price_tag = soup.find("meta", attrs={"property": "og:product:price:amount"})
+    if price_tag: price = int(float(price_tag.get("content")))
 
-    # Author & Publisher
-    author = "Unknown"
-    publisher = "Unknown"
+    author, publisher = "Unknown", "Unknown"
     desc_tag = soup.find("meta", attrs={"name": "description"})
     if desc_tag:
         desc_text = desc_tag.get("content")
-        # ใช้ Regex ดึงคำที่อยู่หลัง "ผู้เขียน" และก่อน "สำนักพิมพ์"
         author_match = re.search(r"ผู้เขียน\s+(.*?)\s+สำนักพิมพ์", desc_text)
-        if author_match:
-            author = author_match.group(1).strip()
-        
-        # ดึงคำที่อยู่หลัง "สำนักพิมพ์"
+        if author_match: author = author_match.group(1).strip()
         pub_match = re.search(r"สำนักพิมพ์\s+(.*)", desc_text)
-        if pub_match:
-            publisher = pub_match.group(1).strip()
+        if pub_match: publisher = pub_match.group(1).strip()
 
-    #img
+    # จัดการรูปภาพ
     raw_img_url = soup.find("meta", attrs={"property": "og:image"}).get("content")
     final_image_url = upload_book_cover(raw_img_url, isbn)
 
+    # --- ส่วนการบันทึกข้อมูล (ย้ายมาไว้ตรงนี้) ---
     book_data = {
         "isbn": isbn,
         "title": title,
@@ -71,8 +58,18 @@ def scrape_naiin_detail_page(driver, conn, book_url):
         "url": book_url,
         "source": "naiin"
     }
-    insert_book(conn, book_data)
+
+    # เรียกใช้ฟังก์ชันบันทึกทันที
+    insert_book(conn, book_data) 
+    
     return book_data
+
+def scrape_naiin_all_pages(driver, conn, max_pages=999):
+    all_urls = get_all_book_urls(driver, max_pages)
+    for i, url in enumerate(all_urls):
+        print(f"--- [naiin] เล่มที่ {i+1}/{len(all_urls)} ---")
+        # ส่ง conn เข้าไปด้วย
+        scrape_naiin_detail_page(driver, conn, url)
 
 def get_all_book_urls(driver, max_pages=999):
     urls = set()
@@ -103,12 +100,3 @@ def get_all_book_urls(driver, max_pages=999):
             print(f"[*] [naiin] หมวด {code} หน้า {p} - เจอใหม่ {len(urls) - count_before} ลิงก์ (รวมสะสม {len(urls)})")
             
     return list(urls)
-
-def scrape_naiin_all_pages(driver, conn, max_pages=999):
-    all_urls = get_all_book_urls(driver, max_pages)
-    for i, url in enumerate(all_urls):
-        print(f"--- [naiin] เล่มที่ {i+1}/{len(all_urls)} ---")
-        book_data = scrape_naiin_detail_page(driver, url)
-        if book_data:
-            print(f"ได้ข้อมูล: {book_data['title']} | ISBN: {book_data['isbn']} | ราคา: {book_data['price']}")
-            insert_book(conn, book_data)
