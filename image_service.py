@@ -4,63 +4,45 @@ import requests
 from PIL import Image
 from supabase import create_client
 
-# ดึงค่า Config จาก Environment Variables (ตั้งค่าใน Railway)
+# 1. ดึงค่าจาก Environment Variable
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 
-# ตรวจสอบว่ามีค่าครบไหมก่อนเริ่มทำงาน
-if SUPABASE_URL and SUPABASE_KEY:
-    supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
-else:
+# 2. ตรวจสอบเงื่อนไข: ถ้าไม่มีค่า หรือค่าไม่ใช่ URL ให้ข้ามการต่อ Supabase
+if not SUPABASE_URL or not SUPABASE_URL.startswith("http"):
+    print("⚠️ [Warning] SUPABASE_URL ไม่ถูกต้องหรือว่างเปล่า! ระบบจะข้ามการอัปโหลดรูปภาพ")
     supabase = None
-    print("⚠️ Warning: ไม่พบ SUPABASE_URL หรือ SUPABASE_KEY บอทจะเก็บแค่ลิงก์รูปเดิม")
+else:
+    try:
+        # สร้าง Client เฉพาะเมื่อค่า URL ถูกต้องเท่านั้น
+        supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+        print("✅ เชื่อมต่อ Supabase Storage สำเร็จ")
+    except Exception as e:
+        print(f"❌ ไม่สามารถสร้าง Supabase Client ได้: {e}")
+        supabase = None
 
 def upload_book_cover(raw_image_url, isbn):
-    """
-    หน้าที่: ดาวน์โหลดรูป -> ย่อขนาด -> แปลงเป็น WebP -> อัปโหลดขึ้น Supabase
-    """
-    if not supabase or not raw_image_url:
-        return raw_image_url # คืนค่าเดิมถ้าไม่ได้ตั้งค่า Supabase
+    # ถ้าไม่มี Supabase ให้ส่งลิงก์เดิมกลับไปเลย บอทจะได้ไม่พัง
+    if supabase is None or not raw_image_url:
+        return raw_image_url
 
     try:
-        # 1. ดาวน์โหลดรูปภาพจากต้นทาง (นายอินทร์/แจ่มใส/SE-ED)
-        response = requests.get(raw_image_url, timeout=10)
-        if response.status_code != 200:
-            return raw_image_url
-
-        # 2. ใช้ Pillow เปิดรูปภาพ
-        img = Image.open(io.BytesIO(response.content))
+        # ... (โค้ดโหลดรูปและบีบอัดรูปภาพเหมือนเดิม) ...
+        # [ย่อส่วนโค้ดเพื่อความกระชับ]
+        resp = requests.get(raw_image_url, timeout=10)
+        img = Image.open(io.BytesIO(resp.content)).convert("RGB")
+        img.thumbnail((400, 600))
         
-        # แปลงเป็น RGB (กัน Error กรณีไฟล์เป็น PNG หรือมี Alpha channel)
-        if img.mode in ("RGBA", "P"):
-            img = img.convert("RGB")
-
-        # 3. ย่อขนาด (Resize) 
-        # หน้าปกหนังสือใน App กว้างแค่ 300-400px ก็ชัดมากแล้ว
-        img.thumbnail((400, 600)) 
-
-        # 4. บีบอัดและแปลงเป็นไฟล์ WebP (ประหยัดพื้นที่ที่สุด)
-        output_buffer = io.BytesIO()
-        # quality=80 คือจุดที่สมดุลระหว่างความชัดและขนาดไฟล์
-        img.save(output_buffer, format="WEBP", quality=80)
-        image_bytes = output_buffer.getvalue()
-
-        # 5. อัปโหลดไปที่ Supabase Storage
-        # ตั้งชื่อไฟล์ตาม ISBN (เช่น 9786161885700.webp)
+        buffer = io.BytesIO()
+        img.save(buffer, format="WEBP", quality=80)
+        
         file_path = f"covers/{isbn}.webp"
-        bucket_name = "book-images" # ชื่อ Bucket ที่คุณสร้างใน Supabase
-
-        # อัปโหลดไฟล์ (ถ้ามีไฟล์เดิมอยู่แล้วจะเขียนทับด้วย upsert)
-        supabase.storage.from_(bucket_name).upload(
+        supabase.storage.from_("book-images").upload(
             path=file_path,
-            file=image_bytes,
+            file=buffer.getvalue(),
             file_options={"content-type": "image/webp", "x-upsert": "true"}
         )
-
-        # 6. รับ Public URL เพื่อส่งกลับไปเก็บใน MySQL
-        public_url = supabase.storage.from_(bucket_name).get_public_url(file_path)
-        return public_url
-
+        return supabase.storage.from_("book-images").get_public_url(file_path)
     except Exception as e:
-        print(f"❌ Image Service Error: {e}")
-        return raw_image_url # ถ้าผิดพลาด ให้ใช้ลิงก์เดิมไปก่อน
+        print(f"❌ Image Upload Error: {e}")
+        return raw_image_url
