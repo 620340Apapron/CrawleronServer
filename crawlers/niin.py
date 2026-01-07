@@ -72,7 +72,7 @@ def scrape_naiin_detail_page(driver, book_url):
         "source": "naiin"
     }
 
-def get_all_book_urls(driver, max_pages=5):
+def get_all_book_urls(driver, max_pages=999):
     urls = set()
     
     for code in range(1, 36): 
@@ -80,17 +80,14 @@ def get_all_book_urls(driver, max_pages=5):
         print(f"\n[*] [naiin] กำลังเริ่มเก็บหมวดหมู่รหัส: {code}")
 
         for p in range(1, max_pages + 1):
-            # นำ base_url ที่สร้างมาต่อกับ &page={p}
             target_url = f"{base_url}&page={p}"
             driver.get(target_url)
-            
-            # หน่วงเวลา
+
             time.sleep(2) 
             
             # หาลิงก์สินค้า
             links = driver.find_elements(By.CSS_SELECTOR, "a.item-name")
             
-            # ถ้าหน้าจอนี้ไม่มีสินค้า (links ว่างเปล่า) ให้ break ออกจากลูปหน้า (ไปหมวดถัดไป)
             if not links:
                 print(f"[*] [naiin] รหัสหมวด {code} หมดที่หน้า {p-1}")
                 break
@@ -105,7 +102,7 @@ def get_all_book_urls(driver, max_pages=5):
             
     return list(urls)
 
-def scrape_naiin_all_pages(driver, conn, max_pages=5):
+def scrape_naiin_all_pages(driver, conn, max_pages=999):
     all_urls = get_all_book_urls(driver, max_pages)
     for i, url in enumerate(all_urls):
         print(f"--- [naiin] เล่มที่ {i+1}/{len(all_urls)} ---")
