@@ -40,7 +40,6 @@ def create_tables(conn):
             image_url TEXT,
             url TEXT,
             source TEXT,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );""")
         
         cursor.execute("""
@@ -54,7 +53,6 @@ def create_tables(conn):
             image_url TEXT,
             url TEXT,
             source TEXT,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );""")
         conn.commit()
         print("✅ สร้าง/ตรวจสอบตารางเรียบร้อย")
