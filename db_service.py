@@ -22,20 +22,6 @@ def create_connection():
             print("✅ เชื่อมต่อฐานข้อมูลสำเร็จ")
             return connection
     except mysql.connector.Error as err:
-        if err.errno == 1045:
-            try:
-                print("🔄 พยายามเชื่อมต่อด้วย auth_plugin สำรอง...")
-                connection = mysql.connector.connect(
-                    host=host,
-                    user=user,
-                    password=password,
-                    database=database,
-                    port=port,
-                    connect_timeout=20
-                )
-                return connection
-            except:
-                pass
         print(f"❌ ไม่สามารถเชื่อมต่อ MySQL ได้: {err}")
         return None
 
