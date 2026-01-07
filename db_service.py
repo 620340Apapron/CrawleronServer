@@ -71,12 +71,21 @@ def insert_book(conn, book):
     VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
     """
     try:
-        cursor.execute(sql, (
-            book.get('isbn'), book.get('title'), book.get('author'),
-            book.get('publisher'), book.get('price'), book.get('image_url'),
-            book.get('url'), book.get('source')
-        ))
+        data_tuple = (
+            book.get('isbn', 'Unknown'),
+            book.get('title', 'Unknown'),
+            book.get('author', 'Unknown'),
+            book.get('publisher', 'Unknown'),
+            # แปลงเป็น float เพื่อให้เข้ากับ DECIMAL(10,2)
+            float(book.get('price', 0) or 0), 
+            book.get('image_url', ''),
+            book.get('url', ''),
+            book.get('source', 'Unknown')
+        )
+        
+        cursor.execute(sql, data_tuple)
         conn.commit()
+        print(f"   💾 บันทึกลง MySQL สำเร็จ: {book.get('title')[:30]}...")
     except Error as e:
         print(f"❌ Error บันทึกหนังสือ: {e}")
     finally:
