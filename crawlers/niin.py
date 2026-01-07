@@ -13,7 +13,7 @@ def normalize_text(txt):
     txt = txt.replace("Books | ร้านหนังสือนายอินทร์", "")
     return ' '.join(txt.replace('"', '').strip().split())
 
-def scrape_naiin_detail_page(driver, book_url):
+def scrape_naiin_detail_page(driver, conn, book_url):
     driver.get(book_url)
     try:
         # รอแค่ให้หน้าเว็บโหลดเสร็จ
@@ -61,7 +61,7 @@ def scrape_naiin_detail_page(driver, book_url):
     raw_img_url = soup.find("meta", attrs={"property": "og:image"}).get("content")
     final_image_url = upload_book_cover(raw_img_url, isbn)
 
-    return {
+    book_data = {
         "isbn": isbn,
         "title": title,
         "author": author,
@@ -71,6 +71,8 @@ def scrape_naiin_detail_page(driver, book_url):
         "url": book_url,
         "source": "naiin"
     }
+    insert_book(conn, book_data)
+    return book_data
 
 def get_all_book_urls(driver, max_pages=999):
     urls = set()
