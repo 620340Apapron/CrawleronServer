@@ -3,14 +3,13 @@ import os
 from mysql.connector import Error
 
 def create_connection():
-    host = os.getenv("MYSQLHOST", "trolley.proxy.rlwy.net")
+    host = os.getenv("MYSQLHOST", "mysql-k65u.railway.internal")
     user = os.getenv("MYSQLUSER", "root")
     password = os.getenv("MYSQLPASSWORD", "TpmaxCTXjtHqhDnvlUCXbNIhZlmjfnnn")
     database = os.getenv("MYSQLDATABASE", "railway")
     port = int(os.getenv("MYSQLPORT", 3306))
 
     try:
-        # ลองเชื่อมต่อแบบปกติก่อน (MySQL 9 มักใช้ caching_sha2_password)
         connection = mysql.connector.connect(
             host=host,
             user=user,
@@ -23,7 +22,6 @@ def create_connection():
             print("✅ เชื่อมต่อฐานข้อมูลสำเร็จ")
             return connection
     except mysql.connector.Error as err:
-        # ถ้าติด Error 1045 ให้ลองใส่ auth_plugin='mysql_native_password'
         if err.errno == 1045:
             try:
                 print("🔄 พยายามเชื่อมต่อด้วย auth_plugin สำรอง...")
