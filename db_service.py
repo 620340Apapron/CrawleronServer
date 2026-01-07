@@ -31,8 +31,8 @@ def create_tables(conn):
     try:
         cursor.execute("""
         CREATE TABLE IF NOT EXISTS raw_books (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            isbn VARCHAR(255),
+            id INT AUTO_INCREMENT ,
+            isbn VARCHAR(255) PRIMARY KEY,
             title TEXT,
             author TEXT,
             publisher TEXT,
@@ -44,8 +44,8 @@ def create_tables(conn):
         
         cursor.execute("""
         CREATE TABLE IF NOT EXISTS book_history (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            isbn VARCHAR(255),
+            id INT AUTO_INCREMENT ,
+            isbn VARCHAR(255) PRIMARY KEY,
             title TEXT,
             author TEXT,
             publisher TEXT,
