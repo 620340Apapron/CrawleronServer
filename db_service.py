@@ -3,7 +3,7 @@ import os
 from mysql.connector import Error
 
 def create_connection():
-    host = os.getenv("MYSQLHOST", "mysql-k65u.railway.internal")
+    host = os.getenv("MYSQLHOST", "trolley.proxy.rlwy.net")
     user = os.getenv("MYSQLUSER", "root")
     password = os.getenv("MYSQLPASSWORD", "TpmaxCTXjtHqhDnvlUCXbNIhZlmjfnnn")
     database = os.getenv("MYSQLDATABASE", "railway")
