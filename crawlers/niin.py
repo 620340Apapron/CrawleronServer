@@ -43,8 +43,14 @@ def scrape_naiin_detail_page(driver, conn, book_url): # เพิ่ม conn เ
         pub_match = re.search(r"สำนักพิมพ์\s+(.*)", desc_text)
         if pub_match: publisher = pub_match.group(1).strip()
 
-    raw_img_url = soup.find("meta", attrs={"property": "og:image"}).get("content")
-    final_image_url = upload_book_cover(raw_img_url, isbn)
+    image_tag = soup.find("meta", attrs={"property": "og:image"})
+    final_image_url = ""
+    if image_tag:
+        raw_img_url = image_tag.get("content")
+        # เรียกใช้ image_service
+        final_image_url = upload_book_cover(raw_img_url, isbn)
+    else:
+        print(f"⚠️ [naiin] ไม่พบรูปภาพสำหรับ ISBN: {isbn}")
 
     book_data = {
         "isbn": isbn,
@@ -56,8 +62,10 @@ def scrape_naiin_detail_page(driver, conn, book_url): # เพิ่ม conn เ
         "url": book_url,
         "source": "naiin"
     }
-
-    insert_book(conn, book_data) 
+    if conn and conn.is_connected():
+        insert_book(conn, book_data) 
+    else:
+        print("❌ [naiin] การเชื่อมต่อฐานข้อมูลหลุด ไม่สามารถบันทึกได้")
     
     return book_data
 

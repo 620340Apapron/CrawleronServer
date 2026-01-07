@@ -65,28 +65,34 @@ def create_tables(conn):
 
 def insert_book(conn, book):
     """บันทึกข้อมูลลง raw_books"""
+    if conn is None:
+        print("❌ [DB Error] ไม่มี Object การเชื่อมต่อ (Connection is None)")
+        return
+
     cursor = conn.cursor()
     sql = """
     INSERT INTO raw_books (isbn, title, author, publisher, price, image_url, url, source)
     VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
     """
     try:
+        # มั่นใจว่าข้อมูลทุกตัวเป็นชนิดที่ถูกต้อง
         data_tuple = (
-            book.get('isbn', 'Unknown'),
-            book.get('title', 'Unknown'),
-            book.get('author', 'Unknown'),
-            book.get('publisher', 'Unknown'),
+            str(book.get('isbn', 'Unknown')),
+            str(book.get('title', 'Unknown')),
+            str(book.get('author', 'Unknown')),
+            str(book.get('publisher', 'Unknown')),
             float(book.get('price', 0) or 0), 
-            book.get('image_url', ''),
-            book.get('url', ''),
-            book.get('source', 'Unknown')
+            str(book.get('image_url', '')),
+            str(book.get('url', '')),
+            str(book.get('source', 'Unknown'))
         )
         
         cursor.execute(sql, data_tuple)
-        conn.commit()
-        print(f"   💾 บันทึกลง MySQL สำเร็จ: {book.get('title')[:30]}...")
+        conn.commit() # ยืนยันการบันทึก
+        print(f"   💾 บันทึกสำเร็จ: {book.get('title')[:30]}")
     except Error as e:
-        print(f"❌ Error บันทึกหนังสือ: {e}")
+        print(f"❌ [MySQL Error] บันทึกไม่สำเร็จ: {e}")
+        conn.rollback() # ย้อนกลับกรณีพัง
     finally:
         cursor.close()
 
