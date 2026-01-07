@@ -33,7 +33,7 @@ def get_driver():
     return webdriver.Chrome(service=service, options=options)
 
 def main():
-    run_emergency_fix() 
+    #run_emergency_fix() 
     # เชื่อมต่อฐานข้อมูล
     conn = create_connection()
     if conn is None:
