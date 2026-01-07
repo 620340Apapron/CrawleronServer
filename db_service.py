@@ -1,7 +1,6 @@
 import mysql.connector
 import os
-32
-3
+from mysql.connector import Error
 
 def create_connection():
     host = os.getenv("MYSQLHOST", "mysql-k65u.railway.internal")
@@ -27,12 +26,11 @@ def create_connection():
             try:
                 print("🔄 พยายามเชื่อมต่อด้วย auth_plugin สำรอง...")
                 connection = mysql.connector.connect(
-                    host: "mysql-k65u.railway.internal",
-                    user: "root",
-                    password: "TpmaxCTXjtHqhDnvlUCXbNIhZlmjfnnn",
-                    database: "railway",
-                    port: "3306",
-                    auth_plugin='mysql_native_password',
+                    host=host,
+                    user=user,
+                    password=password,
+                    database=database,
+                    port=port,
                     connect_timeout=20
                 )
                 return connection
