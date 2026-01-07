@@ -11,7 +11,7 @@ def normalize_text(txt):
     if not txt: return ""
     return ' '.join(txt.replace('"', '').strip().split())
 
-def scrape_seed_detail_page(driver, book_url):
+def scrape_seed_detail_page(driver, conn, book_url):
     driver.get(book_url)
     try:
         WebDriverWait(driver, 15).until(EC.presence_of_element_located((By.ID, "__next")))
@@ -57,7 +57,7 @@ def scrape_seed_detail_page(driver, book_url):
     if raw_img_url:
         final_image_url = upload_book_cover(raw_img_url, isbn)
         
-    return {
+    book_data = {
         "isbn": isbn,
         "title": title,
         "author": author,
@@ -65,8 +65,12 @@ def scrape_seed_detail_page(driver, book_url):
         "price": price,
         "image_url": final_image_url,
         "url": book_url,
-        "source": "se-ed"
+        "source": "naiin"
     }
+
+    insert_book(conn, book_data) 
+    
+    return book_data
 
 def get_all_book_urls(driver, max_pages=999):
     urls = set()

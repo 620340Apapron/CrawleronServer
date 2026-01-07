@@ -13,7 +13,7 @@ def normalize_text(txt):
         return ""
     return ' '.join(txt.replace('"', '').strip().split())
 
-def scrape_jamsai_detail_page(driver, book_url):
+def scrape_jamsai_detail_page(driver, conn, book_url):
     driver.get(book_url)
     try:
         WebDriverWait(driver, 15).until(
@@ -41,8 +41,8 @@ def scrape_jamsai_detail_page(driver, book_url):
             raw_image_url = ""
 
         final_image_url = upload_book_cover(raw_image_url, isbn)
-
-        return {
+    
+        book_data  = {
             "isbn": isbn, 
             "title": normalize_text(product.get('display_name')),
             "author": product['writers'][0]['name'] if product.get('writers') else "Unknown",
@@ -52,6 +52,9 @@ def scrape_jamsai_detail_page(driver, book_url):
             "url": book_url,
             "source": "jamsai"
         }
+        insert_book(conn, book_data) 
+        return book_data
+    
     except Exception as e:
         print(f"❌ [jamsai] Error parsing JSON: {e}")
         return None

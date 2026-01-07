@@ -32,7 +32,7 @@ def get_all_book_urls(driver, max_pages=999):
                 urls.add(href)
     return list(urls)
 
-def scrape_amarin_detail_page(driver, book_url):
+def scrape_amarin_detail_page(driver, conn, book_url):
     driver.get(book_url)
     try:
         WebDriverWait(driver, 15).until(
@@ -70,7 +70,7 @@ def scrape_amarin_detail_page(driver, book_url):
     except (ValueError, TypeError):
         price = 0
 
-    return {
+    book_data = {
         "isbn": isbn,
         "title": title,
         "author": author,
@@ -78,8 +78,12 @@ def scrape_amarin_detail_page(driver, book_url):
         "price": price,
         "image_url": final_image_url,
         "url": book_url,
-        "source": "amarin"
+        "source": "naiin"
     }
+
+    insert_book(conn, book_data) 
+    
+    return book_data
 
 def scrape_amarin_all_pages(driver, conn, max_pages=999):
     all_products = []

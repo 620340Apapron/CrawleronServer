@@ -13,7 +13,7 @@ def normalize_text(txt):
         return ""
     return ' '.join(txt.replace('"', '').strip().split())
 
-def scrape_b2s_detail_page(driver, book_url):
+def scrape_b2s_detail_page(driver, conn, book_url):
     driver.get(book_url)
     try:
         WebDriverWait(driver, 15).until(
@@ -54,7 +54,7 @@ def scrape_b2s_detail_page(driver, book_url):
     image_url = image_tag.get("content")
     final_image_url = upload_book_cover(image_url, isbn)
 
-    return {
+    book_data = {
         "isbn": isbn,
         "title": title,
         "author": author,
@@ -62,8 +62,12 @@ def scrape_b2s_detail_page(driver, book_url):
         "price": price,
         "image_url": final_image_url,
         "url": book_url,
-        "source": "b2s"
+        "source": "naiin"
     }
+
+    insert_book(conn, book_data) 
+    
+    return book_data
 
 def get_all_book_urls(driver, max_pages=999):
     urls = set()

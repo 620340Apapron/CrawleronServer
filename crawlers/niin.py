@@ -43,11 +43,9 @@ def scrape_naiin_detail_page(driver, conn, book_url): # เพิ่ม conn เ
         pub_match = re.search(r"สำนักพิมพ์\s+(.*)", desc_text)
         if pub_match: publisher = pub_match.group(1).strip()
 
-    # จัดการรูปภาพ
     raw_img_url = soup.find("meta", attrs={"property": "og:image"}).get("content")
     final_image_url = upload_book_cover(raw_img_url, isbn)
 
-    # --- ส่วนการบันทึกข้อมูล (ย้ายมาไว้ตรงนี้) ---
     book_data = {
         "isbn": isbn,
         "title": title,
@@ -59,7 +57,6 @@ def scrape_naiin_detail_page(driver, conn, book_url): # เพิ่ม conn เ
         "source": "naiin"
     }
 
-    # เรียกใช้ฟังก์ชันบันทึกทันที
     insert_book(conn, book_data) 
     
     return book_data
@@ -68,7 +65,6 @@ def scrape_naiin_all_pages(driver, conn, max_pages=999):
     all_urls = get_all_book_urls(driver, max_pages)
     for i, url in enumerate(all_urls):
         print(f"--- [naiin] เล่มที่ {i+1}/{len(all_urls)} ---")
-        # ส่ง conn เข้าไปด้วย
         scrape_naiin_detail_page(driver, conn, url)
 
 def get_all_book_urls(driver, max_pages=999):
