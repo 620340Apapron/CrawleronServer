@@ -1,7 +1,10 @@
 import re
 from bs4 import BeautifulSoup
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import TimeoutException
 from db_service import insert_book
-from image_service import upload_book_cover
 from utils import extract_isbn
 
 def normalize_text(txt):
