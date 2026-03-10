@@ -19,7 +19,7 @@ def scrape_amarin_all_pages(driver, conn, max_pages=10):
 
     base_url = "https://amarinbooks.com/product-category/book/page/{}/"
 
-    for page in range(1, max_pages + 1):
+    for page in range(1,21):
 
         url = base_url.format(page)
 

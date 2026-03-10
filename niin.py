@@ -19,7 +19,7 @@ def scrape_naiin_all_pages(driver, conn, max_pages=10):
 
     base_url = "https://www.naiin.com/category?page={}"
 
-    for page in range(1, max_pages + 1):
+    for page in range(1,21):
 
         url = base_url.format(page)
 
