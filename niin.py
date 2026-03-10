@@ -25,6 +25,9 @@ def scrape_naiin_all_pages(driver, conn, max_pages=10):
         print("เปิดหน้า:", url)
 
         driver.get(url)
+        WebDriverWait(driver,10).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR,"a.product-item-link"))
+        )
 
         soup = BeautifulSoup(driver.page_source, "html.parser")
 

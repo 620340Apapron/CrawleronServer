@@ -24,6 +24,9 @@ def scrape_jamsai_all_pages(driver, conn, max_pages=5):
         print("กำลังเปิด:", url)
 
         driver.get(url)
+        WebDriverWait(driver,10).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR,"a.product-item-link"))
+        )
 
         WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.TAG_NAME, "body"))
