@@ -5,7 +5,6 @@ from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 
 from db_service import create_connection, create_tables
-from process_books import process_books
 from book_history import update_history
 
 from amarin import scrape_amarin_all_pages

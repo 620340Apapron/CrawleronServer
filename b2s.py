@@ -1,7 +1,6 @@
 import re
 from bs4 import BeautifulSoup
 from db_service import insert_book
-from image_service import upload_book_cover
 from utils import extract_isbn
 
 
