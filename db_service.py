@@ -26,13 +26,15 @@ def create_tables(conn):
         price DECIMAL(10,2),
         image_url TEXT,
         url TEXT,
-        source VARCHAR(50)
+        source VARCHAR(50),
+        UNIQUE(isbn,source)
     )
     """)
 
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS books (
-        isbn VARCHAR(50) PRIMARY KEY,
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        isbn VARCHAR(50) UNIQUE,
         title TEXT,
         author TEXT,
         publisher TEXT,
@@ -43,10 +45,11 @@ def create_tables(conn):
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS book_prices (
         id INT AUTO_INCREMENT PRIMARY KEY,
-        isbn VARCHAR(50),
-        price DECIMAL(10,2),
+        book_id INT,
         source VARCHAR(50),
-        url TEXT
+        price DECIMAL(10,2),
+        url TEXT,
+        UNIQUE(book_id,source)
     )
     """)
 

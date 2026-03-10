@@ -72,8 +72,10 @@ def process_books(conn):
     print("แยกข้อมูลเสร็จแล้ว")
 
     cursor.close()
-    conn.close()
 
 
 if __name__ == "__main__":
-    process_books()
+    conn = create_connection()
+
+    if conn:
+        process_books(conn)
