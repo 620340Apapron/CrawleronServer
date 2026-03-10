@@ -55,7 +55,7 @@ def main():
         {"name": "amarin", "scraper": scrape_amarin_all_pages},
     ]
 
-    max_pages_to_scrape = 999
+    max_pages_to_scrape = 10
 
     for site in sites:
         source = site['name']

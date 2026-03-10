@@ -3,9 +3,9 @@ import os
 from mysql.connector import Error
 
 def create_connection():
-    host = os.getenv("MYSQLHOST", "mysql-k65u.railway.internal")
+    host = os.getenv("MYSQLHOST", "mysql.railway.internal")
     user = os.getenv("MYSQLUSER", "root")
-    password = os.getenv("MYSQLPASSWORD", "TpmaxCTXjtHqhDnvlUCXbNIhZlmjfnnn")
+    password = os.getenv("MYSQLPASSWORD", "ZosyTwKSPBYUrmmTcUfgPRFhqNwaIzNF")
     database = os.getenv("MYSQLDATABASE", "railway")
     port = int(os.getenv("MYSQLPORT", "3306"))
 
@@ -16,7 +16,7 @@ def create_connection():
             password=password,
             database=database,
             port=port,
-            connect_timeout=20
+            connect_timeout=20,
         )
         if connection.is_connected():
             print("✅ เชื่อมต่อฐานข้อมูลสำเร็จ")
