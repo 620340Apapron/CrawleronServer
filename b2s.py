@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-
+import time
 from db_service import insert_book
 
 
@@ -24,17 +24,15 @@ def scrape_b2s_all_pages(driver, conn, max_pages=5):
         print("กำลังเปิด:", url)
 
         driver.get(url)
-        WebDriverWait(driver,10).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR,"a.product-item-link"))
-        )
+        time.sleep(2)
 
-        WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.TAG_NAME, "body"))
+        WebDriverWait(driver,20).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR,".product-card"))
         )
 
         soup = BeautifulSoup(driver.page_source, "html.parser")
 
-        books = soup.select("a.product-item-link")
+        books = soup.select(".product-card a")
 
         print("พบ", len(books), "เล่ม")
 
@@ -109,6 +107,7 @@ def scrape_b2s_detail_page(driver, conn, book_url):
         "source": "b2s"
     }
 
-    insert_book(conn, book_data)
-
-    print("บันทึก:", title)
+    try:
+        insert_book(conn, book_data)
+    except Exception as e:
+        print("DB error:", e)

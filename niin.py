@@ -6,6 +6,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
 from db_service import insert_book
 from utils import extract_isbn
+import time
 
 
 def normalize_text(txt):
@@ -25,13 +26,17 @@ def scrape_naiin_all_pages(driver, conn, max_pages=10):
         print("เปิดหน้า:", url)
 
         driver.get(url)
-        WebDriverWait(driver,10).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR,"a.product-item-link"))
+        time.sleep(2)
+
+        WebDriverWait(driver,20).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR,".product-item"))
         )
+
+        books = driver.find_elements(By.CSS_SELECTOR,".product-item")
 
         soup = BeautifulSoup(driver.page_source, "html.parser")
 
-        links = soup.select("a")
+        links = soup.select(".product-item a")
 
         book_urls = []
 
@@ -89,7 +94,7 @@ def scrape_naiin_detail_page(driver, conn, book_url):
 
     final_image_url = image_url
 
-    book = {
+    book_data = {
         "isbn": isbn,
         "title": title,
         "author": author,
@@ -100,4 +105,7 @@ def scrape_naiin_detail_page(driver, conn, book_url):
         "source": "naiin"
     }
 
-    insert_book(conn, book)
+    try:
+        insert_book(conn, book_data)
+    except Exception as e:
+        print("DB error:", e)

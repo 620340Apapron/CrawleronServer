@@ -6,6 +6,7 @@ from selenium.common.exceptions import TimeoutException
 from bs4 import BeautifulSoup
 from db_service import insert_book
 from utils import extract_isbn
+import time
 
 
 def normalize_text(txt):
@@ -25,13 +26,15 @@ def scrape_amarin_all_pages(driver, conn, max_pages=10):
         print("เปิดหน้า:", url)
 
         driver.get(url)
+        time.sleep(2)
+
         WebDriverWait(driver,10).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR,"a.product-item-link"))
+            EC.presence_of_element_located((By.TAG_NAME,"h1"))
         )
 
         soup = BeautifulSoup(driver.page_source, "html.parser")
 
-        links = soup.select("a")
+        links = soup.select("li.product a.woocommerce-LoopProduct-link")
 
         book_urls = []
 
@@ -39,7 +42,7 @@ def scrape_amarin_all_pages(driver, conn, max_pages=10):
 
             href = link.get("href")
 
-            if href and "/product/" in href:
+            if href and "/product/" in href and "product-category" not in href:
                 book_urls.append(href)
 
         book_urls = list(set(book_urls))
@@ -81,7 +84,7 @@ def scrape_amarin_detail_page(driver, conn, book_url):
 
     final_image_url = image_url
 
-    book = {
+    book_data = {
         "isbn": isbn,
         "title": title,
         "author": author,
@@ -92,4 +95,7 @@ def scrape_amarin_detail_page(driver, conn, book_url):
         "source": "amarin"
     }
 
-    insert_book(conn, book)
+    try:
+        insert_book(conn, book_data)
+    except Exception as e:
+        print("DB error:", e)
