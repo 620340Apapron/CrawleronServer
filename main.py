@@ -6,6 +6,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 
 from db_service import create_connection, create_tables
 from book_history import update_history
+from process_books import process_books
 
 from amarin import scrape_amarin_all_pages
 from b2s import scrape_b2s_all_pages
