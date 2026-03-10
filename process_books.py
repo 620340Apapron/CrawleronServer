@@ -2,9 +2,8 @@ import mysql.connector
 from db_service import create_connection
 
 
-def process_books():
+def process_books(conn):
 
-    conn = create_connection()
     cursor = conn.cursor(dictionary=True)
 
     print("เริ่มแยกข้อมูลจาก raw_books")

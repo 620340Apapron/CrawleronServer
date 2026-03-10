@@ -1,11 +1,10 @@
 import re
+from bs4 import BeautifulSoup
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import TimeoutException
-from bs4 import BeautifulSoup
+
 from db_service import insert_book
-from utils import extract_isbn
 
 
 def normalize_text(txt):
@@ -14,58 +13,72 @@ def normalize_text(txt):
     return " ".join(txt.strip().split())
 
 
-def scrape_b2s_all_pages(driver, conn, max_pages=10):
+def scrape_b2s_all_pages(driver, conn, max_pages=5):
 
-    base_url = "https://www.b2s.co.th/en/book?page={}"
+    base_url = "https://www.b2s.co.th/en/category/books?page={}"
 
     for page in range(1, max_pages + 1):
 
         url = base_url.format(page)
 
-        print("เปิดหน้า:", url)
+        print("กำลังเปิด:", url)
 
         driver.get(url)
 
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.TAG_NAME, "body"))
+        )
+
         soup = BeautifulSoup(driver.page_source, "html.parser")
 
-        links = soup.select("a")
+        books = soup.select("a.product-item-link")
 
-        book_urls = []
+        print("พบ", len(books), "เล่ม")
 
-        for link in links:
+        for b in books:
 
-            href = link.get("href")
+            book_url = b.get("href")
 
-            if href and "/product/" in href:
+            if book_url:
 
-                if href.startswith("/"):
-                    href = "https://www.b2s.co.th" + href
+                if not book_url.startswith("http"):
+                    book_url = "https://www.b2s.co.th" + book_url
 
-                book_urls.append(href)
-
-        book_urls = list(set(book_urls))
-
-        for book_url in book_urls:
-            scrape_b2s_detail_page(driver, conn, book_url)
+                scrape_b2s_detail_page(driver, conn, book_url)
 
 
 def scrape_b2s_detail_page(driver, conn, book_url):
 
     driver.get(book_url)
 
+    WebDriverWait(driver, 10).until(
+        EC.presence_of_element_located((By.TAG_NAME, "h1"))
+    )
+
     soup = BeautifulSoup(driver.page_source, "html.parser")
 
     title = "Unknown"
-    tag = soup.select_one("h1")
+    title_tag = soup.select_one("h1")
 
-    if tag:
-        title = normalize_text(tag.text)
+    if title_tag:
+        title = normalize_text(title_tag.text)
 
     author = "Unknown"
-    author_tag = soup.select_one(".author")
+    author_tag = soup.select_one(".product.attribute.author")
 
     if author_tag:
         author = normalize_text(author_tag.text)
+
+    publisher = "B2S"
+
+    isbn = "Unknown"
+
+    text = soup.get_text()
+
+    m = re.search(r"ISBN\s*[:\-]?\s*(\d+)", text)
+
+    if m:
+        isbn = m.group(1)
 
     price = 0
     price_tag = soup.select_one(".price")
@@ -74,9 +87,7 @@ def scrape_b2s_detail_page(driver, conn, book_url):
         m = re.search(r"[\d,.]+", price_tag.text)
 
         if m:
-            price = int(float(m.group(0).replace(",", "")))
-
-    isbn = extract_isbn(soup)
+            price = float(m.group(0).replace(",", ""))
 
     image_url = ""
     image_tag = soup.find("meta", attrs={"property": "og:image"})
@@ -84,17 +95,17 @@ def scrape_b2s_detail_page(driver, conn, book_url):
     if image_tag:
         image_url = image_tag.get("content")
 
-    final_image_url = image_url
-
-    book = {
+    book_data = {
         "isbn": isbn,
         "title": title,
         "author": author,
-        "publisher": "B2S",
+        "publisher": publisher,
         "price": price,
-        "image_url": final_image_url,
+        "image_url": image_url,
         "url": book_url,
         "source": "b2s"
     }
 
-    insert_book(conn, book)
+    insert_book(conn, book_data)
+
+    print("บันทึก:", title)

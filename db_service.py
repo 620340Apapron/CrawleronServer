@@ -16,30 +16,47 @@ def create_tables(conn):
 
     cursor = conn.cursor()
 
-    # ตารางข้อมูลดิบจาก crawler
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS raw_books (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        isbn VARCHAR(50),
+        title TEXT,
+        author TEXT,
+        publisher TEXT,
+        price DECIMAL(10,2),
+        image_url TEXT,
+        url TEXT,
+        source VARCHAR(50)
+    )
+    """)
+
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS books (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    isbn VARCHAR(255) UNIQUE,
-    title TEXT,
-    author TEXT,
-    publisher TEXT,
-    image_url TEXT
+        isbn VARCHAR(50) PRIMARY KEY,
+        title TEXT,
+        author TEXT,
+        publisher TEXT,
+        image_url TEXT
     )
     """)
 
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS book_prices (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    book_id INT,
-    store VARCHAR(50),
-    price DECIMAL(10,2),
-    url TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        isbn VARCHAR(50),
+        price DECIMAL(10,2),
+        source VARCHAR(50),
+        url TEXT
+    )
+    """)
 
-    UNIQUE KEY unique_store_price (book_id, store),
-
-    FOREIGN KEY (book_id) REFERENCES books(id)
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS book_history (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        isbn VARCHAR(50),
+        price DECIMAL(10,2),
+        source VARCHAR(50),
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
     """)
 

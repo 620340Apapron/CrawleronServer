@@ -64,7 +64,7 @@ def main():
         scrape_amarin_all_pages(driver, conn)
 
         print("เริ่มแยกข้อมูลหนังสือ")
-        process_books()
+        process_books(conn)
 
         print("บันทึกประวัติราคา")
         update_history(conn)

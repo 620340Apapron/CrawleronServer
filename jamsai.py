@@ -3,16 +3,17 @@ from bs4 import BeautifulSoup
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import TimeoutException
+
 from db_service import insert_book
-from utils import extract_isbn
+
 
 def normalize_text(txt):
     if not txt:
         return ""
-    return ' '.join(txt.replace('"', '').strip().split())
+    return ' '.join(txt.strip().split())
 
-def scrape_jamsai_all_pages(driver, conn, max_pages=10):
+
+def scrape_jamsai_all_pages(driver, conn, max_pages=5):
 
     base_url = "https://www.jamsai.com/shop/?page={}"
 
@@ -20,51 +21,42 @@ def scrape_jamsai_all_pages(driver, conn, max_pages=10):
 
         url = base_url.format(page)
 
-        print("เปิดหน้า:", url)
+        print("กำลังเปิด:", url)
 
         driver.get(url)
 
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.TAG_NAME, "body"))
+        )
+
         soup = BeautifulSoup(driver.page_source, "html.parser")
 
-        links = soup.select("a")
+        books = soup.select("a.product-item-link")
 
-        book_urls = []
+        print("พบ", len(books), "เล่ม")
 
-        for link in links:
+        for b in books:
 
-            href = link.get("href")
+            book_url = b.get("href")
 
-            if href and "/product/" in href:
-
-                if href.startswith("/"):
-                    href = "https://www.jamsai.com" + href
-
-                book_urls.append(href)
-
-        book_urls = list(set(book_urls))
-
-        for book_url in book_urls:
-
-            try:
+            if book_url:
                 scrape_jamsai_detail_page(driver, conn, book_url)
-            except Exception as e:
-                print("error:", e)
 
 
 def scrape_jamsai_detail_page(driver, conn, book_url):
 
     driver.get(book_url)
 
-    try:
-        WebDriverWait(driver, 15).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, "h1"))
-        )
-    except TimeoutException:
-        return None
+    WebDriverWait(driver, 10).until(
+        EC.presence_of_element_located((By.TAG_NAME, "h1"))
+    )
 
     soup = BeautifulSoup(driver.page_source, "html.parser")
 
-    isbn = extract_isbn(soup)
+    isbn = "Unknown"
+    isbn_tag = soup.find("meta", attrs={"property": "book:isbn"})
+    if isbn_tag:
+        isbn = isbn_tag.get("content")
 
     title = "Unknown"
     title_tag = soup.select_one("h1")
@@ -72,7 +64,7 @@ def scrape_jamsai_detail_page(driver, conn, book_url):
         title = normalize_text(title_tag.text)
 
     author = "Unknown"
-    author_tag = soup.select_one(".product-author")
+    author_tag = soup.select_one(".author")
     if author_tag:
         author = normalize_text(author_tag.text)
 
@@ -80,18 +72,16 @@ def scrape_jamsai_detail_page(driver, conn, book_url):
 
     price = 0
     price_tag = soup.select_one(".price")
+
     if price_tag:
         m = re.search(r'[\d,.]+', price_tag.text)
         if m:
-            price = int(float(m.group(0).replace(",", "")))
+            price = float(m.group(0).replace(",", ""))
 
     image_url = ""
     image_tag = soup.find("meta", attrs={"property": "og:image"})
-
     if image_tag:
         image_url = image_tag.get("content")
-
-    final_image_url = image_url
 
     book_data = {
         "isbn": isbn,
@@ -99,11 +89,11 @@ def scrape_jamsai_detail_page(driver, conn, book_url):
         "author": author,
         "publisher": publisher,
         "price": price,
-        "image_url": final_image_url,
+        "image_url": image_url,
         "url": book_url,
         "source": "jamsai"
     }
 
     insert_book(conn, book_data)
 
-    return book_data
+    print("บันทึก:", title)
