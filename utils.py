@@ -1,0 +1,23 @@
+import re
+
+def extract_isbn(soup):
+
+    # 1️⃣ meta tag
+    meta = soup.find("meta", {"property": "book:isbn"})
+    if meta:
+        return meta.get("content")
+
+    # 2️⃣ schema.org
+    isbn_tag = soup.find(attrs={"itemprop": "isbn"})
+    if isbn_tag:
+        return isbn_tag.text.strip()
+
+    # 3️⃣ search จาก text ทั้งหน้า
+    text = soup.get_text()
+
+    match = re.search(r'97[89][-\s]?\d[-\s]?\d{2,5}[-\s]?\d{2,7}[-\s]?\d', text)
+
+    if match:
+        return match.group().replace("-", "").replace(" ", "")
+
+    return "Unknown"

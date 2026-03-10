@@ -6,7 +6,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
 from db_service import insert_book
 from image_service import upload_book_cover
-
+from utils import extract_isbn
 
 def normalize_text(txt):
     if not txt:
@@ -21,34 +21,35 @@ def scrape_jamsai_all_pages(driver, conn, max_pages=10):
 
         url = base_url.format(page)
 
+        print("เปิดหน้า:", url)
+
         driver.get(url)
-
-        print("กำลังเปิด:", url)
-
-        try:
-            WebDriverWait(driver, 10).until(
-                EC.presence_of_element_located((By.CSS_SELECTOR, "a"))
-            )
-        except TimeoutException:
-            print("โหลดหน้าไม่สำเร็จ")
-            continue
 
         soup = BeautifulSoup(driver.page_source, "html.parser")
 
-        book_links = soup.select("a")
+        links = soup.select("a")
 
-        for link in book_links:
+        book_urls = []
+
+        for link in links:
 
             href = link.get("href")
 
             if href and "/product/" in href:
 
-                print("พบหนังสือ:", href)
+                if href.startswith("/"):
+                    href = "https://www.jamsai.com" + href
 
-                try:
-                    scrape_jamsai_detail_page(driver, conn, href)
-                except Exception as e:
-                    print("error:", e)
+                book_urls.append(href)
+
+        book_urls = list(set(book_urls))
+
+        for book_url in book_urls:
+
+            try:
+                scrape_jamsai_detail_page(driver, conn, book_url)
+            except Exception as e:
+                print("error:", e)
 
 
 def scrape_jamsai_detail_page(driver, conn, book_url):
@@ -64,10 +65,7 @@ def scrape_jamsai_detail_page(driver, conn, book_url):
 
     soup = BeautifulSoup(driver.page_source, "html.parser")
 
-    isbn = "Unknown"
-    isbn_tag = soup.find("meta", attrs={"property": "book:isbn"})
-    if isbn_tag:
-        isbn = isbn_tag.get("content")
+    isbn = extract_isbn(soup)
 
     title = "Unknown"
     title_tag = soup.select_one("h1")
