@@ -1,106 +1,113 @@
-# jamsai.py
-import time, re, json
+import re
 from bs4 import BeautifulSoup
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import TimeoutException, NoSuchElementException
+from selenium.common.exceptions import TimeoutException
 from db_service import insert_book
 from image_service import upload_book_cover
+
 
 def normalize_text(txt):
     if not txt:
         return ""
     return ' '.join(txt.replace('"', '').strip().split())
 
+def scrape_jamsai_all_pages(driver, conn, max_pages=10):
+
+    base_url = "https://www.jamsai.com/shop/?page={}"
+
+    for page in range(1, max_pages + 1):
+
+        url = base_url.format(page)
+
+        driver.get(url)
+
+        print("กำลังเปิด:", url)
+
+        try:
+            WebDriverWait(driver, 10).until(
+                EC.presence_of_element_located((By.CSS_SELECTOR, "a"))
+            )
+        except TimeoutException:
+            print("โหลดหน้าไม่สำเร็จ")
+            continue
+
+        soup = BeautifulSoup(driver.page_source, "html.parser")
+
+        book_links = soup.select("a")
+
+        for link in book_links:
+
+            href = link.get("href")
+
+            if href and "/product/" in href:
+
+                print("พบหนังสือ:", href)
+
+                try:
+                    scrape_jamsai_detail_page(driver, conn, href)
+                except Exception as e:
+                    print("error:", e)
+
+
 def scrape_jamsai_detail_page(driver, conn, book_url):
+
     driver.get(book_url)
+
     try:
         WebDriverWait(driver, 15).until(
-            EC.presence_of_element_located((By.ID, "__NEXT_DATA__"))
+            EC.presence_of_element_located((By.CSS_SELECTOR, "h1"))
         )
     except TimeoutException:
-        print(f"[*] [jamsai] Timeout: {book_url}")
         return None
 
     soup = BeautifulSoup(driver.page_source, "html.parser")
-    
-    try:
-        json_tag = soup.find('script', id='__NEXT_DATA__')
-        if not json_tag: return None
-        
-        js_data = json.loads(json_tag.string)
-        product = js_data['props']['pageProps']['product']
-        
-        isbn = product.get('skuid', 'Unknown')
 
-        rel_path = product.get('image_path')
-        if rel_path:
-            raw_image_url = f"https://images.www.jamsai.com/{rel_path}"
-        else:
-            raw_image_url = ""
+    isbn = "Unknown"
+    isbn_tag = soup.find("meta", attrs={"property": "book:isbn"})
+    if isbn_tag:
+        isbn = isbn_tag.get("content")
 
-        final_image_url = upload_book_cover(raw_image_url, isbn)
-    
-        book_data  = {
-            "isbn": isbn, 
-            "title": normalize_text(product.get('display_name')),
-            "author": product['writers'][0]['name'] if product.get('writers') else "Unknown",
-            "publisher": product['brands'][0]['name'] if product.get('brands') else "Jamsai",
-            "price": int(product.get('special_price', 0)),
-            "image_url": final_image_url,
-            "url": book_url,
-            "source": "jamsai"
-        }
-        insert_book(conn, book_data) 
-        return book_data
-    
-    except Exception as e:
-        print(f"❌ [jamsai] Error parsing JSON: {e}")
-        return None
+    title = "Unknown"
+    title_tag = soup.select_one("h1")
+    if title_tag:
+        title = normalize_text(title_tag.text)
 
-def get_all_book_urls(driver, max_pages=999):
-    urls = set()
-    # เปลี่ยน URL หน้ารวมสินค้า
-    base_url = "https://www.jamsai.com/shop"
-    
-    for p in range(1, max_pages + 1):
-        print(f"[*] [jamsai] กำลังรวบรวม URL จากหน้า {p}...")
-        
-        try:
-            driver.get(f"{base_url}{p}")
-        except TimeoutException:
-            print(f"[*] [jamsai] ไม่พบข้อมูลในหน้า {p}, สิ้นสุดการทำงาน")
-            break
+    author = "Unknown"
+    author_tag = soup.select_one(".product-author")
+    if author_tag:
+        author = normalize_text(author_tag.text)
 
-        try:
-            WebDriverWait(driver, 15).until(
-                EC.presence_of_all_elements_located((By.XPATH, "/html/body/div/div/div/section[2]/div/div/div[2]/div/div[2]/div/div/div/div[1]/div/div[2]/h3/a"))
-            )
-        except TimeoutException:
-                print(f"[*] [naiin] ไม่มีสินค้าในหน้า {p}, จบหมวดนี้")
-                break
-        
-        links = driver.find_elements(By.XPATH, "/html/body/div/div/div/section[2]/div/div/div[2]/div/div[2]/div/div/div/div[1]/div/div[2]/h3/a")
-        for link in links:
-            href = link.get_attribute("href")
-            if href and "product" in href:
-                urls.add(href)
-    return list(urls)
+    publisher = "Jamsai"
 
-def scrape_jamsai_all_pages(driver, conn, max_pages=10):
-    all_products = []
-    
-    all_urls = get_all_book_urls(driver, max_pages)
+    price = 0
+    price_tag = soup.select_one(".price")
+    if price_tag:
+        m = re.search(r'[\d,.]+', price_tag.text)
+        if m:
+            price = int(float(m.group(0).replace(",", "")))
 
-    if not all_urls:
-        print("[ERROR] ไม่สามารถรวบรวม URL ใดๆ ได้เลย โปรแกรมจะสิ้นสุดการทำงาน")
-        return []
+    image_url = ""
+    image_tag = soup.find("meta", attrs={"property": "og:image"})
+    if image_tag:
+        image_url = image_tag.get("content")
 
-    for i, url in enumerate(all_urls):
-        print(f"--- กำลังดึงข้อมูลเล่มที่ {i + 1}/{len(all_urls)} ---")
-        book_data = scrape_jamsai_detail_page(driver, url)
-        if book_data:
-           insert_book(conn, book_data)
+    final_image_url = ""
+    if image_url:
+        final_image_url = upload_book_cover(image_url, isbn)
 
-    return 
+    book_data = {
+        "isbn": isbn,
+        "title": title,
+        "author": author,
+        "publisher": publisher,
+        "price": price,
+        "image_url": final_image_url,
+        "url": book_url,
+        "source": "jamsai"
+    }
+
+    insert_book(conn, book_data)
+
+    return book_data
