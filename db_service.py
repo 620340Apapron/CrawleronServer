@@ -3,6 +3,11 @@ import os
 
 
 def create_connection():
+    print("HOST:", os.getenv("MYSQLHOST"))
+    print("USER:", os.getenv("MYSQLUSER"))
+    print("DB:", os.getenv("MYSQLDATABASE"))
+    print("PORT:", os.getenv("MYSQLPORT"))
+
     return mysql.connector.connect(
         host=os.getenv("MYSQLHOST"),
         user=os.getenv("MYSQLUSER"),
