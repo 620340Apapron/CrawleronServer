@@ -26,17 +26,15 @@ def scrape_naiin_all_pages(driver, conn, max_pages=10):
         print("เปิดหน้า:", url)
 
         driver.get(url)
-        time.sleep(2)
+        time.sleep(5)
 
-        WebDriverWait(driver,20).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR,".product-item"))
+        WebDriverWait(driver,30).until(
+            EC.presence_of_element_located((By.TAG_NAME,"body"))
         )
-
-        books = driver.find_elements(By.CSS_SELECTOR,".product-item")
 
         soup = BeautifulSoup(driver.page_source, "html.parser")
 
-        links = soup.select(".product-item a")
+        links = links = soup.select("a[href*='/product/detail/']")
 
         book_urls = []
 
