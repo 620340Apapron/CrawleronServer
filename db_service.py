@@ -27,6 +27,7 @@ def create_tables(conn):
         image_url TEXT,
         url TEXT,
         source VARCHAR(50),
+                   
         UNIQUE(isbn,source)
     )
     """)
@@ -49,6 +50,7 @@ def create_tables(conn):
         source VARCHAR(50),
         price DECIMAL(10,2),
         url TEXT,
+                   
         UNIQUE(book_id,source)
     )
     """)

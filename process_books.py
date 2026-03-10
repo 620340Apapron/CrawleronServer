@@ -73,6 +73,34 @@ def process_books(conn):
 
     cursor.close()
 
+def update_history(conn):
+
+    cursor = conn.cursor(dictionary=True)
+
+    cursor.execute("SELECT * FROM book_prices")
+
+    prices = cursor.fetchall()
+
+    for p in prices:
+
+        cursor.execute(
+            """
+            INSERT INTO book_history
+            (book_id,store,price)
+
+            VALUES (%s,%s,%s)
+            """,
+            (
+                p["book_id"],
+                p["store"],
+                p["price"]
+            )
+        )
+
+    conn.commit()
+
+    cursor.close()
+
 
 if __name__ == "__main__":
     conn = create_connection()
