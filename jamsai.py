@@ -87,12 +87,11 @@ def scrape_jamsai_detail_page(driver, conn, book_url):
 
     image_url = ""
     image_tag = soup.find("meta", attrs={"property": "og:image"})
+
     if image_tag:
         image_url = image_tag.get("content")
 
-    final_image_url = ""
-    if image_url:
-        final_image_url = upload_book_cover(image_url, isbn)
+    final_image_url = image_url
 
     book_data = {
         "isbn": isbn,

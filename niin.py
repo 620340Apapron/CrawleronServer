@@ -74,16 +74,13 @@ def scrape_naiin_detail_page(driver, conn, book_url):
 
     isbn = extract_isbn(soup)
 
-    img = ""
-    img_tag = soup.select_one("img")
+    image_url = ""
+    image_tag = soup.find("meta", attrs={"property": "og:image"})
 
-    if img_tag:
-        img = img_tag.get("src")
+    if image_tag:
+        image_url = image_tag.get("content")
 
-    final_image = ""
-
-    if img:
-        final_image = upload_book_cover(img, isbn)
+    final_image_url = image_url
 
     book = {
         "isbn": isbn,
@@ -91,7 +88,7 @@ def scrape_naiin_detail_page(driver, conn, book_url):
         "author": author,
         "publisher": "Naiin",
         "price": price,
-        "image_url": final_image,
+        "image_url": final_image_url,
         "url": book_url,
         "source": "naiin"
     }
