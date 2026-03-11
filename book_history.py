@@ -26,7 +26,7 @@ def update_history(conn):
 
     for isbn, book in unique_books.items():
 
-        isbn, price, url, source = book
+        isbn, price, source, created_at = book
 
         cursor.execute("""
         SELECT price FROM book_history
@@ -45,13 +45,13 @@ def update_history(conn):
 
                 insert_history(cursor, book)
 
-                print(f"📈 ราคาเปลี่ยน {isbn} : {last_price} -> {price}")
+                print(f"ราคาเปลี่ยน {isbn} : {last_price} -> {price}")
 
         else:
 
             insert_history(cursor, book)
 
-            print(f"🆕 เพิ่มหนังสือใหม่ {isbn}")
+            print(f"เพิ่มหนังสือใหม่ {isbn}")
 
     conn.commit()
 
