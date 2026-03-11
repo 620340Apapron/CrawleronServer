@@ -6,7 +6,7 @@ def update_history(conn):
     cursor = conn.cursor()
 
     cursor.execute("""
-    SELECT isbn, price, url, source
+    SELECT isbn, price, source, created_at
     FROM raw_books
     """)
 
@@ -66,7 +66,7 @@ def insert_history(cursor, book):
 
     sql = """
     INSERT INTO book_history
-    (isbn, price, url, source)
+    (isbn, price, source, created_at)
     VALUES (%s,%s,%s,%s)
     """
 
