@@ -29,7 +29,7 @@ def scrape_amarin_all_pages(driver, conn, max_pages=10):
     time.sleep(2)
 
     WebDriverWait(driver,10).until(
-            EC.presence_of_element_located((By.TAG_NAME,"h1"))
+            EC.presence_of_element_located((By.TAG_NAME,"li.product a.woocommerce-LoopProduct-link"))
         )
 
     soup = BeautifulSoup(driver.page_source, "html.parser")

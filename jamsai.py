@@ -29,7 +29,7 @@ def scrape_jamsai_all_pages(driver, conn, max_pages=5):
         time.sleep(2)
 
         WebDriverWait(driver,20).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR,".product-item"))
+            EC.presence_of_element_located((By.CSS_SELECTOR,".product-item a"))
         )
 
         soup = BeautifulSoup(driver.page_source, "html.parser")

@@ -30,12 +30,12 @@ def scrape_b2s_all_pages(driver, conn, max_pages=5):
         
 
         WebDriverWait(driver,20).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR,".product-card w-100"))
+            EC.presence_of_element_located((By.CSS_SELECTOR,".product-box-inner"))
         )
 
         soup = BeautifulSoup(driver.page_source, "html.parser")
 
-        links = soup.select("a[href*='/product/']")
+        links = soup.select(".product-box-inner")
         book_urls = []
 
         for link in links:
