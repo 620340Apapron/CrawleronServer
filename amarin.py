@@ -19,35 +19,33 @@ def scrape_amarin_all_pages(driver, conn, max_pages=10):
 
     base_url = "https://amarinbooks.com/product-category/%e0%b8%a7%e0%b8%a3%e0%b8%a3%e0%b8%93%e0%b8%81%e0%b8%a3%e0%b8%a3%e0%b8%a1/"
 
-    for page in range(1,11):
+    url = base_url
 
-        url = base_url.format(page)
+    print("เปิดหน้า:", url)
 
-        print("เปิดหน้า:", url)
+    driver.get(url)
+    time.sleep(2)
 
-        driver.get(url)
-        time.sleep(2)
-
-        WebDriverWait(driver,10).until(
+    WebDriverWait(driver,10).until(
             EC.presence_of_element_located((By.TAG_NAME,"h1"))
         )
 
-        soup = BeautifulSoup(driver.page_source, "html.parser")
+    soup = BeautifulSoup(driver.page_source, "html.parser")
 
-        links = soup.select("li.product a.woocommerce-LoopProduct-link")
+    links = soup.select("li.product a.woocommerce-LoopProduct-link")
 
-        book_urls = []
+    book_urls = []
 
-        for link in links:
+    for link in links:
 
             href = link.get("href")
 
             if href and "/product/" in href and "product-category" not in href:
                 book_urls.append(href)
 
-        book_urls = list(set(book_urls))
+    book_urls = list(set(book_urls))
 
-        for book_url in book_urls:
+    for book_url in book_urls:
             scrape_amarin_detail_page(driver, conn, book_url)
 
 
