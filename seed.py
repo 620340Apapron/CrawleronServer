@@ -1,5 +1,6 @@
 import re
 from bs4 import BeautifulSoup
+
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -28,9 +29,13 @@ def scrape_seed_all_pages(driver, conn, max_pages=10):
         driver.get(url)
         time.sleep(2)
         
-        WebDriverWait(driver,20).until(
+        try:
+            WebDriverWait(driver,20).until(
             EC.presence_of_element_located((By.CSS_SELECTOR,".product-list-item"))
         )
+        except TimeoutException:
+            print("Jamsai: หน้าโหลดไม่สำเร็จ")
+            return
 
         soup = BeautifulSoup(driver.page_source, "html.parser")
 

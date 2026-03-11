@@ -1,4 +1,6 @@
-import re
+import re,time
+
+from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -7,7 +9,7 @@ from selenium.common.exceptions import TimeoutException
 from bs4 import BeautifulSoup
 from db_service import insert_book
 from utils import extract_isbn
-import time
+
 
 
 
@@ -28,9 +30,13 @@ def scrape_amarin_all_pages(driver, conn, max_pages=10):
     driver.get(url)
     time.sleep(2)
 
-    WebDriverWait(driver,10).until(
+    try:
+        WebDriverWait(driver,10).until(
             EC.presence_of_element_located((By.TAG_NAME,"li.product a.woocommerce-LoopProduct-link"))
-        )
+            )
+    except TimeoutException:
+        print("Jamsai: หน้าโหลดไม่สำเร็จ")
+        return
 
     soup = BeautifulSoup(driver.page_source, "html.parser")
 

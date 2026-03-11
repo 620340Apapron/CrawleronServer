@@ -1,5 +1,7 @@
 import re
 from bs4 import BeautifulSoup
+
+
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -26,10 +28,15 @@ def scrape_naiin_all_pages(driver, conn, max_pages=10):
 
     driver.get(url)
     time.sleep(5)
-
-    WebDriverWait(driver,30).until(
+    
+    try:
+        WebDriverWait(driver,30).until(
             EC.presence_of_element_located((By.TAG_NAME,"body"))
-        )
+            )
+    except TimeoutException:
+
+        print("Jamsai: หน้าโหลดไม่สำเร็จ")
+        return
 
     soup = BeautifulSoup(driver.page_source, "html.parser")
 
