@@ -37,9 +37,9 @@ def scrape_b2s_all_pages(driver, conn, max_pages=5):
         books = soup.select("a[href*='/product/']")
 
         print("พบ", len(books), "เล่ม")
-        
 
-        for b in books:
+
+        for book_url in book_urls:
 
             book_url = b.get("href")
 

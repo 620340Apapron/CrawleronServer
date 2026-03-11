@@ -17,6 +17,7 @@ def normalize_text(txt):
 def scrape_jamsai_all_pages(driver, conn, max_pages=5):
 
     base_url = "https://www.jamsai.com/shop/?page={}"
+    book_urls=[]
 
     for page in range(1,11):
 
@@ -36,7 +37,7 @@ def scrape_jamsai_all_pages(driver, conn, max_pages=5):
         books = soup.select(".product-item a")
 
         print("พบ", len(books), "เล่ม")
-        
+
 
         for b in books:
 
