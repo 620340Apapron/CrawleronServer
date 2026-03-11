@@ -31,7 +31,7 @@ def update_history(conn):
         cursor.execute("""
         SELECT price FROM book_history
         WHERE isbn=%s
-        ORDER BY created_at DESC
+        ORDER BY source DESC
         LIMIT 1
         """, (isbn,))
 
