@@ -17,7 +17,7 @@ def scrape_b2s_all_pages(driver, conn, max_pages=5):
 
     base_url = "https://www.b2s.co.th/en/category/books?page={}"
 
-    for page in range(1,21):
+    for page in range(1,11):
 
         url = base_url.format(page)
 

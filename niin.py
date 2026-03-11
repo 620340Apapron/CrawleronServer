@@ -17,9 +17,9 @@ def normalize_text(txt):
 
 def scrape_naiin_all_pages(driver, conn, max_pages=10):
 
-    base_url = "https://www.naiin.com/category?page={}"
+    base_url = "https://www.naiin.com/category?category_1_code=2&product_type_id=1"
 
-    for page in range(1,21):
+    for page in range(1,11):
 
         url = base_url.format(page)
 

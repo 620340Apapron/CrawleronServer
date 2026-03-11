@@ -17,9 +17,9 @@ def normalize_text(txt):
 
 def scrape_amarin_all_pages(driver, conn, max_pages=10):
 
-    base_url = "https://amarinbooks.com/product-category/book/page/{}/"
+    base_url = "https://amarinbooks.com/product-category/%e0%b8%a7%e0%b8%a3%e0%b8%a3%e0%b8%93%e0%b8%81%e0%b8%a3%e0%b8%a3%e0%b8%a1/"
 
-    for page in range(1,21):
+    for page in range(1,11):
 
         url = base_url.format(page)
 

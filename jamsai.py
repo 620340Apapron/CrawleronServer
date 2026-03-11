@@ -17,7 +17,7 @@ def scrape_jamsai_all_pages(driver, conn, max_pages=5):
 
     base_url = "https://www.jamsai.com/shop/?page={}"
 
-    for page in range(1,21):
+    for page in range(1,11):
 
         url = base_url.format(page)
 
