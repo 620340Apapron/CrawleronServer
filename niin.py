@@ -90,7 +90,7 @@ def scrape_naiin_detail_page(driver, conn, book_url):
         author = normalize_text(author_tag.text)
 
     publisher = "Unknown"
-    publisher_tag = soup.select_one("PublisherName")
+    publisher_tag = soup.select_one(".PublisherName")
     if publisher_tag:
         author = normalize_text(publisher_tag.text)
 

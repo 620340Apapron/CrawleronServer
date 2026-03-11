@@ -93,7 +93,7 @@ def update_history(conn):
             (
                 p["book_id"],
                 p["store"],
-                p["price"]
+                p["price"],
             )
         )
 
