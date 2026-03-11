@@ -85,7 +85,7 @@ def scrape_b2s_detail_page(driver, conn, book_url):
     if author_tag:
         author = normalize_text(author_tag.text)
 
-    publisher = "B2S"
+    publisher = soup.select_one(".mr-3 fw-bold")
 
     isbn = "Unknown"
 
