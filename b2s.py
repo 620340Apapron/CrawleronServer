@@ -51,11 +51,17 @@ def scrape_b2s_all_pages(driver, conn, max_pages=5):
 
 def scrape_b2s_detail_page(driver, conn, book_url):
 
-    driver.get(book_url)
+    try:
 
-    WebDriverWait(driver, 10).until(
-        EC.presence_of_element_located((By.TAG_NAME, "h1"))
-    )
+        driver.get(book_url)
+
+        html = driver.page_source
+
+    except Exception as e:
+
+        print("Chrome crashed at:", book_url)
+
+        return
 
     soup = BeautifulSoup(driver.page_source, "html.parser")
 

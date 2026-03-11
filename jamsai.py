@@ -46,7 +46,17 @@ def scrape_jamsai_all_pages(driver, conn, max_pages=5):
 
 def scrape_jamsai_detail_page(driver, conn, book_url):
 
-    driver.get(book_url)
+    try:
+
+        driver.get(book_url)
+
+        html = driver.page_source
+
+    except Exception as e:
+
+        print("Chrome crashed at:", book_url)
+
+        return
 
     WebDriverWait(driver, 10).until(
         EC.presence_of_element_located((By.TAG_NAME, "h1"))

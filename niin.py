@@ -55,7 +55,17 @@ def scrape_naiin_all_pages(driver, conn, max_pages=10):
 
 def scrape_naiin_detail_page(driver, conn, book_url):
 
-    driver.get(book_url)
+    try:
+
+        driver.get(book_url)
+
+        html = driver.page_source
+
+    except Exception as e:
+
+        print("Chrome crashed at:", book_url)
+
+        return
 
     soup = BeautifulSoup(driver.page_source, "html.parser")
 
