@@ -30,7 +30,12 @@ def get_driver():
     options.add_argument("--disable-infobars")
     options.add_argument("--disable-notifications")
 
-    driver = webdriver.Chrome(options=options)
+    driver = webdriver.Chrome(
+        service=Service(ChromeDriverManager().install()),
+        options=options
+    )
+    
+    return driver
 
 
 def main():
