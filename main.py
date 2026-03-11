@@ -29,12 +29,15 @@ def get_driver():
     options.add_argument("--disable-extensions")
     options.add_argument("--disable-infobars")
     options.add_argument("--disable-notifications")
+    options.add_argument("--disable-dev-tools")
+
+    options.add_argument("--window-size=1920,1080")
 
     driver = webdriver.Chrome(
         service=Service(ChromeDriverManager().install()),
         options=options
     )
-    
+
     return driver
 
 
