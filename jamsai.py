@@ -34,17 +34,22 @@ def scrape_jamsai_all_pages(driver, conn, max_pages=5):
 
         soup = BeautifulSoup(driver.page_source, "html.parser")
 
-        books = soup.select(".product-item a")
+        links = soup.select(".product-item a")
 
-        print("พบ", len(books), "เล่ม")
+        book_urls = []
 
+        for link in links:
 
-        for b in books:
+            href = link.get("href")
 
-            book_url = b.get("href")
+            if href and "/product/" in href and "product-category" not in href:
+                book_urls.append(href)
+        
+        book_urls = list(set(book_urls))
+        
+        for book_url in book_urls:
+            scrape_jamsai_detail_page(driver, conn, book_url)
 
-            if book_url:
-                scrape_jamsai_detail_page(driver, conn, book_url)
 
 
 def scrape_jamsai_detail_page(driver, conn, book_url):

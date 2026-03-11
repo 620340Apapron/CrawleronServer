@@ -27,6 +27,7 @@ def scrape_b2s_all_pages(driver, conn, max_pages=5):
 
         driver.get(url)
         time.sleep(2)
+        
 
         WebDriverWait(driver,20).until(
             EC.presence_of_element_located((By.CSS_SELECTOR,".product-card"))
@@ -34,21 +35,20 @@ def scrape_b2s_all_pages(driver, conn, max_pages=5):
 
         soup = BeautifulSoup(driver.page_source, "html.parser")
 
-        books = soup.select("a[href*='/product/']")
+        links = soup.select("a[href*='/product/']")
+        book_urls = []
 
-        print("พบ", len(books), "เล่ม")
+        for link in links:
 
+            href = link.get("href")
 
+            if href and "/product/" in href and "product-category" not in href:
+                book_urls.append(href)
+        
+        book_urls = list(set(book_urls))
+        
         for book_url in book_urls:
-
-            book_url = b.get("href")
-
-            if book_url:
-
-                if not book_url.startswith("http"):
-                    book_url = "https://www.b2s.co.th" + book_url
-
-                scrape_b2s_detail_page(driver, conn, book_url)
+            scrape_b2s_detail_page(driver, conn, book_url)
 
 
 def scrape_b2s_detail_page(driver, conn, book_url):
