@@ -30,7 +30,7 @@ def scrape_b2s_all_pages(driver, conn, max_pages=5):
         
 
         WebDriverWait(driver,20).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR,".product-card"))
+            EC.presence_of_element_located((By.CSS_SELECTOR,".product-card w-100"))
         )
 
         soup = BeautifulSoup(driver.page_source, "html.parser")
@@ -46,7 +46,7 @@ def scrape_b2s_all_pages(driver, conn, max_pages=5):
                 book_urls.append(href)
         
         book_urls = list(set(book_urls))
-        
+
         for book_url in book_urls:
             scrape_b2s_detail_page(driver, conn, book_url)
 
