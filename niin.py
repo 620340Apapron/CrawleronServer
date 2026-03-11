@@ -79,16 +79,20 @@ def scrape_naiin_detail_page(driver, conn, book_url):
     soup = BeautifulSoup(driver.page_source, "html.parser")
 
     title = "Unknown"
-    title_tag = soup.select_one("h1")
+    title_tag = soup.select_one('meta[property="og:title"]')
 
     if title_tag:
-        title = normalize_text(title_tag.text)
+        title = title_tag["content"] if title_tag else None
 
     author = "Unknown"
-    author_tag = soup.select_one(".author")
-
+    author_tag = soup.select_one(".AuthorName")
     if author_tag:
         author = normalize_text(author_tag.text)
+
+    publisher = "Unknown"
+    publisher_tag = soup.select_one("PublisherName")
+    if publisher_tag:
+        author = normalize_text(publisher_tag.text)
 
     price = 0
     price_tag = soup.select_one(".price")
@@ -113,7 +117,7 @@ def scrape_naiin_detail_page(driver, conn, book_url):
         "isbn": isbn,
         "title": title,
         "author": author,
-        "publisher": "Naiin",
+        "publisher": publisher,
         "price": price,
         "image_url": final_image_url,
         "url": book_url,
