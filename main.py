@@ -30,8 +30,7 @@ def get_driver():
     options.add_argument("--disable-infobars")
     options.add_argument("--disable-notifications")
     options.add_argument("--disable-dev-tools")
-
-    options.add_argument("--window-size=1920,1080")
+    options.add_argument("--single-process")
 
     driver = webdriver.Chrome(
         service=Service(ChromeDriverManager().install()),
@@ -58,19 +57,29 @@ def main():
     try:
 
         print("เริ่ม crawl Naiin")
+        driver = get_driver()
         scrape_naiin_all_pages(driver, conn)
+        driver.quit()
 
         print("เริ่ม crawl B2S")
+        driver = get_driver()
         scrape_b2s_all_pages(driver, conn)
+        driver.quit()
 
         print("เริ่ม crawl Jamsai")
+        driver = get_driver()
         scrape_jamsai_all_pages(driver, conn)
+        driver.quit()
 
         print("เริ่ม crawl SE-ED")
+        driver = get_driver()
         scrape_seed_all_pages(driver, conn)
+        driver.quit()
 
         print("เริ่ม crawl Amarin")
+        driver = get_driver()
         scrape_amarin_all_pages(driver, conn)
+        driver.quit()
 
         print("เริ่มแยกข้อมูลหนังสือ")
         process_books(conn)
