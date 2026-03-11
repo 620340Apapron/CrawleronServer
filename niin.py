@@ -4,6 +4,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
+from main import get_driver
 from db_service import insert_book
 from utils import extract_isbn
 import time
@@ -49,8 +50,15 @@ def scrape_naiin_all_pages(driver, conn, max_pages=10):
 
     book_urls = list(set(book_urls))
 
+
+    count = 0   
     for book_url in book_urls:
             scrape_naiin_detail_page(driver, conn, book_url)
+            count += 1
+
+            if count % 30 == 0:
+                driver.quit()
+                driver = get_driver()
 
 
 def scrape_naiin_detail_page(driver, conn, book_url):

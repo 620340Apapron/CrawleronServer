@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from main import get_driver
 import time
 from db_service import insert_book
 
@@ -35,6 +36,7 @@ def scrape_jamsai_all_pages(driver, conn, max_pages=5):
         books = soup.select(".product-item a")
 
         print("พบ", len(books), "เล่ม")
+        
 
         for b in books:
 
