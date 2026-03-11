@@ -3,7 +3,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
-from main import get_driver
+
 from bs4 import BeautifulSoup
 from db_service import insert_book
 from utils import extract_isbn
@@ -47,14 +47,10 @@ def scrape_amarin_all_pages(driver, conn, max_pages=10):
 
     book_urls = list(set(book_urls))
 
-    count = 0
+
     for book_url in book_urls:
             scrape_amarin_detail_page(driver, conn, book_url)
-            count += 1
-
-            if count % 30 == 0:
-                driver.quit()
-                driver = get_driver()
+            
 
 
 def scrape_amarin_detail_page(driver, conn, book_url):
