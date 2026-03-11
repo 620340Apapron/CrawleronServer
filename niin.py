@@ -19,26 +19,24 @@ def scrape_naiin_all_pages(driver, conn, max_pages=10):
 
     base_url = "https://www.naiin.com/category?category_1_code=2&product_type_id=1"
 
-    for page in range(1,11):
+    url = base_url
 
-        url = base_url.format(page)
+    print("เปิดหน้า:", url)
 
-        print("เปิดหน้า:", url)
+    driver.get(url)
+    time.sleep(5)
 
-        driver.get(url)
-        time.sleep(5)
-
-        WebDriverWait(driver,30).until(
+    WebDriverWait(driver,30).until(
             EC.presence_of_element_located((By.TAG_NAME,"body"))
         )
 
-        soup = BeautifulSoup(driver.page_source, "html.parser")
+    soup = BeautifulSoup(driver.page_source, "html.parser")
 
-        links = links = soup.select("a[href*='/product/detail/']")
+    links = links = soup.select("a[href*='/product/detail/']")
 
-        book_urls = []
+    book_urls = []
 
-        for link in links:
+    for link in links:
 
             href = link.get("href")
 
@@ -49,9 +47,9 @@ def scrape_naiin_all_pages(driver, conn, max_pages=10):
 
                 book_urls.append(href)
 
-        book_urls = list(set(book_urls))
+    book_urls = list(set(book_urls))
 
-        for book_url in book_urls:
+    for book_url in book_urls:
             scrape_naiin_detail_page(driver, conn, book_url)
 
 
