@@ -2,6 +2,7 @@ import ssl
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
+import os
 
 from db_service import create_connection, create_tables
 from book_history import update_history
@@ -24,24 +25,18 @@ def get_driver():
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--disable-gpu")
     
-    # Railway/Nixpacks typically installs to these locations
+    # Standard Railway paths
     chrome_path = "/usr/bin/google-chrome-stable"
-    driver_path = "/usr/bin/chromedriver"
-    
-    # Check if they exist, if not, try alternative chromium path
     if not os.path.exists(chrome_path):
         chrome_path = "/usr/bin/chromium"
 
     options.binary_location = chrome_path
-    service = Service(executable_path=driver_path)
     
-    try:
-        driver = webdriver.Chrome(service=service, options=options)
-        return driver
-    except Exception as e:
-        print(f"Failed to start Chrome. Error: {e}")
-        # Last resort: Try without explicit paths and let Selenium Manager find it
-        return webdriver.Chrome(options=options)
+    # Point to the driver installed by nixpacks
+    service = Service(executable_path="/usr/bin/chromedriver")
+    
+    driver = webdriver.Chrome(service=service, options=options)
+    return driver
 
 
 def main():
