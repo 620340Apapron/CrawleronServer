@@ -25,14 +25,24 @@ def get_driver():
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--disable-gpu")
     
-    # In Railway's Nixpacks environment, Chromium is located here:
-    options.binary_location = "/usr/bin/chromium"
-
-    # We use the system-installed chromedriver
-    service = Service("/usr/bin/chromedriver")
+    # Railway/Nixpacks typically installs to these locations
+    chrome_path = "/usr/bin/google-chrome-stable"
+    driver_path = "/usr/bin/chromedriver"
     
-    driver = webdriver.Chrome(service=service, options=options)
-    return driver
+    # Check if they exist, if not, try alternative chromium path
+    if not os.path.exists(chrome_path):
+        chrome_path = "/usr/bin/chromium"
+
+    options.binary_location = chrome_path
+    service = Service(executable_path=driver_path)
+    
+    try:
+        driver = webdriver.Chrome(service=service, options=options)
+        return driver
+    except Exception as e:
+        print(f"Failed to start Chrome. Error: {e}")
+        # Last resort: Try without explicit paths and let Selenium Manager find it
+        return webdriver.Chrome(options=options)
 
 
 def main():
