@@ -2,12 +2,21 @@ import mysql.connector
 import os
 
 def create_connection():
+    host = os.getenv("MYSQLHOST")
+    user = os.getenv("MYSQLUSER")
+    password = os.getenv("MYSQLPASSWORD")
+    database = os.getenv("MYSQLDATABASE")
+    port = os.getenv("MYSQLPORT", 3306)
+
+    # Debug print to see what Railway is giving you (Delete this later!)
+    print(f"Connecting to: {host} as {user}")
+
     return mysql.connector.connect(
-        host=os.getenv("MYSQLHOST"),
-        user=os.getenv("MYSQLUSER"),
-        password=os.getenv("MYSQLPASSWORD"),
-        database=os.getenv("MYSQLDATABASE"),
-        port=int(os.getenv("MYSQLPORT", 3306)),
+        host=host,
+        user=user,
+        password=password,
+        database=database,
+        port=int(port)
     )
 
 def create_tables(conn):
