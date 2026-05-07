@@ -6,10 +6,13 @@ def create_connection():
     user = os.getenv("MYSQLUSER")
     password = os.getenv("MYSQLPASSWORD")
     database = os.getenv("MYSQLDATABASE")
-    port = os.getenv("MYSQLPORT", 3306)
+    port = os.getenv("MYSQLPORT", "3306")
 
-    # Debug print to see what Railway is giving you (Delete this later!)
-    print(f"Connecting to: {host} as {user}")
+    # This helps you debug in the Railway Logs
+    print(f"Attempting connection to HOST: {host}, USER: {user}, DB: {database}")
+
+    if not host:
+        raise ValueError("MYSQLHOST environment variable is not set!")
 
     return mysql.connector.connect(
         host=host,
