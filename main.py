@@ -20,14 +20,18 @@ ssl._create_default_https_context = ssl._create_unverified_context
 
 def get_driver():
     options = Options()
-    options.add_argument("--headless=new") # Required for servers
+    options.add_argument("--headless=new")
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--disable-gpu")
     
-    options.binary_location = "/usr/bin/chromium" 
+    # In Railway's Nixpacks environment, Chromium is located here:
+    options.binary_location = "/usr/bin/chromium"
 
-    driver = webdriver.Chrome(options=options)
+    # We use the system-installed chromedriver
+    service = Service("/usr/bin/chromedriver")
+    
+    driver = webdriver.Chrome(service=service, options=options)
     return driver
 
 
