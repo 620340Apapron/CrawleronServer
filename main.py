@@ -1,8 +1,9 @@
 import ssl
+import os
+import shutil
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
-import os
 
 from db_service import create_connection, create_tables
 from book_history import update_history
@@ -25,18 +26,37 @@ def get_driver():
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--disable-gpu")
     
-    # Standard Railway paths
-    chrome_path = "/usr/bin/google-chrome-stable"
-    if not os.path.exists(chrome_path):
-        chrome_path = "/usr/bin/chromium"
+    # 1. Find Chrome Binary
+    # Try multiple common paths for Railway/Nixpacks
+    chrome_locations = [
+        "/usr/bin/google-chrome-stable",
+        "/usr/bin/google-chrome",
+        "/usr/bin/chromium",
+        "/usr/bin/chromium-browser",
+        shutil.which("google-chrome-stable"),
+        shutil.which("chromium")
+    ]
+    
+    chrome_path = next((loc for loc in chrome_locations if loc and os.path.exists(loc)), None)
+    
+    if chrome_path:
+        print(f"Found Chrome at: {chrome_path}")
+        options.binary_location = chrome_path
+    else:
+        print("Warning: Could not find Chrome binary path. Selenium might fail.")
 
-    options.binary_location = chrome_path
+    # 2. Find Chromedriver
+    driver_path = shutil.which("chromedriver") or "/usr/bin/chromedriver"
     
-    # Point to the driver installed by nixpacks
-    service = Service(executable_path="/usr/bin/chromedriver")
-    
-    driver = webdriver.Chrome(service=service, options=options)
-    return driver
+    if os.path.exists(driver_path):
+        print(f"Found Chromedriver at: {driver_path}")
+        service = Service(executable_path=driver_path)
+    else:
+        print(f"Error: Chromedriver not found at {driver_path}")
+        # If not found, we let Selenium try to find it in PATH automatically
+        service = Service()
+
+    return webdriver.Chrome(service=service, options=options)
 
 
 def main():
