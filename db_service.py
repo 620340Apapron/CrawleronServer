@@ -1,13 +1,7 @@
 import mysql.connector
 import os
 
-
 def create_connection():
-    print("HOST:", os.getenv("MYSQLHOST"))
-    print("USER:", os.getenv("MYSQLUSER"))
-    print("DB:", os.getenv("MYSQLDATABASE"))
-    print("PORT:", os.getenv("MYSQLPORT"))
-
     return mysql.connector.connect(
         host=os.getenv("MYSQLHOST"),
         user=os.getenv("MYSQLUSER"),
@@ -16,11 +10,9 @@ def create_connection():
         port=int(os.getenv("MYSQLPORT", 3306)),
     )
 
-
 def create_tables(conn):
-
     cursor = conn.cursor()
-
+    
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS raw_books (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -32,15 +24,13 @@ def create_tables(conn):
         image_url TEXT,
         url TEXT,
         source VARCHAR(50),
-                   
-        UNIQUE(isbn,source)
+        UNIQUE(isbn, source)
     )
     """)
 
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS books (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        isbn VARCHAR(50) UNIQUE,
+        isbn VARCHAR(50) PRIMARY KEY,
         title TEXT,
         author TEXT,
         publisher TEXT,
@@ -51,25 +41,31 @@ def create_tables(conn):
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS book_prices (
         id INT AUTO_INCREMENT PRIMARY KEY,
-        book_id INT,
+        isbn VARCHAR(50),
         source VARCHAR(50),
         price DECIMAL(10,2),
         url TEXT,
-                   
-        UNIQUE(book_id,source)
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (isbn) REFERENCES books(isbn),
+        UNIQUE(isbn, source)
     )
     """)
+    conn.commit()
 
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS book_history (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        isbn VARCHAR(50),
-        price DECIMAL(10,2),
-        source VARCHAR(50),
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    )
-    """)
-
+def insert_book(conn, book):
+    cursor = conn.cursor()
+    sql = """
+    INSERT INTO raw_books (isbn, title, author, publisher, price, image_url, url, source)
+    VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+    ON DUPLICATE KEY UPDATE
+        price = VALUES(price),
+        image_url = VALUES(image_url),
+        url = VALUES(url)
+    """
+    cursor.execute(sql, (
+        book["isbn"], book["title"], book["author"], book["publisher"],
+        book["price"], book["image_url"], book["url"], book["source"]
+    ))
     conn.commit()
 
 

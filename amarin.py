@@ -19,43 +19,21 @@ def normalize_text(txt):
     return " ".join(txt.strip().split())
 
 
-def scrape_amarin_all_pages(driver, conn, max_pages=10):
-
+def scrape_amarin_all_pages(driver, conn, max_books=50):
     base_url = "https://amarinbooks.com/product-category/%e0%b8%a7%e0%b8%a3%e0%b8%a3%e0%b8%93%e0%b8%81%e0%b8%a3%e0%b8%a3%e0%b8%a1/"
-
-    url = base_url
-
-    print("เปิดหน้า:", url)
-
-    driver.get(url)
+    driver.get(base_url)
     time.sleep(2)
 
-    try:
-        WebDriverWait(driver,10).until(
-            EC.presence_of_element_located((By.TAG_NAME,"li.product a.woocommerce-LoopProduct-link"))
-            )
-    except TimeoutException:
-        print("Jamsai: หน้าโหลดไม่สำเร็จ")
-        return
-
+    total_scraped = 0
     soup = BeautifulSoup(driver.page_source, "html.parser")
-
     links = soup.select("li.product a.woocommerce-LoopProduct-link")
 
-    book_urls = []
-
     for link in links:
-
-            href = link.get("href")
-
-            if href and "/product/" in href and "product-category" not in href:
-                book_urls.append(href)
-
-    book_urls = list(set(book_urls))
-
-
-    for book_url in book_urls:
-            scrape_amarin_detail_page(driver, conn, book_url)
+        if total_scraped >= max_books: break
+        href = link.get("href")
+        if href and "/product/" in href:
+            scrape_amarin_detail_page(driver, conn, href)
+            total_scraped += 1
             
 
 

@@ -19,80 +19,33 @@ def normalize_text(txt):
 
 
 def scrape_naiin_all_pages(driver, conn, max_pages=10):
-
-    base_url = "https://www.naiin.com/category?category_1_code=2&product_type_id=1"
-
-    url = base_url
-
-    print("เปิดหน้า:", url)
-
-    driver.get(url)
-    time.sleep(5)
-    
-    try:
-        WebDriverWait(driver,30).until(
-            EC.presence_of_element_located((By.TAG_NAME,"body"))
-            )
-    except TimeoutException:
-
-        print("Jamsai: หน้าโหลดไม่สำเร็จ")
-        return
-
-    soup = BeautifulSoup(driver.page_source, "html.parser")
-
-    links = links = soup.select("a[href*='/product/detail/']")
-
-    book_urls = []
-
-    for link in links:
-
+    total_scraped = 0
+    for page in range(1, 6):
+        if total_scraped >= max_books: break
+        driver.get(f"https://www.naiin.com/category?category_1_code=2&product_type_id=1")
+        time.sleep(2)
+        soup = BeautifulSoup(driver.page_source, "html.parser")
+        links = soup.select(".product-list-item a")
+        for link in links:
+            if total_scraped >= max_books: break
             href = link.get("href")
-
-            if href and "/product/detail/" in href:
-
-                if href.startswith("/"):
-                    href = "https://www.naiin.com" + href
-
-                book_urls.append(href)
-
-    book_urls = list(set(book_urls))
-
-
-    for book_url in book_urls:
-            scrape_naiin_detail_page(driver, conn, book_url)
+            if href:
+                scrape_naiin_detail_page(driver, conn, href)
+                total_scraped += 1
            
 
 def scrape_naiin_detail_page(driver, conn, book_url):
-
-    try:
-
-        driver.get(book_url)
-
-        html = driver.page_source
-
-    except Exception as e:
-
-        print("Chrome crashed at:", book_url)
-
-        return
-
+    driver.get(book_url)
     soup = BeautifulSoup(driver.page_source, "html.parser")
 
-    title = "Unknown"
-    title_tag = soup.select_one('meta[property="og:title"]')
-
-    if title_tag:
-        title = title_tag["content"] if title_tag else None
-
-    author = "Unknown"
-    author_tag = soup.select_one(".AuthorName")
-    if author_tag:
-        author = normalize_text(author_tag.text)
-
+    title = soup.select_one('meta[property="og:title"]')["content"] if soup.select_one('meta[property="og:title"]') else "Unknown"
+    author = normalize_text(soup.select_one(".AuthorName").text) if soup.select_one(".AuthorName") else "Unknown"
+    
+    # FIXED: Was saving into 'author' variable in your original file
     publisher = "Unknown"
     publisher_tag = soup.select_one(".PublisherName")
     if publisher_tag:
-        author = normalize_text(publisher_tag.text)
+        publisher = normalize_text(publisher_tag.text)
 
     price = 0
     price_tag = soup.select_one(".price")

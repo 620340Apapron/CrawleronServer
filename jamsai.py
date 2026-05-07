@@ -16,45 +16,20 @@ def normalize_text(txt):
     return ' '.join(txt.strip().split())
 
 
-def scrape_jamsai_all_pages(driver, conn, max_pages=5):
-
-    base_url = "https://www.jamsai.com/shop/?page={}"
-    book_urls=[]
-
-    for page in range(1,11):
-
-        url = base_url.format(page)
-
-        print("กำลังเปิด:", url)
-
-        driver.get(url)
+def scrape_jamsai_all_pages(driver, conn, max_books=50):
+    total_scraped = 0
+    for page in range(1, 6):
+        if total_scraped >= max_books: break
+        driver.get(f"https://www.jamsai.com/shop/?page={page}")
         time.sleep(2)
-
-        try:
-            WebDriverWait(driver,20).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR,".product-item a"))
-            )
-        except TimeoutException:
-
-             print("Jamsai: หน้าโหลดไม่สำเร็จ")
-             return
-
         soup = BeautifulSoup(driver.page_source, "html.parser")
-
         links = soup.select(".product-item a")
-
-        book_urls = []
-
         for link in links:
+            if total_scraped >= max_books: break
             href = link.get("href")
-            if href and "/product/" in href and "product-category" not in href:
-                book_urls.append(href)
-        
-        book_urls = list(set(book_urls))
-        
-        for book_url in book_urls:
-            scrape_jamsai_detail_page(driver, conn, book_url)
-
+            if href and "/product/" in href:
+                scrape_jamsai_detail_page(driver, conn, href)
+                total_scraped += 1
 
 
 def scrape_jamsai_detail_page(driver, conn, book_url):
