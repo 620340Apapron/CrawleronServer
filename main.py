@@ -50,11 +50,11 @@ def main():
 
     try:
         driver = get_driver() #
-        scrape_naiin_all_pages(driver, conn, max_books=limit)
-        scrape_b2s_all_pages(driver, conn, max_books=limit)
-        scrape_jamsai_all_pages(driver, conn, max_books=limit)
-        scrape_seed_all_pages(driver, conn, max_books=limit)
-        scrape_amarin_all_pages(driver, conn, max_books=limit)
+        scrape_naiin_all_pages(driver, conn)
+        scrape_b2s_all_pages(driver, conn)
+        scrape_jamsai_all_pages(driver, conn)
+        scrape_seed_all_pages(driver, conn)
+        scrape_amarin_all_pages(driver, conn)
         driver.quit()
 
         # Run normalization and history update
