@@ -21,42 +21,14 @@ ssl._create_default_https_context = ssl._create_unverified_context
 
 def get_driver():
     options = Options()
-    options.add_argument("--headless=new")
+    options.add_argument("--headless=new") # Run in the background
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
-    options.add_argument("--disable-gpu")
     
-    # 1. Find Chrome Binary
-    # Try multiple common paths for Railway/Nixpacks
-    chrome_locations = [
-        "/usr/bin/google-chrome-stable",
-        "/usr/bin/google-chrome",
-        "/usr/bin/chromium",
-        "/usr/bin/chromium-browser",
-        shutil.which("google-chrome-stable"),
-        shutil.which("chromium")
-    ]
-    
-    chrome_path = next((loc for loc in chrome_locations if loc and os.path.exists(loc)), None)
-    
-    if chrome_path:
-        print(f"Found Chrome at: {chrome_path}")
-        options.binary_location = chrome_path
-    else:
-        print("Warning: Could not find Chrome binary path. Selenium might fail.")
-
-    # 2. Find Chromedriver
-    driver_path = shutil.which("chromedriver") or "/usr/bin/chromedriver"
-    
-    if os.path.exists(driver_path):
-        print(f"Found Chromedriver at: {driver_path}")
-        service = Service(executable_path=driver_path)
-    else:
-        print(f"Error: Chromedriver not found at {driver_path}")
-        # If not found, we let Selenium try to find it in PATH automatically
-        service = Service()
-
-    return webdriver.Chrome(service=service, options=options)
+    # We tell Python: "The Oven is already installed in the kitchen"
+    service = Service() 
+    driver = webdriver.Chrome(service=service, options=options)
+    return driver
 
 
 def main():
