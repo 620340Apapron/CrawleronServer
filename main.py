@@ -2,7 +2,6 @@ import ssl
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
-from webdriver_manager.chrome import ChromeDriverManager
 
 from db_service import create_connection, create_tables
 from book_history import update_history
