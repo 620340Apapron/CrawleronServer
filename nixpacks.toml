@@ -1,11 +1,8 @@
-# nixpacks.toml
 [phases.setup]
-nixPkgs = ["python310", "google-chrome", "chromedriver"]
+nixPkgs = ["python311", "chromium", "chromedriver"]
 
-[phases.build]
-cmds = ["pip install -r requirements.txt"]
+[phases.install]
+cmds = ["python -m venv /opt/venv && /opt/venv/bin/pip install -r requirements.txt"]
 
-[variables]
-# These help Chrome run in a restricted container environment
-PYTHONUNBUFFERED = "1"
-CHROME_PATH = "/usr/bin/google-chrome-stable"
+[start]
+cmd = "python main.py"

@@ -21,14 +21,18 @@ ssl._create_default_https_context = ssl._create_unverified_context
 
 def get_driver():
     options = Options()
-    options.add_argument("--headless=new") # Run in the background
+    options.add_argument("--headless=new")
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("--disable-gpu")
     
-    # We tell Python: "The Oven is already installed in the kitchen"
-    service = Service() 
-    driver = webdriver.Chrome(service=service, options=options)
-    return driver
+    # This line automatically finds where 'chromium' is installed in the kitchen
+    path = shutil.which("chromium") or shutil.which("chromium-browser")
+    if path:
+        options.binary_location = path
+    
+    # Just start it up
+    return webdriver.Chrome(options=options)
 
 
 def main():
