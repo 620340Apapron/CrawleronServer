@@ -24,11 +24,15 @@ def get_driver():
     options = Options()
     options.add_argument("--headless=new")
     options.add_argument("--no-sandbox")
-    options.add_argument("--disable-dev-shm-usage") 
+    options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--disable-gpu")
     
-    options.add_argument("--blink-settings=imagesEnabled=false") 
-    options.add_argument("--disable-dev-tools")
+    # --- เพิ่มบรรทัดเหล่านี้เพื่อแก้ปัญหา FREEZE ---
+    options.add_argument("--blink-settings=imagesEnabled=false") # ไม่โหลดรูปภาพ
+    options.add_argument("--disable-extensions")
+    options.add_argument("--proxy-server='direct://'")
+    options.add_argument("--proxy-bypass-list=*")
+    options.page_load_strategy = 'eager' # โหลดเฉพาะ HTML ไม่ต้องรอ script อื่นๆ
     
     path = shutil.which("chromium") or shutil.which("chromium-browser")
     if path:
@@ -38,36 +42,32 @@ def get_driver():
 
 def main():
     print("เริ่มระบบ crawler")
-
     conn = create_connection() #
     create_tables(conn) #
     limit = 50
 
-    if conn is None:
-        print("เชื่อมต่อ database ไม่ได้")
-        return
+    scrapers = [
+        ("Naiin", scrape_naiin_all_pages),
+        ("B2S", scrape_b2s_all_pages),
+        # เพิ่มร้านอื่นๆ ตรงนี้
+    ]
 
-    create_tables(conn)
+    for name, scrape_func in scrapers:
+        driver = None
+        try:
+            print(f"กำลังเริ่มดึงข้อมูลจาก: {name}")
+            driver = get_driver() # เปิด browser ใหม่ทุกร้าน
+            scrape_func(driver, conn, max_books=limit)
+        except Exception as e:
+            print(f"เกิดข้อผิดพลาดที่ร้าน {name}: {e}")
+        finally:
+            if driver:
+                driver.quit() # ปิด browser ทันทีที่จบร้านเพื่อคืน RAM
+                time.sleep(2) # พักเครื่อง 2 วินาที
 
-    try:
-        driver = get_driver()
-        scrape_naiin_all_pages(driver, conn, max_books=limit)
-        scrape_b2s_all_pages(driver, conn, max_books=limit)
-        scrape_jamsai_all_pages(driver, conn, max_books=limit)
-        scrape_seed_all_pages(driver, conn, max_books=limit)
-        scrape_amarin_all_pages(driver, conn, max_books=limit)
-        
-        # REMOVE driver.quit() from here
-        
-        process_books(conn)
-        update_history(conn)
-
-    except Exception as e:
-        print(f"Error during execution: {e}")
-    finally:
-        if 'driver' in locals():
-            driver.quit() # This is the only one you need
-        conn.close()
+    process_books(conn)
+    update_history(conn)
+    conn.close()
 
 if __name__ == "__main__":
     main()

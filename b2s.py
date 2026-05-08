@@ -84,7 +84,14 @@ def scrape_b2s_detail_page(driver, conn, book_url):
     }
 
     try:
+        driver.get(book_url)
+        # รอให้ราคาโหลด
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, ".product-price, .price"))
+        )
+        # ... (โค้ดดึงข้อมูลเดิมของคุณ) ...
+        
         insert_book(conn, book_data)
-        print(f"Scraped: {book_data['title']}")
+        print(f"Scraped: {title}")
     except Exception as e:
-        print("DB error:", e)
+        print(f"B2S Detail Error ({book_url}): {e}")
