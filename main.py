@@ -21,13 +21,16 @@ load_dotenv()
 
 def get_driver():
     options = Options()
-    options.add_argument("--headless=new")
+    options = Options()
+    
     options.add_argument("--no-sandbox")
-    options.add_argument("--disable-dev-shm-usage") # บังคับใช้ /tmp แทน shm
+    options.add_argument("--remote-debugging-port=9222")
+    options.add_argument("--headless=new")
+    options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--disable-gpu")
     options.add_argument("--memory-pressure-off")
-    options.add_argument("--js-flags='--max-old-space-size=512'") # จำกัด RAM JS
-    options.add_argument("--blink-settings=imagesEnabled=false") # ไม่โหลดรูป
+    options.add_argument("--js-flags='--max-old-space-size=512'") 
+    options.add_argument("--blink-settings=imagesEnabled=false") 
     options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
     
     driver = webdriver.Chrome(options=options)

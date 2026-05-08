@@ -24,7 +24,7 @@ def scrape_b2s_all_pages(driver, conn, max_books=10, **kwargs):
         driver.get(f"https://www.b2s.co.th/en/category/books?page={page}")
         time.sleep(2)
         soup = BeautifulSoup(driver.page_source, "html.parser")
-        links = soup.select("a.product-item-link") or soup.select(".product-box-inner")
+        links = soup.select("a.product-item-link")
         for link in links:
             href = link.get("href")
             if href:

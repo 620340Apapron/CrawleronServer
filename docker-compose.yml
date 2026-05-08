@@ -1,6 +1,6 @@
 services:
   crawler:
     build: .
-    shm_size: '1gb' 
+    shm_size: '2gb' 
     environment:
       - MYSQLHOST=db
