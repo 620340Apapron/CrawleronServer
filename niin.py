@@ -44,17 +44,17 @@ def scrape_naiin_detail_page(driver, conn, book_url):
         
         soup = BeautifulSoup(driver.page_source, "html.parser")
 
-        title_tag = soup.find("h1") or soup.find("meta", property="og:title")
+        title_tag = soup.find("h1.product-name tw-hidden md:tw-block") or soup.find("product-name tw-hidden md:tw-block")
         title = normalize_text(title_tag.text if hasattr(title_tag, 'text') else title_tag.get("content", "Unknown"))
         
-        author_tag = soup.select_one("a.author-name") or soup.select_one(".AuthorName")
+        author_tag = soup.find("a.author-name tw-inline-flex truncate-1") or soup.select_one(".AuthorName")
         author = normalize_text(author_tag.text) if author_tag else "Unknown"
 
-        pub_tag = soup.select_one("a.publisher-name") or soup.select_one(".PublisherName")
+        pub_tag = soup.find("a.link-book-detail truncate-1") or soup.select_one(".PublisherName")
         publisher = normalize_text(pub_tag.text) if pub_tag else "Unknown"
 
         price = 0
-        price_tag = soup.select_one(".product-price-actual") or soup.select_one(".price")
+        price_tag = soup.select_one(".product-price-actual") or soup.find("div.price")
         if price_tag:
             m = re.search(r"[\d,.]+", price_tag.text)
             price = float(m.group(0).replace(",", "")) if m else 0
