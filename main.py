@@ -3,7 +3,7 @@ import os
 import shutil
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.chrome.service import Servic
+from selenium.webdriver.chrome.service import Service
 import json
 from decimal import Decimal
 from datetime import date, datetime
