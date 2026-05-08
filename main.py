@@ -27,9 +27,8 @@ def get_driver():
     options.add_argument("--disable-dev-shm-usage") 
     options.add_argument("--disable-gpu")
     
-    options.add_argument("--blink-settings=imagesEnabled=false")
-    options.add_argument("--disable-extensions")
-    options.add_argument("--disable-software-rasterizer")
+    options.add_argument("--blink-settings=imagesEnabled=false") 
+    options.add_argument("--disable-dev-tools")
     
     path = shutil.which("chromium") or shutil.which("chromium-browser")
     if path:

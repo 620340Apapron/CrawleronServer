@@ -42,7 +42,7 @@ def scrape_naiin_detail_page(driver, conn, book_url):
             EC.presence_of_element_located((By.CSS_SELECTOR, ".product-price, .price"))
         )
 
-        current_browser_url = driver.current_url 
+        final_url = driver.current_url
         
         soup = BeautifulSoup(driver.page_source, "html.parser")
 
@@ -73,11 +73,11 @@ def scrape_naiin_detail_page(driver, conn, book_url):
             "publisher": publisher,
             "price": price,
             "image_url": image_url,
-            "url": current_browser_url,
+            "url": final_url,
             "source": "naiin"
         }
 
-        book_data["url"] = current_browser_url
+        
         insert_book(conn, book_data)
         print(f"Scraped: {book_data['title']}")
 
