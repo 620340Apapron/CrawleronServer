@@ -44,8 +44,10 @@ def scrape_amarin_detail_page(driver, conn, book_url):
         title_tag = soup.find("h1")
         title = normalize_text(title_tag.text) if title_tag else "Unknown"
 
-        author_tag = soup.select_one(".product_meta .author")
-        author = normalize_text(author_tag.text) if author_tag else "Unknown"
+        author_tag = soup.select_one(".product_meta .author") or soup.find("span", string=re.compile("ผู้เขียน"))
+        author = "Unknown"
+        if author_tag:
+            author = normalize_text(author_tag.text.replace("ผู้เขียน:", ""))
 
         pub_tag = soup.select_one(".product_meta .posted_in")
         publisher = "Amarin"

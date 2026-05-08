@@ -39,10 +39,10 @@ def scrape_b2s_detail_page(driver, conn, book_url):
         WebDriverWait(driver, 15).until(EC.presence_of_element_located((By.CSS_SELECTOR, "h1.page-title")))
         soup = BeautifulSoup(driver.page_source, "html.parser")
 
-        title = normalize_text(soup.select_one("h1.page-title").text) if soup.select_one("h1.page-title") else "Unknown"
+        title_tag = soup.select_one("h1.page-title") or soup.find("h1")
+        title = normalize_text(title_tag.text) if title_tag else "Unknown"
         
-        # ดึงสำนักพิมพ์จากตารางคุณสมบัติหรือ Class เฉพาะ
-        pub_tag = soup.select_one(".mr-3.fw-bold") or soup.find("td", {"data-th": "Publisher"})
+        pub_tag = soup.find("td", {"data-th": "Publisher"}) or soup.select_one(".mr-3.fw-bold")
         publisher = normalize_text(pub_tag.text) if pub_tag else "B2S"
 
         author_tag = soup.select_one(".product.attribute.author")

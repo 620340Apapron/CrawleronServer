@@ -38,18 +38,17 @@ def scrape_seed_detail_page(driver, conn, book_url):
         WebDriverWait(driver, 15).until(EC.presence_of_element_located((By.TAG_NAME, "h1")))
         soup = BeautifulSoup(driver.page_source, "html.parser")
 
-        title_tag = soup.find("h1")
-        title = normalize_text(title_tag.text) if title_tag else "Unknown"
+        title = normalize_text(soup.find("h1").text) if soup.find("h1") else "Unknown"
 
         # ค้นหาคำว่าสำนักพิมพ์ในหน้าเว็บ
         pub_tag = soup.find("a", href=re.compile("publisher")) or soup.find("span", string=re.compile("สำนักพิมพ์"))
         publisher = normalize_text(pub_tag.text) if pub_tag else "Se-ed"
 
-        author_tag = soup.find("a", href=re.compile("author"))
+        author_tag = soup.find("a", href=re.compile(r"author", re.I))
         author = normalize_text(author_tag.text) if author_tag else "Unknown"
 
+        price_tag = soup.select_one(".price-cyber") or soup.select_one(".product-price")
         price = 0
-        price_tag = soup.select_one(".price-cyber") or soup.select_one(".price")
         if price_tag:
             m = re.search(r"[\d,.]+", price_tag.text)
             if m: price = float(m.group(0).replace(",", ""))

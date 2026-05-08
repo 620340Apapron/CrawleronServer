@@ -23,17 +23,15 @@ def get_driver():
     options = Options()
     options.add_argument("--headless=new")
     options.add_argument("--no-sandbox")
-    options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("--disable-dev-shm-usage") # บังคับใช้ /tmp แทน shm
     options.add_argument("--disable-gpu")
+    options.add_argument("--memory-pressure-off")
+    options.add_argument("--js-flags='--max-old-space-size=512'") # จำกัด RAM JS
+    options.add_argument("--blink-settings=imagesEnabled=false") # ไม่โหลดรูป
+    options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
     
-    # เพิ่ม 3 บรรทัดนี้
-    options.add_argument("--proxy-server='direct://'")
-    options.add_argument("--proxy-bypass-list=*")
-    options.add_argument("--js-flags='--max-old-space-size=512'") # จำกัด RAM ของ JS
-    
-    options.add_argument("--blink-settings=imagesEnabled=false") 
     driver = webdriver.Chrome(options=options)
-    driver.set_page_load_timeout(30) # เพิ่มเวลา timeout เผื่อเน็ตช้า
+    driver.set_page_load_timeout(30)
     return driver
 
 def run_crawler():
@@ -59,14 +57,11 @@ def run_crawler():
         for name, scrape_func in scrapers:
             driver = None
             try:
-        
                 if not conn or not conn.is_connected():
                     conn = create_connection()
-            
                 driver = get_driver()
                 print(f"🔍 กำลังเริ่มดึงข้อมูลจาก: {name}")
                 scrape_func(driver, conn, max_books=10)
-        
             except Exception as e:
                 print(f"❌ Error ในร้าน {name}: {e}")
             finally:
