@@ -66,19 +66,20 @@ def scrape_naiin_detail_page(driver, conn, book_url):
         image_url = image_tag.get("content") if image_tag else ""
 
         book_data = {
-            "isbn": isbn,
-            "title": title,
-            "author": author,
-            "publisher": publisher,
-            "price": price,
-            "image_url": image_url,
-            "url": final_url,
-            "source": "naiin"
-        }
-
-        
+        "isbn": isbn,
+        "title": title,
+        "author": author,
+        "publisher": "Amarin",
+        "price": price,
+        "image_url": image_url,
+        "url": book_url,
+        "source": "Amarin"
+    }
+    
+        # สำคัญมาก: ต้องมีบรรทัดนี้ ข้อมูลถึงจะเข้า raw_books!
+        from db_service import insert_book
         insert_book(conn, book_data)
-        print(f"Scraped: {book_data['title']}")
+        print(f"📥 บันทึกชั่วคราวสำเร็จ: {title}")
 
     except Exception as e:
         print(f"❌ โหลดหน้า {book_url} ไม่สำเร็จ: {e}")

@@ -67,17 +67,20 @@ def run_crawler():
             ("Amarin", scrape_amarin_all_pages),
         ]
 
-        for name, scrape_func in scrapers:
+    for name, scrape_func in scrapers:
+        driver = None
+        try:
+            # เช็คว่า Connection ยังดีอยู่ไหม ถ้าหลุดให้ต่อใหม่
+            if not conn or not conn.is_connected():
+             conn = create_connection()
+            
             driver = get_driver()
-            try:
-                print(f"🔍 กำลังดึงข้อมูลจาก: {name}...")
-                scrape_func(driver, conn, max_books=10) 
-            except Exception as e:
-                print(f"❌ Error ในร้าน {name}: {e}")
-            finally:
-                if driver:
-                    driver.quit()
-            time.sleep(2) # พักเบรคกันโดนบล็อก
+            print(f"🔍 กำลังเริ่มดึงข้อมูลจาก: {name}")
+            scrape_func(driver, conn, max_books=5) # ลอง 5 เล่มก่อน
+        except Exception as e:
+            print(f"❌ Error scraping {name}: {e}")
+        finally:
+            if driver: driver.quit()
 
         
         print("🔄 กำลังประมวลผลข้อมูล (Process Books)...")

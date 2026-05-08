@@ -94,6 +94,8 @@ def scrape_amarin_detail_page(driver, conn, book_url):
     }
 
     try:
+        from db_service import insert_book
         insert_book(conn, book_data)
+        print(f"📥 บันทึกชั่วคราวสำเร็จ: {title}")
     except Exception as e:
         print("DB error:", e)
