@@ -32,18 +32,14 @@ def scrape_jamsai_all_pages(driver, conn, max_books=50):
                 total_scraped += 1
 
 
-def scrape_jamsai_detail_page(driver, conn, book_url):
+def scrape_jamsai_detail_page(driver, conn, url):
 
     try:
-
-        driver.get(book_url)
-
-        html = driver.page_source
-
+        driver.get(url)
+        # ไม่ต้องรอจนโหลดเสร็จทั้งหน้า เอาแค่หัวข้อขึ้นก็พอ
+        time.sleep(1) 
     except Exception as e:
-
-        print("Chrome crashed at:", book_url)
-
+        print(f"⚠️ ข้ามหน้า {url} เพราะโหลดช้าเกินไป")
         return
 
     WebDriverWait(driver, 10).until(
@@ -58,10 +54,9 @@ def scrape_jamsai_detail_page(driver, conn, book_url):
     if isbn_tag:
         isbn = isbn_tag.get("content")
 
-    title = "Unknown"
-    title_tag = soup.select_one("h1")
-    if title_tag:
-        title = normalize_text(title_tag.text)
+    title = soup.select_one(".product_title") or soup.find("h1")
+
+    price_tag = soup.select_one(".woocommerce-Price-amount") or soup.select_one(".price")
 
     author = "Unknown"
     author_tag = soup.select_one(".author")
@@ -69,9 +64,6 @@ def scrape_jamsai_detail_page(driver, conn, book_url):
         author = normalize_text(author_tag.text)
 
     publisher = "Jamsai"
-
-    price = 0
-    price_tag = soup.select_one(".price")
 
     if price_tag:
         m = re.search(r'[\d,.]+', price_tag.text)

@@ -20,19 +20,31 @@ ssl._create_default_https_context = ssl._create_unverified_context
 load_dotenv()
 
 def get_driver():
+    
     options = Options()
     options.add_argument("--headless=new")
     options.add_argument("--no-sandbox")
-    options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("--disable-dev-shm-usage") 
     options.add_argument("--disable-gpu")
+
+    options.add_argument("--disable-blink-features=AutomationControlled")
+    options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36")
+
+    options.add_argument("--disable-extensions")
+    options.add_argument("--disable-infobars")
+    options.add_argument("--memory-pressure-off")
     options.add_argument("--blink-settings=imagesEnabled=false")
     
-    # กำหนด Path ของ ChromeDriver (ปรับตามสภาพแวดล้อมของคุณ)
+   
     chrome_bin = "/usr/bin/chromium-browser"
     if os.path.exists(chrome_bin):
         options.binary_location = chrome_bin
 
-    return webdriver.Chrome(options=options)
+    driver = webdriver.Chrome(options=options)
+    
+
+    driver.set_page_load_timeout(30) 
+    return driver
 
 def run_crawler():
     print("🚀 เริ่มระบบ Crawler (Standalone Mode)")

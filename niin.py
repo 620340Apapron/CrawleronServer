@@ -38,15 +38,16 @@ def scrape_naiin_all_pages(driver, conn, max_books=10, **kwargs):
 def scrape_naiin_detail_page(driver, conn, book_url):
     try:
         driver.get(book_url)
-        WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, ".product-price, .price"))
+        WebDriverWait(driver, 15).until(
+            EC.presence_of_element_located((By.TAG_NAME, "h1"))
         )
 
         final_url = driver.current_url
         
         soup = BeautifulSoup(driver.page_source, "html.parser")
 
-        title = soup.select_one('meta[property="og:title"]')["content"] if soup.select_one('meta[property="og:title"]') else "Unknown"
+        title_tag = soup.find("h1") or soup.find("meta", property="og:title")
+        title = normalize_text(title_tag.text if hasattr(title_tag, 'text') else title_tag.get("content", "Unknown"))
         
         author_tag = soup.select_one("a.author-name") or soup.select_one(".AuthorName")
         author = normalize_text(author_tag.text) if author_tag else "Unknown"
@@ -54,12 +55,10 @@ def scrape_naiin_detail_page(driver, conn, book_url):
         publisher_tag = soup.select_one("a.publisher-name") or soup.select_one(".PublisherName")
         publisher = normalize_text(publisher_tag.text) if publisher_tag else "Unknown"
 
-        price = 0
-        price_tag = soup.select_one(".product-price") or soup.select_one(".price")
+        price_tag = soup.select_one(".product-price-actual") or soup.select_one(".price")
         if price_tag:
             m = re.search(r"[\d,.]+", price_tag.text)
-            if m:
-                price = int(float(m.group(0).replace(",", "")))
+            price = float(m.group(0).replace(",", "")) if m else 0
 
         isbn = extract_isbn(soup)
         
@@ -82,4 +81,4 @@ def scrape_naiin_detail_page(driver, conn, book_url):
         print(f"Scraped: {book_data['title']}")
 
     except Exception as e:
-        print(f"Error scraping {book_url}: {e}")
+        print(f"❌ โหลดหน้า {book_url} ไม่สำเร็จ: {e}")

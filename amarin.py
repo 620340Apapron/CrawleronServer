@@ -1,9 +1,8 @@
 import re,time
 
-from selenium.common.exceptions import TimeoutException
-from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-
+from selenium.webdriver.common.by import By
 
 from bs4 import BeautifulSoup
 from db_service import insert_book
@@ -41,6 +40,9 @@ def scrape_amarin_detail_page(driver, conn, book_url):
     try:
 
         driver.get(book_url)
+        WebDriverWait(driver, 15).until(
+            EC.presence_of_element_located((By.TAG_NAME, "h1"))
+        )
 
         html = driver.page_source
 

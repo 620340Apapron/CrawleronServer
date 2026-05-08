@@ -42,13 +42,16 @@ def scrape_b2s_detail_page(driver, conn, book_url):
     current_browser_url = driver.current_url 
     soup = BeautifulSoup(driver.page_source, "html.parser")
 
-    title = normalize_text(soup.select_one("h1").text) if soup.select_one("h1") else "Unknown"
+    title = soup.select_one("h1.page-title") or soup.select_one("[data-ui-id='page-title-wrapper']")
+    title = normalize_text(title.text) if title else "Unknown"
+
     author = normalize_text(soup.select_one(".product.attribute.author").text) if soup.select_one(".product.attribute.author") else "Unknown"
     
     publisher_tag = soup.select_one(".mr-3.fw-bold") 
     publisher = normalize_text(publisher_tag.text) if publisher_tag else "Unknown"
 
-    isbn = "Unknown"
+    isbn_tag = soup.find("td", {"data-th": "ISBN"})
+    isbn = isbn_tag.text.strip() if isbn_tag else extract_isbn(soup)
 
     text = soup.get_text()
 
@@ -85,9 +88,8 @@ def scrape_b2s_detail_page(driver, conn, book_url):
 
     try:
         driver.get(book_url)
-        # รอให้ราคาโหลด
-        WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, ".product-price, .price"))
+        WebDriverWait(driver, 15).until(
+            EC.presence_of_element_located((By.TAG_NAME, "h1"))
         )
         
         insert_book(conn, book_data)
