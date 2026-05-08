@@ -4,6 +4,7 @@ import shutil
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
+import time
 
 from db_service import create_connection, create_tables
 from book_history import update_history
@@ -23,11 +24,14 @@ def get_driver():
     options = Options()
     options.add_argument("--headless=new")
     options.add_argument("--no-sandbox")
-    options.add_argument("--disable-dev-shm-usage")  # Stops memory crashes
+    options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--disable-gpu")
-    options.add_argument("--window-size=1920,1080")
     
-    # Help Railway find Chromium
+    # ADD THESE TO STOP THE FREEZE:
+    options.add_argument("--proxy-server='direct://'")
+    options.add_argument("--proxy-bypass-list=*")
+    options.add_argument("--blink-settings=imagesEnabled=false") # Don't load images (Saves RAM)
+    
     path = shutil.which("chromium") or shutil.which("chromium-browser")
     if path:
         options.binary_location = path

@@ -1,26 +1,28 @@
+import time
 import mysql.connector
 import os
 
+import time
+import mysql.connector
+
 def create_connection():
-    host = os.getenv("MYSQLHOST")
-    user = os.getenv("MYSQLUSER")
-    password = os.getenv("MYSQLPASSWORD")
-    database = os.getenv("MYSQLDATABASE")
-    port = os.getenv("MYSQLPORT", "3306")
-
-    # This helps you debug in the Railway Logs
-    print(f"Attempting connection to HOST: {host}, USER: {user}, DB: {database}")
-
-    if not host:
-        raise ValueError("MYSQLHOST environment variable is not set!")
-
-    return mysql.connector.connect(
-        host=host,
-        user=user,
-        password=password,
-        database=database,
-        port=int(port)
-    )
+    retries = 5
+    while retries > 0:
+        try:
+            conn = mysql.connector.connect(
+                host=os.getenv("MYSQLHOST"),
+                user=os.getenv("MYSQLUSER"),
+                password=os.getenv("MYSQLPASSWORD"),
+                database=os.getenv("MYSQLDATABASE"),
+                port=os.getenv("MYSQLPORT")
+            )
+            print("Successfully connected to MySQL!")
+            return conn
+        except Exception as e:
+            print(f"Database not ready yet... retrying in 5s ({retries} left)")
+            time.sleep(5)
+            retries -= 1
+    return None
 
 def create_tables(conn):
     cursor = conn.cursor()
