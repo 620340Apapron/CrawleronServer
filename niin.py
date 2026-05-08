@@ -1,11 +1,9 @@
 import re
 from bs4 import BeautifulSoup
 
-
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import TimeoutException
 
 from db_service import insert_book
 from utils import extract_isbn
@@ -35,49 +33,54 @@ def scrape_naiin_all_pages(driver, conn, max_books=50,):
            
 
 def scrape_naiin_detail_page(driver, conn, book_url):
-    driver.get(book_url)
-    soup = BeautifulSoup(driver.page_source, "html.parser")
-
-    title = soup.select_one('meta[property="og:title"]')["content"] if soup.select_one('meta[property="og:title"]') else "Unknown"
-    author = normalize_text(soup.select_one(".AuthorName").text) if soup.select_one(".AuthorName") else "Unknown"
-    
-    # FIXED: Was saving into 'author' variable in your original file
-    publisher = "Unknown"
-    publisher_tag = soup.select_one(".PublisherName")
-    if publisher_tag:
-        publisher = normalize_text(publisher_tag.text)
-
-    price = 0
-    price_tag = soup.select_one(".price")
-
-    if price_tag:
-        m = re.search(r"[\d,.]+", price_tag.text)
-
-        if m:
-            price = int(float(m.group(0).replace(",", "")))
-
-    isbn = extract_isbn(soup)
-
-    image_url = ""
-    image_tag = soup.find("meta", attrs={"property": "og:image"})
-
-    if image_tag:
-        image_url = image_tag.get("content")
-
-    final_image_url = image_url
-
-    book_data = {
-        "isbn": isbn,
-        "title": title,
-        "author": author,
-        "publisher": publisher,
-        "price": price,
-        "image_url": final_image_url,
-        "url": book_url,
-        "source": "naiin"
-    }
-
     try:
+        driver.get(book_url)
+        
+        # 1. SMART WAIT: Wait until the price or title is actually visible
+        # This prevents the "DevTools" disconnect and empty data
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, ".product-price, .price"))
+        )
+        
+        # 2. Get the ACTUAL current URL from the browser
+        current_browser_url = driver.current_url 
+        
+        soup = BeautifulSoup(driver.page_source, "html.parser")
+
+        # Selectors (Optimized for current Naiin layout)
+        title = soup.select_one('meta[property="og:title"]')["content"] if soup.select_one('meta[property="og:title"]') else "Unknown"
+        
+        author_tag = soup.select_one("a.author-name") or soup.select_one(".AuthorName")
+        author = normalize_text(author_tag.text) if author_tag else "Unknown"
+        
+        publisher_tag = soup.select_one("a.publisher-name") or soup.select_one(".PublisherName")
+        publisher = normalize_text(publisher_tag.text) if publisher_tag else "Unknown"
+
+        price = 0
+        price_tag = soup.select_one(".product-price") or soup.select_one(".price")
+        if price_tag:
+            m = re.search(r"[\d,.]+", price_tag.text)
+            if m:
+                price = int(float(m.group(0).replace(",", "")))
+
+        isbn = extract_isbn(soup)
+        
+        image_tag = soup.find("meta", attrs={"property": "og:image"})
+        image_url = image_tag.get("content") if image_tag else ""
+
+        book_data = {
+            "isbn": isbn,
+            "title": title,
+            "author": author,
+            "publisher": publisher,
+            "price": price,
+            "image_url": image_url,
+            "url": current_browser_url, # <--- SAVES THE LIVE URL FROM BROWSER
+            "source": "naiin"
+        }
+
         insert_book(conn, book_data)
+        print(f"Saved: {title}")
+
     except Exception as e:
-        print("DB error:", e)
+        print(f"Error scraping {book_url}: {e}")
