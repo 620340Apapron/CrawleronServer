@@ -33,66 +33,37 @@ def scrape_seed_all_pages(driver, conn, max_books = 50):
 
 
 def scrape_seed_detail_page(driver, conn, book_url):
-
     try:
-
         driver.get(book_url)
-        WebDriverWait(driver, 15).until(
-            EC.presence_of_element_located((By.TAG_NAME, "h1"))
-        )
+        WebDriverWait(driver, 15).until(EC.presence_of_element_located((By.TAG_NAME, "h1")))
+        
+        soup = BeautifulSoup(driver.page_source, "html.parser")
 
-        html = driver.page_source
+        title_tag = soup.find("h1")
+        title = normalize_text(title_tag.text) if title_tag else "Unknown"
 
-    except Exception as e:
+        # ซีเอ็ดมักระบุสำนักพิมพ์ในหน้าข้อมูลสินค้า
+        pub_tag = soup.find("a", href=re.compile("publisher")) or soup.find("span", string=re.compile("สำนักพิมพ์"))
+        publisher = "Se-ed"
+        if pub_tag:
+            publisher = normalize_text(pub_tag.text)
 
-        print("Chrome crashed at:", book_url)
+        price = 0
+        price_tag = soup.select_one(".price-cyber") or soup.select_one(".price")
+        if price_tag:
+            m = re.search(r"[\d,.]+", price_tag.text)
+            if m: price = float(m.group(0).replace(",", ""))
 
-        return
-    current_browser_url = driver.current_url 
+        isbn = extract_isbn(soup)
+        image_tag = soup.find("meta", attrs={"property": "og:image"})
+        image_url = image_tag.get("content") if image_tag else ""
 
-    soup = BeautifulSoup(driver.page_source, "html.parser")
-
-    title = "Unknown"
-    title_tag = soup.select_one("h1")
-
-    if title_tag:
-        title = normalize_text(title_tag.text)
-
-    author = "Unknown"
-
-    price = 0
-    price_tag = soup.select_one(".price")
-
-    if price_tag:
-        m = re.search(r"[\d,.]+", price_tag.text)
-
-        if m:
-            price = int(float(m.group(0).replace(",", "")))
-
-    isbn = extract_isbn(soup)
-
-    image_url = ""
-    image_tag = soup.find("meta", attrs={"property": "og:image"})
-
-    if image_tag:
-        image_url = image_tag.get("content")
-
-    final_image_url = image_url
-
-    book_data = {
-        "isbn": isbn,
-        "title": title,
-        "author": author,
-        "publisher": "SE-ED",
-        "price": price,
-        "image_url": final_image_url,
-        "url": current_browser_url,
-        "source": "seed"
-    }
-
-    try:
-        from db_service import insert_book
+        book_data = {
+            "isbn": isbn, "title": title, "author": "Unknown",
+            "publisher": publisher, "price": price, "image_url": image_url,
+            "url": book_url, "source": "Seed"
+        }
         insert_book(conn, book_data)
-        print(f"📥 บันทึกชั่วคราวสำเร็จ: {title}")
+        print(f"📥 Saved: {title} from Seed")
     except Exception as e:
-        print("DB error:", e)
+        print(f"❌ Error Seed: {book_url} - {e}")

@@ -33,62 +33,35 @@ def scrape_jamsai_all_pages(driver, conn, max_books=50):
 
 
 def scrape_jamsai_detail_page(driver, conn, url):
-
     try:
         driver.get(url)
-        # ไม่ต้องรอจนโหลดเสร็จทั้งหน้า เอาแค่หัวข้อขึ้นก็พอ
-        time.sleep(1) 
-    except Exception as e:
-        print(f"⚠️ ข้ามหน้า {url} เพราะโหลดช้าเกินไป")
-        return
+        WebDriverWait(driver, 15).until(EC.presence_of_element_located((By.TAG_NAME, "h1")))
+        
+        soup = BeautifulSoup(driver.page_source, "html.parser")
 
-    WebDriverWait(driver, 10).until(
-        EC.presence_of_element_located((By.TAG_NAME, "h1"))
-    )
-    current_browser_url = driver.current_url 
+        title_tag = soup.select_one(".product_title") or soup.find("h1")
+        title = normalize_text(title_tag.text) if title_tag else "Unknown"
 
-    soup = BeautifulSoup(driver.page_source, "html.parser")
+        # แจ่มใสส่วนใหญ่เป็นสำนักพิมพ์แจ่มใสเอง แต่อาจมีแบรนด์ย่อย
+        pub_tag = soup.select_one(".product_meta .posted_in")
+        publisher = "Jamsai"
+        if pub_tag and "สำนักพิมพ์" in pub_tag.text:
+            publisher = normalize_text(pub_tag.text.replace("หมวดหมู่:", "").replace("สำนักพิมพ์", ""))
 
-    isbn = "Unknown"
-    isbn_tag = soup.find("meta", attrs={"property": "book:isbn"})
-    if isbn_tag:
-        isbn = isbn_tag.get("content")
+        price = 0
+        price_tag = soup.select_one(".woocommerce-Price-amount") or soup.select_one(".price")
+        if price_tag:
+            m = re.search(r"[\d,.]+", price_tag.text)
+            if m: price = float(m.group(0).replace(",", ""))
 
-    title = soup.select_one(".product_title") or soup.find("h1")
-
-    price_tag = soup.select_one(".woocommerce-Price-amount") or soup.select_one(".price")
-
-    author = "Unknown"
-    author_tag = soup.select_one(".author")
-    if author_tag:
-        author = normalize_text(author_tag.text)
-
-    publisher = "Jamsai"
-
-    if price_tag:
-        m = re.search(r'[\d,.]+', price_tag.text)
-        if m:
-            price = float(m.group(0).replace(",", ""))
-
-    image_url = ""
-    image_tag = soup.find("meta", attrs={"property": "og:image"})
-    if image_tag:
-        image_url = image_tag.get("content")
-
-    book_data = {
-        "isbn": isbn,
-        "title": title,
-        "author": author,
-        "publisher": publisher,
-        "price": price,
-        "image_url": image_url,
-        "url": current_browser_url,
-        "source": "jamsai"
-    }
-
-    try:
-        from db_service import insert_book
+        isbn = extract_isbn(soup)
+        
+        book_data = {
+            "isbn": isbn, "title": title, "author": "Unknown",
+            "publisher": publisher, "price": price, "image_url": "",
+            "url": url, "source": "Jamsai"
+        }
         insert_book(conn, book_data)
-        print(f"📥 บันทึกชั่วคราวสำเร็จ: {title}")
+        print(f"📥 Saved: {title} from Jamsai")
     except Exception as e:
-        print("DB error:", e)
+        print(f"❌ Error Jamsai: {url} - {e}")

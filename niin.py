@@ -41,8 +41,6 @@ def scrape_naiin_detail_page(driver, conn, book_url):
         WebDriverWait(driver, 15).until(
             EC.presence_of_element_located((By.TAG_NAME, "h1"))
         )
-
-        final_url = driver.current_url
         
         soup = BeautifulSoup(driver.page_source, "html.parser")
 
@@ -51,35 +49,33 @@ def scrape_naiin_detail_page(driver, conn, book_url):
         
         author_tag = soup.select_one("a.author-name") or soup.select_one(".AuthorName")
         author = normalize_text(author_tag.text) if author_tag else "Unknown"
-        
-        publisher_tag = soup.select_one("a.publisher-name") or soup.select_one(".PublisherName")
-        publisher = normalize_text(publisher_tag.text) if publisher_tag else "Unknown"
 
+        pub_tag = soup.select_one("a.publisher-name") or soup.select_one(".PublisherName")
+        publisher = normalize_text(pub_tag.text) if pub_tag else "Unknown"
+
+        price = 0
         price_tag = soup.select_one(".product-price-actual") or soup.select_one(".price")
         if price_tag:
             m = re.search(r"[\d,.]+", price_tag.text)
             price = float(m.group(0).replace(",", "")) if m else 0
 
         isbn = extract_isbn(soup)
-        
+
         image_tag = soup.find("meta", attrs={"property": "og:image"})
         image_url = image_tag.get("content") if image_tag else ""
 
         book_data = {
-        "isbn": isbn,
-        "title": title,
-        "author": author,
-        "publisher": "Amarin",
-        "price": price,
-        "image_url": image_url,
-        "url": book_url,
-        "source": "Amarin"
-    }
-    
-        # สำคัญมาก: ต้องมีบรรทัดนี้ ข้อมูลถึงจะเข้า raw_books!
-        from db_service import insert_book
-        insert_book(conn, book_data)
-        print(f"📥 บันทึกชั่วคราวสำเร็จ: {title}")
+            "isbn": isbn,
+            "title": title,
+            "author": author,
+            "publisher": publisher,
+            "price": price,
+            "image_url": image_url,
+            "url": book_url,
+            "source": "Naiin"
+        }
 
+        insert_book(conn, book_data)
+        
     except Exception as e:
-        print(f"❌ โหลดหน้า {book_url} ไม่สำเร็จ: {e}")
+        print(f"❌ Error scraping Naiin detail at {book_url}: {e}")

@@ -36,58 +36,33 @@ def scrape_b2s_all_pages(driver, conn, max_books=10, **kwargs):
 def scrape_b2s_detail_page(driver, conn, book_url):
     try:
         driver.get(book_url)
-        WebDriverWait(driver, 15).until(
-            EC.presence_of_element_located((By.TAG_NAME, "h1"))
-        )
-        current_browser_url = driver.current_url 
+        WebDriverWait(driver, 15).until(EC.presence_of_element_located((By.CSS_SELECTOR, "h1.page-title")))
+        
         soup = BeautifulSoup(driver.page_source, "html.parser")
 
-        title = soup.select_one("h1.page-title") or soup.select_one("[data-ui-id='page-title-wrapper']")
-        title = normalize_text(title.text) if title else "Unknown"
+        title = normalize_text(soup.select_one("h1.page-title").text) if soup.select_one("h1.page-title") else "Unknown"
 
-        author = normalize_text(soup.select_one(".product.attribute.author").text) if soup.select_one(".product.attribute.author") else "Unknown"
-    
-        publisher_tag = soup.select_one(".mr-3.fw-bold") 
-        publisher = normalize_text(publisher_tag.text) if publisher_tag else "Unknown"
-
+        # B2S ใช้คลาส mr-3 fw-bold สำหรับบอกสำนักพิมพ์ในหน้ารายละเอียด
+        pub_tag = soup.select_one(".mr-3.fw-bold") or soup.find("td", {"data-th": "Publisher"})
+        publisher = normalize_text(pub_tag.text) if pub_tag else "B2S"
+        
+        # ISBN จากตาราง More Information
         isbn_tag = soup.find("td", {"data-th": "ISBN"})
         isbn = isbn_tag.text.strip() if isbn_tag else extract_isbn(soup)
 
-        text = soup.get_text()
-
-        m = re.search(r"ISBN\s*[:\-]?\s*(\d+)", text)
-
-        if m:
-            isbn = m.group(1)
-
         price = 0
-        price_tag = soup.select_one(".price")
-
+        price_tag = soup.select_one(".price-wrapper .price") or soup.select_one(".price")
         if price_tag:
             m = re.search(r"[\d,.]+", price_tag.text)
+            if m: price = float(m.group(0).replace(",", ""))
 
-        if m:
-            price = float(m.group(0).replace(",", ""))
-
-        image_url = ""
-        image_tag = soup.find("meta", attrs={"property": "og:image"})
-
-        if image_tag:
-            image_url = image_tag.get("content")
-        
         book_data = {
-        "isbn": isbn,
-        "title": title,
-        "author": author,
-        "publisher": publisher,
-        "price": price,
-        "image_url": image_url,
-        "url": current_browser_url,
-        "source": "b2s"
-    }
-        from db_service import insert_book
+            "isbn": isbn, "title": title, "author": "Unknown",
+            "publisher": publisher, "price": price, "image_url": "",
+            "url": book_url, "source": "B2S"
+        }
         insert_book(conn, book_data)
-        print(f"📥 บันทึกชั่วคราวสำเร็จ: {title}")
+        print(f"📥 Saved: {title} from B2S")
 
     except Exception as e:
-        print(f"B2S Detail Error ({book_url}): {e}")
+        print(f"❌ Error B2S: {book_url} - {e}")

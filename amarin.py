@@ -36,66 +36,48 @@ def scrape_amarin_all_pages(driver, conn, max_books=50):
 
 
 def scrape_amarin_detail_page(driver, conn, book_url):
-
     try:
-
         driver.get(book_url)
-        WebDriverWait(driver, 15).until(
-            EC.presence_of_element_located((By.TAG_NAME, "h1"))
-        )
+        # รอให้ h1 (ชื่อหนังสือ) ปรากฏ
+        WebDriverWait(driver, 15).until(EC.presence_of_element_located((By.TAG_NAME, "h1")))
+        
+        soup = BeautifulSoup(driver.page_source, "html.parser")
 
-        html = driver.page_source
+        # 1. ชื่อเรื่อง
+        title_tag = soup.find("h1")
+        title = normalize_text(title_tag.text) if title_tag else "Unknown"
 
-    except Exception as e:
+        # 2. ผู้เขียน (อมรินทร์มักวางไว้ในรายละเอียดสินค้า)
+        author = "Unknown"
+        author_tag = soup.select_one(".product_meta .author")
+        if author_tag: author = normalize_text(author_tag.text)
 
-        print("Chrome crashed at:", book_url)
+        # อมรินทร์มักจะวางสำนักพิมพ์ไว้ในส่วนรายละเอียดหรือ meta
+        pub_tag = soup.select_one(".product_meta .posted_in") or soup.find("span", string=re.compile("สำนักพิมพ์"))
+        publisher = "Amarin" # ค่าเริ่มต้น
+        if pub_tag:
+            publisher = normalize_text(pub_tag.text.replace("สำนักพิมพ์:", ""))
 
-        return
-    current_browser_url = driver.current_url 
+        # 3. ราคา
+        price = 0
+        price_tag = soup.select_one(".price")
+        if price_tag:
+            m = re.search(r"[\d,.]+", price_tag.text)
+            if m: price = float(m.group(0).replace(",", ""))
 
-    soup = BeautifulSoup(driver.page_source, "html.parser")
+        # 4. ISBN และรูปภาพ
+        isbn = extract_isbn(soup)
+        image_tag = soup.find("meta", attrs={"property": "og:image"})
+        image_url = image_tag.get("content") if image_tag else ""
 
-    title = "Unknown"
-    tag = soup.select_one("h1")
-
-    if tag:
-        title = normalize_text(tag.text)
-
-    author = "Unknown"
-
-    price = 0
-    price_tag = soup.select_one(".price")
-
-    if price_tag:
-        m = re.search(r"[\d,.]+", price_tag.text)
-
-        if m:
-            price = int(float(m.group(0).replace(",", "")))
-
-    isbn = extract_isbn(soup)
-
-    image_url = ""
-    image_tag = soup.find("meta", attrs={"property": "og:image"})
-
-    if image_tag:
-        image_url = image_tag.get("content")
-
-    final_image_url = image_url
-
-    book_data = {
-        "isbn": isbn,
-        "title": title,
-        "author": author,
-        "publisher": "Amarin",
-        "price": price,
-        "image_url": final_image_url,
-        "url": current_browser_url,
-        "source": "amarin"
-    }
-
-    try:
-        from db_service import insert_book
+        # 5. บันทึกข้อมูล
+        book_data = {
+            "isbn": isbn, "title": title, "author": author,
+            "publisher": publisher, "price": price, "image_url": image_url,
+            "url": book_url, "source": "Amarin"
+        }
         insert_book(conn, book_data)
-        print(f"📥 บันทึกชั่วคราวสำเร็จ: {title}")
+        print(f"📥 Saved: {title} from Amarin")
+
     except Exception as e:
-        print("DB error:", e)
+        print(f"❌ Error Amarin: {book_url} - {e}")
