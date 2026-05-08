@@ -1,3 +1,5 @@
+FROM python:3.11-sli
+
 RUN apt-get update && apt-get install -y \
     apt-transport-https \
     ca-certificates \
@@ -47,3 +49,9 @@ RUN apt-get update && apt-get install -y \
     libxtst6 \
     lsb-release \
     xdg-utils
+
+COPY . /app
+WORKDIR /app
+
+RUN pip install -r requirements.txt
+CMD ["python", "your_script.py"]
