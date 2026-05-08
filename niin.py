@@ -16,7 +16,7 @@ def normalize_text(txt):
     return " ".join(txt.strip().split())
 
 
-def scrape_naiin_all_pages(driver, conn, max_books=10, **kwargs):
+def scrape_naiin_all_pages(driver, conn, max_books=50, **kwargs):
     total_scraped = 0
     for page in range(1, 6):
         if total_scraped >= max_books: break
@@ -80,4 +80,4 @@ def scrape_naiin_detail_page(driver, conn, book_url):
         
         
     except Exception as e:
-        print(f"❌ Error scraping Naiin detail at {book_url}: {e}")
+        print(f"Error scraping Naiin detail at {book_url}: {e}")

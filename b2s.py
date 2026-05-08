@@ -17,7 +17,7 @@ def normalize_text(txt):
     return " ".join(txt.strip().split())
 
 
-def scrape_b2s_all_pages(driver, conn, max_books=10, **kwargs):
+def scrape_b2s_all_pages(driver, conn, max_books=50, **kwargs):
     total_scraped = 0
     for page in range(1, 6):
         if total_scraped >= max_books: break
@@ -28,7 +28,7 @@ def scrape_b2s_all_pages(driver, conn, max_books=10, **kwargs):
         for link in links:
             href = link.get("href")
             if href:
-                print(f"🔗 พบลิงก์ B2S: {href}")
+                print(f"พบลิงก์ B2S: {href}")
                 scrape_b2s_detail_page(driver, conn, href)
 
 
@@ -36,7 +36,7 @@ def scrape_b2s_detail_page(driver, conn, book_url):
     try:
         driver.get(book_url)
         WebDriverWait(driver, 15).until(EC.presence_of_element_located((By.CSS_SELECTOR, "h1.page-title")))
-        
+
         soup = BeautifulSoup(driver.page_source, "html.parser")
         
 
@@ -67,6 +67,6 @@ def scrape_b2s_detail_page(driver, conn, book_url):
             "url": book_url, "source": "B2S"
         }
         insert_book(conn, book_data)
-        print(f"📥 Saved: {title} from B2S")
+        print(f"Saved: {title} from B2S")
     except Exception as e:
-        print(f"❌ Error B2S: {e}")
+        print(f"Error B2S: {e}")

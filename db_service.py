@@ -35,7 +35,7 @@ def create_tables(conn):
 
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS books (
-        id INT AUTO_INCREMENT PRIMARY KEY, -- ต้องมีบรรทัดนี้
+        id INT AUTO_INCREMENT PRIMARY KEY, 
         isbn VARCHAR(50) UNIQUE,
         title TEXT,
         author TEXT,
@@ -76,9 +76,9 @@ def insert_book(conn, book):
     try:
         cursor.execute(sql, (...))
         conn.commit()
-        print(f"✅ บันทึกสำเร็จ: {book['isbn']}")
+        print(f"บันทึกสำเร็จ: {book['isbn']}")
     except Exception as e:
-        print(f"❌ DB Error: {e}")
+        print(f"DB Error: {e}")
     
     conn.commit()
 def get_books():

@@ -38,14 +38,14 @@ def get_driver():
     return driver
 
 def run_crawler():
-    print("🚀 เริ่มระบบ Crawler (Standalone Mode)")
+    print("เริ่มระบบ Crawler (Standalone Mode)")
     conn = create_connection()
     if not conn:
-        print("❌ ไม่สามารถเชื่อมต่อฐานข้อมูลได้")
+        print("ไม่สามารถเชื่อมต่อฐานข้อมูลได้")
         return
 
     try:
-        print("📦 กำลังตรวจสอบตาราง...")
+        print("กำลังตรวจสอบตาราง...")
         create_tables(conn)
 
         
@@ -63,25 +63,25 @@ def run_crawler():
                 if not conn or not conn.is_connected():
                     conn = create_connection()
                 driver = get_driver()
-                print(f"🔍 กำลังเริ่มดึงข้อมูลจาก: {name}")
-                scrape_func(driver, conn, max_books=10)
+                print(f"กำลังเริ่มดึงข้อมูลจาก: {name}")
+                scrape_func(driver, conn, max_books=50)
             except Exception as e:
-                print(f"❌ Error ในร้าน {name}: {e}")
+                print(f"Error ในร้าน {name}: {e}")
             finally:
                 if driver:
                     try:
-                        driver.quit() # ปิด browser ให้สนิท
+                        driver.quit()
                     except:
                         pass
-                print(f"💤 พักเครื่อง 5 วินาทีก่อนเริ่มร้านถัดไป...")
-                time.sleep(5) # ให้ระบบได้หายใจคืน RAM
+                print(f"พักเครื่อง 5 วินาทีก่อนเริ่มร้านถัดไป...")
+                time.sleep(5)
 
         
-        print("🔄 กำลังประมวลผลข้อมูล (Process Books)...")
+        print("กำลังประมวลผลข้อมูล (Process Books)...")
         process_books(conn)
         update_history(conn)
         
-        print("✅ เสร็จสมบูรณ์! ข้อมูลถูกบันทึกลง MySQL แล้ว")
+        print("เสร็จสมบูรณ์! ข้อมูลถูกบันทึกลง MySQL แล้ว")
 
     finally:
         conn.close()
