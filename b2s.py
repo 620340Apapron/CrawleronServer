@@ -45,8 +45,7 @@ def scrape_b2s_detail_page(driver, conn, book_url):
         # B2S ใช้คลาส mr-3 fw-bold สำหรับบอกสำนักพิมพ์ในหน้ารายละเอียด
         pub_tag = soup.select_one(".mr-3.fw-bold") or soup.find("td", {"data-th": "Publisher"})
         publisher = normalize_text(pub_tag.text) if pub_tag else "B2S"
-        
-        # ISBN จากตาราง More Information
+
         isbn_tag = soup.find("td", {"data-th": "ISBN"})
         isbn = isbn_tag.text.strip() if isbn_tag else extract_isbn(soup)
 

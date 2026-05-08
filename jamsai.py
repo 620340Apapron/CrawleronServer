@@ -43,7 +43,6 @@ def scrape_jamsai_detail_page(driver, conn, url):
         title_tag = soup.select_one(".product_title") or soup.find("h1")
         title = normalize_text(title_tag.text) if title_tag else "Unknown"
 
-        # แจ่มใสส่วนใหญ่เป็นสำนักพิมพ์แจ่มใสเอง แต่อาจมีแบรนด์ย่อย
         pub_tag = soup.select_one(".product_meta .posted_in")
         publisher = "Jamsai"
         if pub_tag and "สำนักพิมพ์" in pub_tag.text:

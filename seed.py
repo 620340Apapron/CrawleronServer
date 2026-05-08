@@ -42,7 +42,6 @@ def scrape_seed_detail_page(driver, conn, book_url):
         title_tag = soup.find("h1")
         title = normalize_text(title_tag.text) if title_tag else "Unknown"
 
-        # ซีเอ็ดมักระบุสำนักพิมพ์ในหน้าข้อมูลสินค้า
         pub_tag = soup.find("a", href=re.compile("publisher")) or soup.find("span", string=re.compile("สำนักพิมพ์"))
         publisher = "Se-ed"
         if pub_tag:

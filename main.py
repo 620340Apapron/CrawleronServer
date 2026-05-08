@@ -20,30 +20,21 @@ ssl._create_default_https_context = ssl._create_unverified_context
 load_dotenv()
 
 def get_driver():
-    
     options = Options()
     options.add_argument("--headless=new")
     options.add_argument("--no-sandbox")
-    options.add_argument("--disable-dev-shm-usage") 
+    options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--disable-gpu")
-
+    options.add_argument("--disable-extensions")
+    options.add_argument("--disable-software-rasterizer")
+    options.add_argument("--memory-pressure-off")
+    options.add_argument("--blink-settings=imagesEnabled=false") 
+    
     options.add_argument("--disable-blink-features=AutomationControlled")
     options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36")
 
-    options.add_argument("--disable-extensions")
-    options.add_argument("--disable-infobars")
-    options.add_argument("--memory-pressure-off")
-    options.add_argument("--blink-settings=imagesEnabled=false")
-    
-   
-    chrome_bin = "/usr/bin/chromium-browser"
-    if os.path.exists(chrome_bin):
-        options.binary_location = chrome_bin
-
     driver = webdriver.Chrome(options=options)
-    
-
-    driver.set_page_load_timeout(30) 
+    driver.set_page_load_timeout(20)
     return driver
 
 def run_crawler():
@@ -70,15 +61,20 @@ def run_crawler():
             driver = None
             try:
                 if not conn or not conn.is_connected():
-                    conn = create_connection()
-            
+                    conn = create_connection()      
                 driver = get_driver()
                 print(f"🔍 กำลังเริ่มดึงข้อมูลจาก: {name}")
-                scrape_func(driver, conn, max_books=5) # ลอง 5 เล่มก่อน
+                scrape_func(driver, conn, max_books=3)            
             except Exception as e:
-                print(f"❌ Error scraping {name}: {e}")
+                print(f"❌ Error ในร้าน {name}: {e}")
             finally:
-                if driver: driver.quit()
+                if driver:
+                    try:
+                        driver.close()
+                        driver.quit()
+                    except:
+                        pass
+                time.sleep(2)
 
         
         print("🔄 กำลังประมวลผลข้อมูล (Process Books)...")
