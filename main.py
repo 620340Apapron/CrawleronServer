@@ -23,15 +23,15 @@ def get_driver():
     options = Options()
     options.add_argument("--headless=new")
     options.add_argument("--no-sandbox")
-    options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("--disable-dev-shm-usage")  # Stops memory crashes
     options.add_argument("--disable-gpu")
+    options.add_argument("--window-size=1920,1080")
     
-    # This line automatically finds where 'chromium' is installed in the kitchen
+    # Help Railway find Chromium
     path = shutil.which("chromium") or shutil.which("chromium-browser")
     if path:
         options.binary_location = path
-    
-    # Just start it up
+        
     return webdriver.Chrome(options=options)
 
 
@@ -49,19 +49,23 @@ def main():
     create_tables(conn)
 
     try:
-        driver = get_driver() #
+        driver = get_driver()
         scrape_naiin_all_pages(driver, conn)
         scrape_b2s_all_pages(driver, conn)
         scrape_jamsai_all_pages(driver, conn)
         scrape_seed_all_pages(driver, conn)
         scrape_amarin_all_pages(driver, conn)
-        driver.quit()
-
-        # Run normalization and history update
+        
+        # REMOVE driver.quit() from here
+        
         process_books(conn)
         update_history(conn)
 
+    except Exception as e:
+        print(f"Error during execution: {e}")
     finally:
+        if 'driver' in locals():
+            driver.quit() # This is the only one you need
         conn.close()
 
 if __name__ == "__main__":
