@@ -76,19 +76,22 @@ def get_bookdetail():
         print(f"ERROR: {e}")
         return jsonify({"error": str(e)}), 500
     
-@app.route('/trigger-crawl', methods=['GET'])
-def trigger_crawler():
+def run_crawler_in_background():
+    print("⏳ เริ่มต้นกระบวนการ Crawler ในเบื้องหลัง...")
+    # เรียกใช้ฟังก์ชัน main() เดิมที่คุณเขียนไว้
+    # (ตรวจสอบให้แน่ใจว่าใน main() มีการเรียก process_books ด้วย)
     try:
-        import threading
-        thread = threading.Thread(target=main_crawl_process)
-        thread.start()
-        
-        return jsonify({
-            "status": "success", 
-            "message": "Crawler started in background. Please wait a few minutes for data to appear."
-        }), 202
+        main() 
+        print("✅ กระบวนการดึงข้อมูลทั้งหมดเสร็จสิ้น!")
     except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+        print(f"❌ Crawler Error: {e}")
+
+@app.route('/trigger-crawl', methods=['GET'])
+def trigger_crawl():
+    # สร้าง Thread ใหม่เพื่อไม่ให้หน้าเว็บค้าง
+    task = threading.Thread(target=run_crawler_in_background)
+    task.start()
+    return jsonify({"status": "started", "message": "Crawler is running in background"}), 202
 
 def main_crawl_process():
     print("เริ่มกระบวนการ Crawler และ Process ข้อมูล...")
@@ -124,15 +127,15 @@ def main():
         finally:
             if driver: driver.quit()
 
-    process_books(conn)
+    print("กำลังย้ายข้อมูลไปตารางหลัก...")
+    process_books(conn)   
     update_history(conn)
-    conn.close()
 
-if __name__ == "__main__":
-    print("กำลังเตรียมระบบ...")
+if __name__ == '__main__':
     conn = create_connection()
     if conn:
-        create_tables(conn)  # สร้างตาราง
+        create_tables(conn)
         conn.close()
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host='0.0.0.0', port=port, debug=True)
+
+    port = int(os.environ.get("PORT", 8080))
+    app.run(host='0.0.0.0', port=port, debug=True, use_reloader=False)
