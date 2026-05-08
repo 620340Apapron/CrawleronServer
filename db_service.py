@@ -1,10 +1,12 @@
 import time
 import mysql.connector
 import os
+from dotenv import load_dotenv
 
 import time
 import mysql.connector
 
+load_dotenv()
 def create_connection():
     retries = 5
     while retries > 0:
@@ -81,7 +83,15 @@ def insert_book(conn, book):
         book["price"], book["image_url"], book["url"], book["source"]
     ))
     conn.commit()
-
+def get_books():
+    conn = create_connection()
+    try:
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM books")
+        books = cursor.fetchall()
+        return books
+    finally:
+        conn.close()
 
 def insert_book(conn, book):
 

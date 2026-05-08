@@ -3,12 +3,18 @@ import os
 import shutil
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.chrome.service import Service
-import time
+from selenium.webdriver.chrome.service import Servic
+import json
+from decimal import Decimal
+from datetime import date, datetime
+from flask import Flask, jsonify, Response
+from flask_cors import CORS
+from dotenv import load_dotenv
 
 from db_service import create_connection, create_tables
 from book_history import update_history
 from process_books import process_books
+from db_service import get_books
 
 from amarin import scrape_amarin_all_pages
 from b2s import scrape_b2s_all_pages
@@ -18,7 +24,9 @@ from seed import scrape_seed_all_pages
 
 
 ssl._create_default_https_context = ssl._create_unverified_context
-
+load_dotenv()
+app = Flask(__name__)
+CORS(app)
 
 def get_driver():
     options = Options()
@@ -38,6 +46,41 @@ def get_driver():
         options.binary_location = path
         
     return webdriver.Chrome(options=options)
+
+@app.route('/books', methods=['GET'])
+def get_bookdetail():
+    try:
+        raw = get_books()
+        books = []
+        for row in raw:
+            clean = {}
+            for k, v in row.items():
+                if isinstance(v, Decimal):
+                    clean[k] = float(v)
+                elif isinstance(v, (datetime, date)):
+                    clean[k] = v.isoformat()
+                elif v is None:
+                    clean[k] = 0.0 if k == "price" else ""
+                else:
+                    clean[k] = v
+            books.append(clean)
+
+        # ใช้ ensure_ascii=False เพื่อให้แสดงภาษาไทยได้ถูกต้อง
+        payload = json.dumps(books, ensure_ascii=False)
+
+        return Response(
+            payload,
+            content_type='application/json; charset=utf-8',
+            status=200
+        )
+
+    except Exception as e:
+        print(f"❌ ERROR: {e}")
+        return jsonify({"error": str(e)}), 500
+
+if __name__ == '__main__':
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port, debug=True)
 
 def main():
     print("เริ่มระบบ crawler")
