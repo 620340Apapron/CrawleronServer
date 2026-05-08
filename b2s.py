@@ -36,6 +36,7 @@ def scrape_b2s_detail_page(driver, conn, book_url):
     try:
         driver.get(book_url)
         WebDriverWait(driver, 15).until(EC.presence_of_element_located((By.CSS_SELECTOR, "h1.page-title")))
+        
         soup = BeautifulSoup(driver.page_source, "html.parser")
         
 

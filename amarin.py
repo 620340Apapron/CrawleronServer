@@ -39,6 +39,7 @@ def scrape_amarin_detail_page(driver, conn, book_url):
     try:
         driver.get(book_url)
         WebDriverWait(driver, 15).until(EC.presence_of_element_located((By.TAG_NAME, "h1")))
+        
         soup = BeautifulSoup(driver.page_source, "html.parser")
 
         title_tag = soup.find("h1")

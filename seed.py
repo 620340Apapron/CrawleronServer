@@ -36,6 +36,7 @@ def scrape_seed_detail_page(driver, conn, book_url):
     try:
         driver.get(book_url)
         WebDriverWait(driver, 15).until(EC.presence_of_element_located((By.TAG_NAME, "h1")))
+        
         soup = BeautifulSoup(driver.page_source, "html.parser")
 
         title = normalize_text(soup.find("h1").text) if soup.find("h1") else "Unknown"
@@ -54,7 +55,7 @@ def scrape_seed_detail_page(driver, conn, book_url):
             if m: price = float(m.group(0).replace(",", ""))
 
         isbn = extract_isbn(soup) or soup.find("span", string=re.compile(r"ISBN"))
-        
+
         image_tag = soup.find("meta", attrs={"property": "og:image"})
         image_url = image_tag.get("content") if image_tag else ""
 

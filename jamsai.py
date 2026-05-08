@@ -37,6 +37,7 @@ def scrape_jamsai_detail_page(driver, conn, url):
     try:
         driver.get(url)
         WebDriverWait(driver, 15).until(EC.presence_of_element_located((By.TAG_NAME, "h1")))
+        
         soup = BeautifulSoup(driver.page_source, "html.parser")
 
         title_tag = soup.select_one(".product_title") or soup.find("h1")
@@ -56,7 +57,7 @@ def scrape_jamsai_detail_page(driver, conn, url):
             if m: price = float(m.group(0).replace(",", ""))
 
         isbn = extract_isbn(soup)
-        
+
         image_tag = soup.find("meta", attrs={"property": "og:image"})
         image_url = image_tag.get("content") if image_tag else ""
 
