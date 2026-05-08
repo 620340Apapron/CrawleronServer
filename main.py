@@ -26,18 +26,14 @@ def get_driver():
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--disable-gpu")
-    
-    # ADD THESE TO STOP THE FREEZE:
-    options.add_argument("--proxy-server='direct://'")
-    options.add_argument("--proxy-bypass-list=*")
-    options.add_argument("--blink-settings=imagesEnabled=false") # Don't load images (Saves RAM)
+    # ADD THIS LINE TO SAVE RAM:
+    options.add_argument("--blink-settings=imagesEnabled=false") 
     
     path = shutil.which("chromium") or shutil.which("chromium-browser")
     if path:
         options.binary_location = path
         
     return webdriver.Chrome(options=options)
-
 
 def main():
     print("เริ่มระบบ crawler")
@@ -54,11 +50,11 @@ def main():
 
     try:
         driver = get_driver()
-        scrape_naiin_all_pages(driver, conn)
-        scrape_b2s_all_pages(driver, conn)
-        scrape_jamsai_all_pages(driver, conn)
-        scrape_seed_all_pages(driver, conn)
-        scrape_amarin_all_pages(driver, conn)
+        scrape_naiin_all_pages(driver, conn, max_books=limit)
+        scrape_b2s_all_pages(driver, conn, max_books=limit)
+        scrape_jamsai_all_pages(driver, conn, max_books=limit)
+        scrape_seed_all_pages(driver, conn, max_books=limit)
+        scrape_amarin_all_pages(driver, conn, max_books=limit)
         
         # REMOVE driver.quit() from here
         

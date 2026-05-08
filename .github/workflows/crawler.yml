@@ -2,8 +2,7 @@ name: Daily Crawler
 
 on:
   schedule:
-    # รันทุกๆ ชั่วโมง
-    - cron: '*0 * * * *'
+    - cron: '0 8 * * *'
   workflow_dispatch:
 
 jobs:

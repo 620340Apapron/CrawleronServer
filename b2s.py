@@ -16,7 +16,7 @@ def normalize_text(txt):
     return " ".join(txt.strip().split())
 
 
-def scrape_b2s_all_pages(driver, conn, max_books=50, **kwargs):
+def scrape_b2s_all_pages(driver, conn, max_books=50):
     total_scraped = 0
     for page in range(1, 6):
         if total_scraped >= max_books: break
