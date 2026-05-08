@@ -46,7 +46,7 @@ def create_tables(conn):
 
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS books (
-        id INT AUTO_INCREMENT PRIMARY KEY, -- ต้องมี id เพื่อให้ process_books ทำงานได้
+        id INT AUTO_INCREMENT PRIMARY KEY, -- ต้องมีบรรทัดนี้
         isbn VARCHAR(50) UNIQUE,
         title TEXT,
         author TEXT,
@@ -54,7 +54,6 @@ def create_tables(conn):
         image_url TEXT
     )
     """)
-
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS book_prices (
         id INT AUTO_INCREMENT PRIMARY KEY,

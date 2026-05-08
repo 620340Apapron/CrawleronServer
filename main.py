@@ -7,8 +7,6 @@ from selenium.webdriver.chrome.service import Service
 import json
 from decimal import Decimal
 from datetime import date, datetime
-from flask import Flask, jsonify, Response
-from flask_cors import CORS
 from dotenv import load_dotenv
 
 from db_service import create_connection, create_tables
@@ -25,8 +23,6 @@ from seed import scrape_seed_all_pages
 
 ssl._create_default_https_context = ssl._create_unverified_context
 load_dotenv()
-app = Flask(__name__)
-CORS(app)
 
 def get_driver():
     options = Options()
@@ -46,63 +42,47 @@ def get_driver():
         options.binary_location = path
         
     return webdriver.Chrome(options=options)
-
-@app.route('/books', methods=['GET'])
-def get_bookdetail():
-    try:
-        raw = get_books()
-        books = []
-        for row in raw:
-            clean = {}
-            for k, v in row.items():
-                if isinstance(v, Decimal):
-                    clean[k] = float(v)
-                elif isinstance(v, (datetime, date)):
-                    clean[k] = v.isoformat()
-                elif v is None:
-                    clean[k] = 0.0 if k == "price" else ""
-                else:
-                    clean[k] = v
-            books.append(clean)
-        payload = json.dumps(books, ensure_ascii=False)
-
-        return Response(
-            payload,
-            content_type='application/json; charset=utf-8',
-            status=200
-        )
-
-    except Exception as e:
-        print(f"ERROR: {e}")
-        return jsonify({"error": str(e)}), 500
     
-def run_crawler_in_background():
-    print("⏳ เริ่มต้นกระบวนการ Crawler ในเบื้องหลัง...")
-    # เรียกใช้ฟังก์ชัน main() เดิมที่คุณเขียนไว้
-    # (ตรวจสอบให้แน่ใจว่าใน main() มีการเรียก process_books ด้วย)
-    try:
-        main() 
-        print("✅ กระบวนการดึงข้อมูลทั้งหมดเสร็จสิ้น!")
-    except Exception as e:
-        print(f"❌ Crawler Error: {e}")
-
-@app.route('/trigger-crawl', methods=['GET'])
-def trigger_crawl():
-    # สร้าง Thread ใหม่เพื่อไม่ให้หน้าเว็บค้าง
-    task = threading.Thread(target=run_crawler_in_background)
-    task.start()
-    return jsonify({"status": "started", "message": "Crawler is running in background"}), 202
-
-def main_crawl_process():
-    print("เริ่มกระบวนการ Crawler และ Process ข้อมูล...")
+def run_crawler_standalone():
+    print("🚀 เริ่มระบบ Crawler (Standalone Mode)")
     conn = create_connection()
-    if conn:
-        try:
-            main() 
-            print("Crawler และย้ายข้อมูลเสร็จสมบูรณ์!")
-        finally:
-            conn.close()
+    if not conn:
+        print("❌ ไม่สามารถเชื่อมต่อฐานข้อมูลได้")
+        return
 
+    try:
+        # 1. เตรียมตาราง
+        create_tables(conn)
+
+        # 2. เริ่มดึงข้อมูล
+        scrapers = [
+            ("Naiin", scrape_naiin_all_pages),
+            ("B2S", scrape_b2s_all_pages),
+            ("Jamsai", scrape_jamsai_all_pages),
+            ("Seed", scrape_seed_all_pages),
+            ("Amarin", scrape_amarin_all_pages),
+        ]
+
+        for name, scrape_func in scrapers:
+            driver = get_driver()
+            try:
+                print(f"กำลังดึงข้อมูลจาก: {name}...")
+                scrape_func(driver, conn, max_books=20)
+            except Exception as e:
+                print(f"❌ Error scraping {name}: {e}")
+            finally:
+                if driver:
+                    driver.quit()
+
+        # 3. ย้ายข้อมูลจาก raw_books -> books
+        print("📦 กำลังย้ายข้อมูลและอัปเดตประวัติราคา...")
+        process_books(conn)
+        update_history(conn)
+        
+        print("✅ ดึงข้อมูลเสร็จสมบูรณ์ 100%!")
+
+    finally:
+        conn.close()
 def main():
     conn = create_connection()
     if not conn: return
