@@ -42,23 +42,26 @@ def scrape_jamsai_detail_page(driver, conn, url):
         title_tag = soup.select_one(".product_title") or soup.find("h1")
         title = normalize_text(title_tag.text) if title_tag else "Unknown"
 
+        author= soup.select_one(".author-name") 
+
         publisher = "Jamsai" # ค่าเริ่มต้นสำหรับเว็บแจ่มใส
         pub_tag = soup.select_one(".product_meta .posted_in")
         if pub_tag and "สำนักพิมพ์" in pub_tag.text:
             publisher = normalize_text(pub_tag.text.replace("สำนักพิมพ์", "").replace("หมวดหมู่:", ""))
 
         price = 0
-        price_tag = soup.select_one(".woocommerce-Price-amount") or soup.select_one(".price")
+        price_tag = soup.select_one(".woocommerce-Price-amount bdi") or soup.select_one(".price")
         if price_tag:
             m = re.search(r"[\d,.]+", price_tag.text)
             if m: price = float(m.group(0).replace(",", ""))
 
         isbn = extract_isbn(soup)
+        
         image_tag = soup.find("meta", attrs={"property": "og:image"})
         image_url = image_tag.get("content") if image_tag else ""
 
         book_data = {
-            "isbn": isbn, "title": title, "author": "Unknown",
+            "isbn": isbn, "title": title, "author": author,
             "publisher": publisher, "price": price, "image_url": image_url,
             "url": url, "source": "Jamsai"
         }

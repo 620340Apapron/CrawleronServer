@@ -41,7 +41,7 @@ def scrape_seed_detail_page(driver, conn, book_url):
         title = normalize_text(soup.find("h1").text) if soup.find("h1") else "Unknown"
 
         # ค้นหาคำว่าสำนักพิมพ์ในหน้าเว็บ
-        pub_tag = soup.find("a", href=re.compile("publisher")) or soup.find("span", string=re.compile("สำนักพิมพ์"))
+        pub_tag = soup.find("a", href=re.compile("publisher")) or soup.find("a", href=re.compile(r"Publisher", re.I))
         publisher = normalize_text(pub_tag.text) if pub_tag else "Se-ed"
 
         author_tag = soup.find("a", href=re.compile(r"author", re.I))
@@ -53,7 +53,8 @@ def scrape_seed_detail_page(driver, conn, book_url):
             m = re.search(r"[\d,.]+", price_tag.text)
             if m: price = float(m.group(0).replace(",", ""))
 
-        isbn = extract_isbn(soup)
+        isbn = extract_isbn(soup) or soup.find("span", string=re.compile(r"ISBN"))
+        
         image_tag = soup.find("meta", attrs={"property": "og:image"})
         image_url = image_tag.get("content") if image_tag else ""
 

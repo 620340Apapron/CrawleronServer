@@ -39,20 +39,20 @@ def scrape_b2s_detail_page(driver, conn, book_url):
         soup = BeautifulSoup(driver.page_source, "html.parser")
         
 
-        title_tag = soup.select_one("h1.page-title") or soup.find("h1")
+        title_tag = soup.select_one("h1.page-title")
         title = normalize_text(title_tag.text) if title_tag else "Unknown"
         
         pub_tag = soup.find("td", {"data-th": "Publisher"}) or soup.select_one(".mr-3.fw-bold")
         publisher = normalize_text(pub_tag.text) if pub_tag else "B2S"
 
-        author_tag = soup.select_one(".product.attribute.author")
+        author_tag = soup.find("td", {"data-th": "Author"})
         author = normalize_text(author_tag.text) if author_tag else "Unknown"
 
         isbn_tag = soup.find("td", {"data-th": "ISBN"})
         isbn = isbn_tag.text.strip() if isbn_tag else extract_isbn(soup)
 
         price = 0
-        price_tag = soup.select_one(".price-wrapper .price") or soup.select_one(".price")
+        price_tag = soup.select_one("[data-price-type='finalPrice'] .price")
         if price_tag:
             m = re.search(r"[\d,.]+", price_tag.text)
             if m: price = float(m.group(0).replace(",", ""))

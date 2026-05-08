@@ -55,12 +55,12 @@ def scrape_amarin_detail_page(driver, conn, book_url):
             publisher = normalize_text(pub_tag.text.replace("สำนักพิมพ์:", "").replace("หมวดหมู่:", ""))
 
         price = 0
-        price_tag = soup.select_one(".price")
+        price_tag = soup.select_one(".price ins .amount")
         if price_tag:
             m = re.search(r"[\d,.]+", price_tag.text)
             if m: price = float(m.group(0).replace(",", ""))
 
-        isbn = extract_isbn(soup)
+        isbn = extract_isbn(soup) or soup.find("td.woocommerce-product-attributes-item__value")
         image_tag = soup.find("meta", attrs={"property": "og:image"})
         image_url = image_tag.get("content") if image_tag else ""
 
