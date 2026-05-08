@@ -44,10 +44,10 @@ def scrape_naiin_detail_page(driver, conn, book_url):
         
         soup = BeautifulSoup(driver.page_source, "html.parser")
 
-        title_tag = soup.find("h1.product-name tw-hidden md:tw-block") or soup.find("product-name tw-hidden md:tw-block")
+        title_tag = soup.find("h1.product-name tw-hidden md:tw-block") or soup.find("itemname")
         title = normalize_text(title_tag.text if hasattr(title_tag, 'text') else title_tag.get("content", "Unknown"))
         
-        author_tag = soup.find("a.author-name tw-inline-flex truncate-1") or soup.select_one(".AuthorName")
+        author_tag = soup.find("a.author-name tw-inline-flex truncate-1") or soup.select_one("tw-inline-block !tw-text-[12px]")
         author = normalize_text(author_tag.text) if author_tag else "Unknown"
 
         pub_tag = soup.find("a.link-book-detail truncate-1") or soup.select_one(".PublisherName")
