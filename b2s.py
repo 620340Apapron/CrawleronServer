@@ -24,13 +24,12 @@ def scrape_b2s_all_pages(driver, conn, max_books=10, **kwargs):
         driver.get(f"https://www.b2s.co.th/en/category/books?page={page}")
         time.sleep(2)
         soup = BeautifulSoup(driver.page_source, "html.parser")
-        links = soup.select(".product-box-inner")
+        links = soup.select("a.product-item-link") or soup.select(".product-box-inner")
         for link in links:
-            if total_scraped >= max_books: break
             href = link.get("href")
             if href:
+                print(f"🔗 พบลิงก์ B2S: {href}")
                 scrape_b2s_detail_page(driver, conn, href)
-                total_scraped += 1
 
 
 def scrape_b2s_detail_page(driver, conn, book_url):
@@ -38,6 +37,7 @@ def scrape_b2s_detail_page(driver, conn, book_url):
         driver.get(book_url)
         WebDriverWait(driver, 15).until(EC.presence_of_element_located((By.CSS_SELECTOR, "h1.page-title")))
         soup = BeautifulSoup(driver.page_source, "html.parser")
+        
 
         title_tag = soup.select_one("h1.page-title") or soup.find("h1")
         title = normalize_text(title_tag.text) if title_tag else "Unknown"

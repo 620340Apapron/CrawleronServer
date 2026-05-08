@@ -22,7 +22,7 @@ def scrape_seed_all_pages(driver, conn, max_books = 50):
         driver.get(f"https://www.se-ed.com/product-category/book?page={page}")
         time.sleep(2)
         soup = BeautifulSoup(driver.page_source, "html.parser")
-        links = soup.select(".product-list-item a")
+        links = soup.select(".product-box a") or soup.select("a.link-product")
         for link in links:
             if total_scraped >= max_books: break
             href = link.get("href")

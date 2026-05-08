@@ -67,10 +67,19 @@ def insert_book(conn, book):
         image_url = VALUES(image_url),
         url = VALUES(url)
     """
+
+    print(f"DEBUG DB: กำลังจะบันทึกเล่ม {book['title']} (ISBN: {book['isbn']})")
     cursor.execute(sql, (
         book["isbn"], book["title"], book["author"], book["publisher"],
         book["price"], book["image_url"], book["url"], book["source"]
     ))
+    try:
+        cursor.execute(sql, (...))
+        conn.commit()
+        print(f"✅ บันทึกสำเร็จ: {book['isbn']}")
+    except Exception as e:
+        print(f"❌ DB Error: {e}")
+    
     conn.commit()
 def get_books():
     conn = create_connection()
