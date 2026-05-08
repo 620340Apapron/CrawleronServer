@@ -39,20 +39,18 @@ def scrape_amarin_detail_page(driver, conn, book_url):
     try:
         driver.get(book_url)
         WebDriverWait(driver, 15).until(EC.presence_of_element_located((By.TAG_NAME, "h1")))
-        
         soup = BeautifulSoup(driver.page_source, "html.parser")
 
         title_tag = soup.find("h1")
         title = normalize_text(title_tag.text) if title_tag else "Unknown"
 
-        author = "Unknown"
         author_tag = soup.select_one(".product_meta .author")
-        if author_tag: author = normalize_text(author_tag.text)
+        author = normalize_text(author_tag.text) if author_tag else "Unknown"
 
-        pub_tag = soup.select_one(".product_meta .posted_in") or soup.find("span", string=re.compile("สำนักพิมพ์"))
+        pub_tag = soup.select_one(".product_meta .posted_in")
         publisher = "Amarin"
         if pub_tag:
-            publisher = normalize_text(pub_tag.text.replace("สำนักพิมพ์:", ""))
+            publisher = normalize_text(pub_tag.text.replace("สำนักพิมพ์:", "").replace("หมวดหมู่:", ""))
 
         price = 0
         price_tag = soup.select_one(".price")
@@ -71,6 +69,5 @@ def scrape_amarin_detail_page(driver, conn, book_url):
         }
         insert_book(conn, book_data)
         print(f"📥 Saved: {title} from Amarin")
-
     except Exception as e:
-        print(f"❌ Error Amarin: {book_url} - {e}")
+        print(f"❌ Error Amarin: {e}")

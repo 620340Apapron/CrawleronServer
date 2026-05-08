@@ -37,14 +37,16 @@ def scrape_b2s_detail_page(driver, conn, book_url):
     try:
         driver.get(book_url)
         WebDriverWait(driver, 15).until(EC.presence_of_element_located((By.CSS_SELECTOR, "h1.page-title")))
-        
         soup = BeautifulSoup(driver.page_source, "html.parser")
 
         title = normalize_text(soup.select_one("h1.page-title").text) if soup.select_one("h1.page-title") else "Unknown"
-
-        # B2S ใช้คลาส mr-3 fw-bold สำหรับบอกสำนักพิมพ์ในหน้ารายละเอียด
+        
+        # ดึงสำนักพิมพ์จากตารางคุณสมบัติหรือ Class เฉพาะ
         pub_tag = soup.select_one(".mr-3.fw-bold") or soup.find("td", {"data-th": "Publisher"})
         publisher = normalize_text(pub_tag.text) if pub_tag else "B2S"
+
+        author_tag = soup.select_one(".product.attribute.author")
+        author = normalize_text(author_tag.text) if author_tag else "Unknown"
 
         isbn_tag = soup.find("td", {"data-th": "ISBN"})
         isbn = isbn_tag.text.strip() if isbn_tag else extract_isbn(soup)
@@ -55,13 +57,15 @@ def scrape_b2s_detail_page(driver, conn, book_url):
             m = re.search(r"[\d,.]+", price_tag.text)
             if m: price = float(m.group(0).replace(",", ""))
 
+        image_tag = soup.find("meta", attrs={"property": "og:image"})
+        image_url = image_tag.get("content") if image_tag else ""
+
         book_data = {
-            "isbn": isbn, "title": title, "author": "Unknown",
-            "publisher": publisher, "price": price, "image_url": "",
+            "isbn": isbn, "title": title, "author": author,
+            "publisher": publisher, "price": price, "image_url": image_url,
             "url": book_url, "source": "B2S"
         }
         insert_book(conn, book_data)
         print(f"📥 Saved: {title} from B2S")
-
     except Exception as e:
-        print(f"❌ Error B2S: {book_url} - {e}")
+        print(f"❌ Error B2S: {e}")

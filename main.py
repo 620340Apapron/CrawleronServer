@@ -64,7 +64,7 @@ def run_crawler():
                     conn = create_connection()      
                 driver = get_driver()
                 print(f"🔍 กำลังเริ่มดึงข้อมูลจาก: {name}")
-                scrape_func(driver, conn, max_books=3)            
+                scrape_func(driver, conn, max_books=10)            
             except Exception as e:
                 print(f"❌ Error ในร้าน {name}: {e}")
             finally:
