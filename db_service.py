@@ -12,12 +12,12 @@ def create_connection():
     while retries > 0:
         try:
             conn = mysql.connector.connect(
-                host=os.getenv("MYSQLHOST"),
-                user=os.getenv("MYSQLUSER"),
+                host=os.getenv("MYSQLHOST"),     
+                user=os.getenv("MYSQLUSER"),     
                 password=os.getenv("MYSQLPASSWORD"),
                 database=os.getenv("MYSQLDATABASE"),
                 port=os.getenv("MYSQLPORT")
-            )
+)
             print("Successfully connected to MySQL!")
             return conn
         except Exception as e:
