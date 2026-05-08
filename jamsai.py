@@ -8,6 +8,7 @@ from selenium.common.exceptions import TimeoutException
 
 import time
 from db_service import insert_book
+from utils import extract_isbn
 
 
 def normalize_text(txt):
