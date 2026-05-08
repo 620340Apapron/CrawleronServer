@@ -49,6 +49,7 @@ def scrape_jamsai_detail_page(driver, conn, book_url):
     WebDriverWait(driver, 10).until(
         EC.presence_of_element_located((By.TAG_NAME, "h1"))
     )
+    current_browser_url = driver.current_url 
 
     soup = BeautifulSoup(driver.page_source, "html.parser")
 
@@ -89,7 +90,7 @@ def scrape_jamsai_detail_page(driver, conn, book_url):
         "publisher": publisher,
         "price": price,
         "image_url": image_url,
-        "url": book_url,
+        "url": current_browser_url,
         "source": "jamsai"
     }
 

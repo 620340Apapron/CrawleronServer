@@ -24,10 +24,12 @@ def get_driver():
     options = Options()
     options.add_argument("--headless=new")
     options.add_argument("--no-sandbox")
-    options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("--disable-dev-shm-usage") 
     options.add_argument("--disable-gpu")
-    # ADD THIS LINE TO SAVE RAM:
-    options.add_argument("--blink-settings=imagesEnabled=false") 
+    
+    options.add_argument("--blink-settings=imagesEnabled=false")
+    options.add_argument("--disable-extensions")
+    options.add_argument("--disable-software-rasterizer")
     
     path = shutil.which("chromium") or shutil.which("chromium-browser")
     if path:

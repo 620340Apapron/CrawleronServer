@@ -46,6 +46,7 @@ def scrape_seed_detail_page(driver, conn, book_url):
         print("Chrome crashed at:", book_url)
 
         return
+    current_browser_url = driver.current_url 
 
     soup = BeautifulSoup(driver.page_source, "html.parser")
 
@@ -83,7 +84,7 @@ def scrape_seed_detail_page(driver, conn, book_url):
         "publisher": "SE-ED",
         "price": price,
         "image_url": final_image_url,
-        "url": book_url,
+        "url": current_browser_url,
         "source": "seed"
     }
 

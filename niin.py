@@ -16,14 +16,17 @@ def normalize_text(txt):
     return " ".join(txt.strip().split())
 
 
-def scrape_naiin_all_pages(driver, conn, max_books=50,):
+def scrape_naiin_all_pages(driver, conn, max_books=50, **kwargs):
     total_scraped = 0
     for page in range(1, 6):
         if total_scraped >= max_books: break
-        driver.get(f"https://www.naiin.com/category?category_1_code=2&product_type_id=1")
+        driver.get(f"https://www.naiin.com/category?category_1_code=2&product_type_id=1") 
+
         time.sleep(2)
+
         soup = BeautifulSoup(driver.page_source, "html.parser")
         links = soup.select(".product-list-item a")
+
         for link in links:
             if total_scraped >= max_books: break
             href = link.get("href")
@@ -35,19 +38,14 @@ def scrape_naiin_all_pages(driver, conn, max_books=50,):
 def scrape_naiin_detail_page(driver, conn, book_url):
     try:
         driver.get(book_url)
-        
-        # 1. SMART WAIT: Wait until the price or title is actually visible
-        # This prevents the "DevTools" disconnect and empty data
         WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, ".product-price, .price"))
         )
-        
-        # 2. Get the ACTUAL current URL from the browser
+
         current_browser_url = driver.current_url 
         
         soup = BeautifulSoup(driver.page_source, "html.parser")
 
-        # Selectors (Optimized for current Naiin layout)
         title = soup.select_one('meta[property="og:title"]')["content"] if soup.select_one('meta[property="og:title"]') else "Unknown"
         
         author_tag = soup.select_one("a.author-name") or soup.select_one(".AuthorName")
@@ -75,12 +73,13 @@ def scrape_naiin_detail_page(driver, conn, book_url):
             "publisher": publisher,
             "price": price,
             "image_url": image_url,
-            "url": current_browser_url, # <--- SAVES THE LIVE URL FROM BROWSER
+            "url": current_browser_url,
             "source": "naiin"
         }
 
+        book_data["url"] = current_browser_url
         insert_book(conn, book_data)
-        print(f"Saved: {title}")
+        print(f"Scraped: {book_data['title']}")
 
     except Exception as e:
         print(f"Error scraping {book_url}: {e}")

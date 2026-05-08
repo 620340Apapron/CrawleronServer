@@ -16,7 +16,7 @@ def normalize_text(txt):
     return " ".join(txt.strip().split())
 
 
-def scrape_b2s_all_pages(driver, conn, max_books=50):
+def scrape_b2s_all_pages(driver, conn, max_books=50, **kwargs):
     total_scraped = 0
     for page in range(1, 6):
         if total_scraped >= max_books: break
@@ -33,7 +33,13 @@ def scrape_b2s_all_pages(driver, conn, max_books=50):
 
 
 def scrape_b2s_detail_page(driver, conn, book_url):
+
     driver.get(book_url)
+    WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, ".product-price, .price"))
+        )
+    
+    current_browser_url = driver.current_url 
     soup = BeautifulSoup(driver.page_source, "html.parser")
 
     title = normalize_text(soup.select_one("h1").text) if soup.select_one("h1") else "Unknown"
@@ -73,11 +79,12 @@ def scrape_b2s_detail_page(driver, conn, book_url):
         "publisher": publisher,
         "price": price,
         "image_url": image_url,
-        "url": book_url,
+        "url": current_browser_url,
         "source": "b2s"
     }
 
     try:
         insert_book(conn, book_data)
+        print(f"Scraped: {book_data['title']}")
     except Exception as e:
         print("DB error:", e)
