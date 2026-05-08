@@ -1,6 +1,6 @@
+flask
+flask-cors
+mysql-connector-python
+python-dotenv
 selenium
-beautifulsoup4
-mysql-connector-python>=8.0.33
-requests
-Pillow
-supabase
+webdriver-manager
