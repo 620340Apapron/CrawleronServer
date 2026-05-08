@@ -8,24 +8,13 @@ import mysql.connector
 
 load_dotenv()
 def create_connection():
-    retries = 5
-    while retries > 0:
-        try:
-            conn = mysql.connector.connect(
-                host=os.getenv("MYSQLHOST"),     
-                user=os.getenv("MYSQLUSER"),     
-                password=os.getenv("MYSQLPASSWORD"),
-                database=os.getenv("MYSQLDATABASE"),
-                port=os.getenv("MYSQLPORT")
-)
-            print("Successfully connected to MySQL!")
-            return conn
-        except Exception as e:
-            print(f"Database not ready yet... retrying in 5s ({retries} left)")
-            time.sleep(5)
-            retries -= 1
-    return None
-
+    return mysql.connector.connect(
+        host=os.getenv("MYSQLHOST"),
+        user=os.getenv("MYSQLUSER"),
+        password=os.getenv("MYSQLPASSWORD"),
+        database=os.getenv("MYSQLDATABASE"),
+        port=os.getenv("MYSQLPORT")
+    )
 def create_tables(conn):
     cursor = conn.cursor()
     
