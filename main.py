@@ -78,10 +78,6 @@ def get_bookdetail():
         print(f"❌ ERROR: {e}")
         return jsonify({"error": str(e)}), 500
 
-if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host='0.0.0.0', port=port, debug=True)
-
 def main():
     print("เริ่มระบบ crawler")
     conn = create_connection() #
@@ -113,4 +109,10 @@ def main():
     conn.close()
 
 if __name__ == "__main__":
-    main()
+    print("🚀 กำลังเตรียมระบบ...")
+    conn = create_connection()
+    if conn:
+        create_tables(conn)  # สร้างตาราง
+        conn.close()
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port, debug=True)

@@ -46,7 +46,8 @@ def create_tables(conn):
 
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS books (
-        isbn VARCHAR(50) PRIMARY KEY,
+        id INT AUTO_INCREMENT PRIMARY KEY, 
+        isbn VARCHAR(50) UNIQUE,     
         title TEXT,
         author TEXT,
         publisher TEXT,
@@ -92,31 +93,3 @@ def get_books():
         return books
     finally:
         conn.close()
-
-def insert_book(conn, book):
-
-    cursor = conn.cursor()
-
-    sql = """
-    INSERT INTO raw_books
-    (isbn,title,author,publisher,price,image_url,url,source)
-    VALUES (%s,%s,%s,%s,%s,%s,%s,%s)
-
-    ON DUPLICATE KEY UPDATE
-        price = VALUES(price),
-        image_url = VALUES(image_url),
-        url = VALUES(url)
-    """
-
-    cursor.execute(sql, (
-        book["isbn"],
-        book["title"],
-        book["author"],
-        book["publisher"],
-        book["price"],
-        book["image_url"],
-        book["url"],
-        book["source"]
-    ))
-
-    conn.commit()
