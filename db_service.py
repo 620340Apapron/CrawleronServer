@@ -46,8 +46,8 @@ def create_tables(conn):
 
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS books (
-        id INT AUTO_INCREMENT PRIMARY KEY, 
-        isbn VARCHAR(50) UNIQUE,     
+        id INT AUTO_INCREMENT PRIMARY KEY, -- เพิ่ม id เพื่อให้ process_books ทำงานได้
+        isbn VARCHAR(50) UNIQUE,
         title TEXT,
         author TEXT,
         publisher TEXT,

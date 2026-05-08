@@ -64,8 +64,6 @@ def get_bookdetail():
                 else:
                     clean[k] = v
             books.append(clean)
-
-        # ใช้ ensure_ascii=False เพื่อให้แสดงภาษาไทยได้ถูกต้อง
         payload = json.dumps(books, ensure_ascii=False)
 
         return Response(
@@ -75,41 +73,63 @@ def get_bookdetail():
         )
 
     except Exception as e:
-        print(f"❌ ERROR: {e}")
+        print(f"ERROR: {e}")
         return jsonify({"error": str(e)}), 500
+    
+@app.route('/trigger-crawl', methods=['GET'])
+def trigger_crawler():
+    try:
+        import threading
+        thread = threading.Thread(target=main_crawl_process)
+        thread.start()
+        
+        return jsonify({
+            "status": "success", 
+            "message": "Crawler started in background. Please wait a few minutes for data to appear."
+        }), 202
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+def main_crawl_process():
+    print("เริ่มกระบวนการ Crawler และ Process ข้อมูล...")
+    conn = create_connection()
+    if conn:
+        try:
+            main() 
+            print("Crawler และย้ายข้อมูลเสร็จสมบูรณ์!")
+        finally:
+            conn.close()
 
 def main():
-    print("เริ่มระบบ crawler")
-    conn = create_connection() #
-    create_tables(conn) #
-    limit = 50
-
+    conn = create_connection()
+    if not conn: return
+    
+    create_tables(conn) # ตรวจสอบ/สร้างตาราง
+    
     scrapers = [
         ("Naiin", scrape_naiin_all_pages),
         ("B2S", scrape_b2s_all_pages),
-        ("Jansai", scrape_jamsai_all_pages),
+        ("Jamsai", scrape_jamsai_all_pages),
         ("Seed", scrape_seed_all_pages),
         ("Amarin", scrape_amarin_all_pages),
     ]
 
     for name, scrape_func in scrapers:
-        driver = None
+        driver = get_driver()
         try:
-            print(f"กำลังเริ่มดึงข้อมูลจาก: {name}")
-            driver = get_driver() # เปิดใหม่ทุกร้าน
-            scrape_func(driver, conn, max_books=limit) # ส่งค่า limit เข้าไป
+            print(f"กำลังดึงข้อมูลจาก: {name}")
+            scrape_func(driver, conn, max_books=20)
         except Exception as e:
-            print(f"เกิดข้อผิดพลาดที่ร้าน {name}: {e}")
+            print(f"Error scraping {name}: {e}")
         finally:
-            if driver:
-                driver.quit() # ปิดทันทีเพื่อคืน RAM
+            if driver: driver.quit()
 
     process_books(conn)
     update_history(conn)
     conn.close()
 
 if __name__ == "__main__":
-    print("🚀 กำลังเตรียมระบบ...")
+    print("กำลังเตรียมระบบ...")
     conn = create_connection()
     if conn:
         create_tables(conn)  # สร้างตาราง
