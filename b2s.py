@@ -89,7 +89,6 @@ def scrape_b2s_detail_page(driver, conn, book_url):
         WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, ".product-price, .price"))
         )
-        # ... (โค้ดดึงข้อมูลเดิมของคุณ) ...
         
         insert_book(conn, book_data)
         print(f"Scraped: {title}")

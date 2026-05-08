@@ -20,12 +20,12 @@ def scrape_naiin_all_pages(driver, conn, max_books=50, **kwargs):
     total_scraped = 0
     for page in range(1, 6):
         if total_scraped >= max_books: break
-        driver.get(f"https://www.naiin.com/category?category_1_code=2&product_type_id=1") 
+        driver.get(f"https://www.naiin.com/category?category_1_code=2&product_type_id=1&page={page}")
 
         time.sleep(2)
 
         soup = BeautifulSoup(driver.page_source, "html.parser")
-        links = soup.select(".product-list-item a")
+        links = soup.select(".item-info a")
 
         for link in links:
             if total_scraped >= max_books: break

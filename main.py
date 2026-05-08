@@ -27,7 +27,6 @@ def get_driver():
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--disable-gpu")
     
-    # --- เพิ่มบรรทัดเหล่านี้เพื่อแก้ปัญหา FREEZE ---
     options.add_argument("--blink-settings=imagesEnabled=false") # ไม่โหลดรูปภาพ
     options.add_argument("--disable-extensions")
     options.add_argument("--proxy-server='direct://'")
@@ -49,21 +48,20 @@ def main():
     scrapers = [
         ("Naiin", scrape_naiin_all_pages),
         ("B2S", scrape_b2s_all_pages),
-        # เพิ่มร้านอื่นๆ ตรงนี้
+        
     ]
 
     for name, scrape_func in scrapers:
         driver = None
         try:
             print(f"กำลังเริ่มดึงข้อมูลจาก: {name}")
-            driver = get_driver() # เปิด browser ใหม่ทุกร้าน
-            scrape_func(driver, conn, max_books=limit)
+            driver = get_driver() # เปิดใหม่ทุกร้าน
+            scrape_func(driver, conn, max_books=limit) # ส่งค่า limit เข้าไป
         except Exception as e:
             print(f"เกิดข้อผิดพลาดที่ร้าน {name}: {e}")
         finally:
             if driver:
-                driver.quit() # ปิด browser ทันทีที่จบร้านเพื่อคืน RAM
-                time.sleep(2) # พักเครื่อง 2 วินาที
+                driver.quit() # ปิดทันทีเพื่อคืน RAM
 
     process_books(conn)
     update_history(conn)
