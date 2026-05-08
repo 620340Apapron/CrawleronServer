@@ -44,13 +44,13 @@ def scrape_naiin_detail_page(driver, conn, book_url):
         
         soup = BeautifulSoup(driver.page_source, "html.parser")
 
-        title_tag = soup.find("h1.product-name tw-hidden md:tw-block") or soup.find("itemname")
+        title_tag = soup.find("meta", property="og:title")["content"] or soup.find("itemname")
         title = normalize_text(title_tag.text if hasattr(title_tag, 'text') else title_tag.get("content", "Unknown"))
         
-        author_tag = soup.find("a.author-name tw-inline-flex truncate-1") or soup.select_one("tw-inline-block !tw-text-[12px]")
+        author_tag = soup.select_one(".author-info a") or soup.find("div", class_="author-name")
         author = normalize_text(author_tag.text) if author_tag else "Unknown"
 
-        pub_tag = soup.find("a.link-book-detail truncate-1") or soup.select_one(".PublisherName")
+        pub_tag = soup.find("a.link-book-detail truncate-1") or soup.select_one(".publisher-name")
         publisher = normalize_text(pub_tag.text) if pub_tag else "Unknown"
 
         price = 0
@@ -59,7 +59,7 @@ def scrape_naiin_detail_page(driver, conn, book_url):
             m = re.search(r"[\d,.]+", price_tag.text)
             price = float(m.group(0).replace(",", "")) if m else 0
 
-        isbn = extract_isbn(soup)
+        isbn = extract_isbn(soup) or soup.find("span",".product-detail-info")
 
         image_tag = soup.find("meta", attrs={"property": "og:image"})
         image_url = image_tag.get("content") if image_tag else ""
