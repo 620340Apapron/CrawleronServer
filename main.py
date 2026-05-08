@@ -59,21 +59,24 @@ def run_crawler():
         for name, scrape_func in scrapers:
             driver = None
             try:
+        
                 if not conn or not conn.is_connected():
-                    conn = create_connection()      
+                    conn = create_connection()
+            
                 driver = get_driver()
                 print(f"🔍 กำลังเริ่มดึงข้อมูลจาก: {name}")
-                scrape_func(driver, conn, max_books=10)            
+                scrape_func(driver, conn, max_books=10)
+        
             except Exception as e:
                 print(f"❌ Error ในร้าน {name}: {e}")
             finally:
                 if driver:
                     try:
-                        driver.close()
-                        driver.quit()
+                        driver.quit() # ปิด browser ให้สนิท
                     except:
                         pass
-                time.sleep(5)
+                print(f"💤 พักเครื่อง 5 วินาทีก่อนเริ่มร้านถัดไป...")
+                time.sleep(5) # ให้ระบบได้หายใจคืน RAM
 
         
         print("🔄 กำลังประมวลผลข้อมูล (Process Books)...")
