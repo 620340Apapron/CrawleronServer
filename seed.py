@@ -36,7 +36,7 @@ def scrape_seed_detail_page(driver, conn, book_url):
     try:
         driver.get(book_url)
         WebDriverWait(driver, 15).until(EC.presence_of_element_located((By.TAG_NAME, "h1")))
-        
+
         soup = BeautifulSoup(driver.page_source, "html.parser")
 
         title = normalize_text(soup.find("h1").text) if soup.find("h1") else "Unknown"
@@ -65,6 +65,6 @@ def scrape_seed_detail_page(driver, conn, book_url):
             "url": book_url, "source": "Seed"
         }
         insert_book(conn, book_data)
-        print(f"📥 Saved: {title} from Seed")
+        print(f"Saved: {title} from Seed")
     except Exception as e:
-        print(f"❌ Error Seed: {e}")
+        print(f"Error Seed: {e}")

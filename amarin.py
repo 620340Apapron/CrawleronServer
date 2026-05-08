@@ -73,4 +73,4 @@ def scrape_amarin_detail_page(driver, conn, book_url):
         insert_book(conn, book_data)
         print(f"Saved: {title} from Amarin")
     except Exception as e:
-        print(f"❌ Error Amarin: {e}")
+        print(f"Error Amarin: {e}")

@@ -67,6 +67,6 @@ def scrape_jamsai_detail_page(driver, conn, url):
             "url": url, "source": "Jamsai"
         }
         insert_book(conn, book_data)
-        print(f"📥 Saved: {title} from Jamsai")
+        print(f"Saved: {title} from Jamsai")
     except Exception as e:
-        print(f"❌ Error Jamsai: {e}")
+        print(f"Error Jamsai: {e}")
