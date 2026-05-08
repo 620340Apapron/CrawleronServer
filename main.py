@@ -25,16 +25,15 @@ def get_driver():
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--disable-gpu")
-    options.add_argument("--disable-extensions")
-    options.add_argument("--disable-software-rasterizer")
-    options.add_argument("--memory-pressure-off")
-    options.add_argument("--blink-settings=imagesEnabled=false") 
     
-    options.add_argument("--disable-blink-features=AutomationControlled")
-    options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36")
-
+    # เพิ่ม 3 บรรทัดนี้
+    options.add_argument("--proxy-server='direct://'")
+    options.add_argument("--proxy-bypass-list=*")
+    options.add_argument("--js-flags='--max-old-space-size=512'") # จำกัด RAM ของ JS
+    
+    options.add_argument("--blink-settings=imagesEnabled=false") 
     driver = webdriver.Chrome(options=options)
-    driver.set_page_load_timeout(20)
+    driver.set_page_load_timeout(30) # เพิ่มเวลา timeout เผื่อเน็ตช้า
     return driver
 
 def run_crawler():
@@ -74,7 +73,7 @@ def run_crawler():
                         driver.quit()
                     except:
                         pass
-                time.sleep(2)
+                time.sleep(5)
 
         
         print("🔄 กำลังประมวลผลข้อมูล (Process Books)...")
