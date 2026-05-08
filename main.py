@@ -91,7 +91,9 @@ def main():
     scrapers = [
         ("Naiin", scrape_naiin_all_pages),
         ("B2S", scrape_b2s_all_pages),
-        
+        ("Jansai", scrape_jamsai_all_pages),
+        ("Seed", scrape_seed_all_pages),
+        ("Amarin", scrape_amarin_all_pages),
     ]
 
     for name, scrape_func in scrapers:
