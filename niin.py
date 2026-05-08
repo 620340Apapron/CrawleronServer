@@ -75,7 +75,9 @@ def scrape_naiin_detail_page(driver, conn, book_url):
             "source": "Naiin"
         }
 
+        print(soup.title.text)
         insert_book(conn, book_data)
+        
         
     except Exception as e:
         print(f"❌ Error scraping Naiin detail at {book_url}: {e}")
